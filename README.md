@@ -15,7 +15,6 @@
 __________
 
 ## Table of contents
-
 - [Trackle library](#trackle-library)
   - [Table of contents](#table-of-contents)
   - [What is Trackle](#what-is-trackle)
@@ -29,7 +28,6 @@ __________
       - [Trackle client](#trackle-client)
 
 ## What is Trackle
-
 Trackle is an IoT platform that offers all the software and services needed to develop an IoT solution from Device to Cloud. [Trackle website](https://www.trackle.io)
 
 ## Overview
@@ -380,4 +378,4 @@ The minimal usage flow for Trackle client is as follows (C++ and C):
 	start the cloud connection flow
 
 - **trackle.loop() - trackleLoop(trackle_s)**:
-	lop function, to keep the device connected to the cloud. Must be called as soon as possible
+	loop function, to keep the device connected to the cloud. Must be called as soon as possible
