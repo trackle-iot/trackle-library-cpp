@@ -72,89 +72,47 @@ namespace trackle
 
             ProtocolError handle_variable_request(char *variable_key, char *variable_arg, Message &message, MessageChannel &channel, token_t token, message_id_t message_id,
                                                   TrackleReturnType::Enum (*variable_type)(const char *variable_key),
-                                                  bool (*variable_calculated)(const char *variable_key),
                                                   const void *(*get_variable)(const char *variable_key))
             {
                 uint8_t *queue = message.buf();
                 message.set_id(message_id);
+
                 // get variable value according to type using the descriptor
                 TrackleReturnType::Enum var_type = variable_type(variable_key);
-                bool var_calculated = variable_calculated(variable_key);
                 size_t response = 0;
 
-                if (var_calculated)
+                if (TrackleReturnType::BOOLEAN == var_type)
                 {
-                    if (TrackleReturnType::BOOLEAN == var_type)
-                    {
-                        bool result = ((bool (*)(const char *))(get_variable(variable_key)))(variable_arg);
-                        response = Messages::variable_value(queue, message_id, token, result);
-                    }
-                    else if (TrackleReturnType::INT == var_type)
-                    {
-                        int result = ((int (*)(const char *))(get_variable(variable_key)))(variable_arg);
-                        response = Messages::variable_value(queue, message_id, token, static_cast<int32_t>(result));
-                    }
-                    else if (TrackleReturnType::STRING == var_type || TrackleReturnType::JSON == var_type)
-                    {
-                        const char *str_val = ((const char *(*)(const char *))(get_variable(variable_key)))(variable_arg);
-
-                        // 2-byte leading length, 16 potential padding bytes
-                        int max_length = message.capacity();
-                        int str_length = strlen(str_val);
-                        if (str_length > max_length)
-                        {
-                            str_length = max_length;
-                        }
-                        response = Messages::variable_value(queue, message_id, token, str_val, str_length);
-                    }
-                    else if (TrackleReturnType::DOUBLE == var_type)
-                    {
-                        double result = ((double (*)(const char *))(get_variable(variable_key)))(variable_arg);
-                        response = Messages::variable_value(queue, message_id, token, result);
-                    }
+                    bool result = ((bool (*)(const char *))(get_variable(variable_key)))(variable_arg);
+                    response = Messages::variable_value(queue, message_id, token, result);
                 }
-                else
+                else if (TrackleReturnType::INT == var_type)
                 {
+                    int result = ((int (*)(const char *))(get_variable(variable_key)))(variable_arg);
+                    response = Messages::variable_value(queue, message_id, token, static_cast<int32_t>(result));
+                }
+                else if (TrackleReturnType::STRING == var_type || TrackleReturnType::JSON == var_type)
+                {
+                    const char *str_val = ((const char *(*)(const char *))(get_variable(variable_key)))(variable_arg);
 
-                    if (TrackleReturnType::BOOLEAN == var_type)
+                    // 2-byte leading length, 16 potential padding bytes
+                    int max_length = message.capacity();
+                    int str_length = strlen(str_val);
+                    if (str_length > max_length)
                     {
-                        const bool *bool_val = (const bool *)get_variable(variable_key);
-                        response = Messages::variable_value(queue, message_id, token, *bool_val);
+                        str_length = max_length;
                     }
-                    else if (TrackleReturnType::INT == var_type)
-                    {
-                        const int32_t *int_val = (const int32_t *)get_variable(variable_key);
-                        response = Messages::variable_value(queue, message_id, token, *int_val);
-                    }
-                    else if (TrackleReturnType::LONG == var_type)
-                    {
-                        const int64_t *long_val = (const int64_t *)get_variable(variable_key);
-                        response = Messages::variable_value(queue, message_id, token, *long_val);
-                    }
-                    else if (TrackleReturnType::STRING == var_type || TrackleReturnType::JSON == var_type)
-                    {
-                        const char *str_val = (const char *)get_variable(variable_key);
-
-                        // 2-byte leading length, 16 potential padding bytes
-                        int max_length = message.capacity();
-                        int str_length = strlen(str_val);
-                        if (str_length > max_length)
-                        {
-                            str_length = max_length;
-                        }
-                        response = Messages::variable_value(queue, message_id, token, str_val, str_length);
-                    }
-                    else if (TrackleReturnType::DOUBLE == var_type)
-                    {
-                        double *double_val = (double *)get_variable(variable_key);
-                        response = Messages::variable_value(queue, message_id, token, *double_val);
-                    }
+                    response = Messages::variable_value(queue, message_id, token, str_val, str_length);
+                }
+                else if (TrackleReturnType::DOUBLE == var_type)
+                {
+                    double result = ((double (*)(const char *))(get_variable(variable_key)))(variable_arg);
+                    response = Messages::variable_value(queue, message_id, token, result);
                 }
 
                 message.set_length(response);
                 return channel.send(message);
             }
         };
-
     }
 }

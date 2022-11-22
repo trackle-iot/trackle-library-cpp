@@ -83,7 +83,6 @@ namespace trackle
                 return variables.handle_variable_request(variable_key, variable_args, message,
                                                          channel, token, msg_id,
                                                          descriptor.variable_type,
-                                                         descriptor.variable_calculated,
                                                          descriptor.get_variable);
             }
             case CoAPMessageType::SAVE_BEGIN:

@@ -55,7 +55,6 @@ struct TrackleDescriptor
   int (*num_variables)(void);
   const char *(*get_variable_key)(int variable_index);
   TrackleReturnType::Enum (*variable_type)(const char *variable_key);
-  bool (*variable_calculated)(const char *variable_key);
   const void *(*get_variable)(const char *variable_key);
 
   bool (*was_ota_upgrade_successful)(void);

@@ -70,18 +70,6 @@ private:
         bool addSubscription(const char *eventName, EventHandler handler, void *handlerData, Subscription_Scope_Type scope, const char *deviceID, void *reserved);
 
         /**
-         * @brief It adds a variable to the list of variables that will be sent to the cloud
-         *
-         * @param varKey The name of the variable. This is the name that will be used to access the variable
-         * from the cloud.
-         * @param userVar a pointer to the variable you want to add.
-         * @param userVarType The type of variable you want to add. This can be one of the following:
-         *
-         * @return result of operation.
-         */
-        bool addGet(const char *varKey, void *userVar, Data_TypeDef userVarType);
-
-        /**
          * @brief It adds a variable to the list of variables that can be set by the cloud
          *
          * @param varKey The name of the variable.

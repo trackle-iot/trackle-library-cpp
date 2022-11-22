@@ -189,22 +189,12 @@ struct CloudVariableTypeBase
     char userVarKey[USER_VAR_KEY_LENGTH + 1];
     Data_TypeDef userVarType;
     Data_TypeDef stringVarType;
-    void *value;
     void (*funct)(const char *);
-    CloudVariableTypeBase(void *val, const char *varKey, Data_TypeDef type)
-    {
-        strncpy(userVarKey, varKey, sizeof(userVarKey) - 1);
-        userVarKey[sizeof(userVarKey) - 1] = '\0';
-        userVarType = type;
-        value = val;
-        funct = NULL;
-    };
     CloudVariableTypeBase(void (*fn)(const char *), const char *varKey, Data_TypeDef type)
     {
         strncpy(userVarKey, varKey, sizeof(userVarKey) - 1);
         userVarKey[sizeof(userVarKey) - 1] = '\0';
         userVarType = type;
-        value = NULL;
         funct = fn;
     };
 };
@@ -352,7 +342,7 @@ bool Trackle::addGet(const char *varKey, void (*fn)(const char *), Data_TypeDef 
     return true;
 }
 
-bool Trackle::addGet(const char *varKey, void *userVar, Data_TypeDef userVarType)
+/*bool Trackle::addGet(const char *varKey, void *userVar, Data_TypeDef userVarType)
 {
     if (!varKey)
     {
@@ -432,7 +422,7 @@ bool Trackle::addGet(const char *varKey, void *userVar, Data_TypeDef userVarType
     }
 
     return true;
-}
+}*/
 
 bool Trackle::get(const char *varKey, user_variable_bool_cb_t *fn)
 {
@@ -902,16 +892,6 @@ TrackleReturnType::Enum wrapVarTypeInEnum(const char *varKey)
     return TrackleReturnType::INT;
 }
 
-/* Checking if the variable is calculated. */
-bool isVarCalculated(const char *varKey)
-{
-    CloudVariableTypeBase *item = find_var_by_key(varKey);
-
-    if (item->funct != NULL)
-        return true;
-    return false;
-}
-
 /**
  * It returns the number of functions in the current program
  *
@@ -1053,23 +1033,7 @@ const char *getUserVariableKey(int variable_index)
 const void *getUserVar(const char *varKey)
 {
     CloudVariableTypeBase *item = find_var_by_key(varKey);
-
-    if (item->funct != NULL)
-    { // calculated var, execute and return value
-        return (const void *)item->funct;
-    }
-    else
-    { // not calculated, return value from pointer
-        if (item->stringVarType == VAR_STRING)
-        {
-            const char *value = (*(string *)item->value).c_str();
-            return (void *)value;
-        }
-        else
-        {
-            return item->value;
-        }
-    }
+    return (const void *)item->funct;
 }
 
 /**
@@ -1184,27 +1148,27 @@ void printType(const char *varKey)
 
     if (item->userVarType == VAR_BOOLEAN)
     {
-        LOG(TRACE, "ACTUAL BOOL %s: %d", item->userVarKey, *(bool *)item->value);
+        LOG(TRACE, "ACTUAL BOOL %s", item->userVarKey);
     }
     else if (item->userVarType == VAR_INT)
     {
-        LOG(TRACE, "ACTUAL INT %s: %d", item->userVarKey, *(int *)item->value);
+        LOG(TRACE, "ACTUAL INT %s", item->userVarKey);
     }
     else if (item->userVarType == VAR_LONG)
     {
-        LOG(TRACE, "ACTUAL LONG %s: %d", item->userVarKey, *(long *)item->value);
+        LOG(TRACE, "ACTUAL LONG %s", item->userVarKey);
     }
     else if (item->userVarType == VAR_STRING)
     {
-        LOG(TRACE, "ACTUAL STRING %s: %s", item->userVarKey, (*(string *)item->value).c_str());
+        LOG(TRACE, "ACTUAL STRING %s", item->userVarKey);
     }
     else if (item->userVarType == VAR_JSON)
     {
-        LOG(TRACE, "ACTUAL JSON %s: %s", item->userVarKey, (*(string *)item->value).c_str());
+        LOG(TRACE, "ACTUAL JSON %s", item->userVarKey);
     }
     else if (item->userVarType == VAR_DOUBLE)
     {
-        LOG(TRACE, "ACTUAL DOUBLE %s: %f", item->userVarKey, *(double *)item->value);
+        LOG(TRACE, "ACTUAL DOUBLE %s", item->userVarKey);
     }
 }
 
@@ -1968,7 +1932,6 @@ Trackle::Trackle(void)
     descriptor.update_state = update_state;
     descriptor.num_variables = numUserVariables;
     descriptor.get_variable_key = getUserVariableKey;
-    descriptor.variable_calculated = isVarCalculated;
     descriptor.variable_type = wrapVarTypeInEnum;
     descriptor.get_variable = getUserVar;
     descriptor.append_system_info = appendSystemInfo;
