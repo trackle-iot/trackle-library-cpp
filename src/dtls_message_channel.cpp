@@ -45,7 +45,7 @@ static int
 dtls_event(struct dtls_context_t *ctx, session_t *session,
 		   dtls_alert_level_t level, unsigned short code)
 {
-	LOG(WARN, "dtls_event alert:%d %d", level, code);
+	LOG(INFO, "dtls_event alert: %d %d", level, code);
 	return 0;
 }
 
