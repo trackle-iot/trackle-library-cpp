@@ -83,13 +83,14 @@ namespace trackle
 
                 if (TrackleReturnType::BOOLEAN == var_type)
                 {
-                    bool result = ((bool (*)(const char *))(get_variable(variable_key)))(variable_arg);
-                    response = Messages::variable_value(queue, message_id, token, result);
+                    bool *result = ((bool *(*)(const char *))(get_variable(variable_key)))(variable_arg);
+                    printf("\n%u %d\n", (uint32_t)result, *result);
+                    response = Messages::variable_value(queue, message_id, token, *result);
                 }
                 else if (TrackleReturnType::INT == var_type)
                 {
-                    int result = ((int (*)(const char *))(get_variable(variable_key)))(variable_arg);
-                    response = Messages::variable_value(queue, message_id, token, static_cast<int32_t>(result));
+                    int *result = ((int *(*)(const char *))(get_variable(variable_key)))(variable_arg);
+                    response = Messages::variable_value(queue, message_id, token, static_cast<int32_t>(*result));
                 }
                 else if (TrackleReturnType::STRING == var_type || TrackleReturnType::JSON == var_type)
                 {
@@ -106,8 +107,8 @@ namespace trackle
                 }
                 else if (TrackleReturnType::DOUBLE == var_type)
                 {
-                    double result = ((double (*)(const char *))(get_variable(variable_key)))(variable_arg);
-                    response = Messages::variable_value(queue, message_id, token, result);
+                    double *result = ((double *(*)(const char *))(get_variable(variable_key)))(variable_arg);
+                    response = Messages::variable_value(queue, message_id, token, *result);
                 }
 
                 message.set_length(response);

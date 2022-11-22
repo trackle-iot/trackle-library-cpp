@@ -44,7 +44,7 @@ extern "C"
      * @trackle
      * @copydetails Trackle::get()
      */
-    bool trackleGet(Trackle *v, const char *varKey, void (*fn)(const char *), Data_TypeDef type) DYNLIB;
+    bool trackleGet(Trackle *v, const char *varKey, void *(*fn)(const char *), Data_TypeDef type) DYNLIB;
 
     /*!
      * @copybrief Trackle::post()

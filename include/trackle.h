@@ -78,7 +78,7 @@ private:
          *
          * @return result of operation.
          */
-        bool addGet(const char *varKey, void (*fn)(const char *), Data_TypeDef userVarType);
+        bool addGet(const char *varKey, void *(*fn)(const char *), Data_TypeDef userVarType);
 
 public:
         /**
@@ -113,7 +113,7 @@ public:
          *
          * @return The return value is the result of the addGet function.
          */
-        bool get(const char *varKey, user_variable_bool_cb_t *fn);
+        bool get(const char *varKey, user_variable_bool_cb_t fn);
 
         /**
          * @brief Add a getter function for a variable of type int.
@@ -123,7 +123,7 @@ public:
          *
          * @return The return value is the result of the addGet function.
          */
-        bool get(const char *varKey, user_variable_int_cb_t *fn);
+        bool get(const char *varKey, user_variable_int_cb_t fn);
 
         /**
          * @brief Add a getter function for a variable of type double.
@@ -133,7 +133,7 @@ public:
          *
          * @return The return value is the result of the addGet function.
          */
-        bool get(const char *varKey, user_variable_double_cb_t *fn);
+        bool get(const char *varKey, user_variable_double_cb_t fn);
 
         /**
          * @brief Add a getter function for a variable of type char.
@@ -143,7 +143,7 @@ public:
          *
          * @return The return value is the result of the addGet function.
          */
-        bool get(const char *varKey, user_variable_char_cb_t *fn);
+        bool get(const char *varKey, user_variable_char_cb_t fn);
 
         /**
          * @brief Add a getter function for a variable of type int.
@@ -154,7 +154,7 @@ public:
          *
          * @return The return value is the result of the addGet function.
          */
-        bool get(const char *varKey, void (*fn)(const char *), Data_TypeDef type);
+        bool get(const char *varKey, void *(*fn)(const char *), Data_TypeDef type);
 
         /**
          * @brief It adds a function to the list of functions that can be called by the cloud

@@ -36,12 +36,12 @@ typedef enum
     SOCKET_READY = 2
 } Connection_Status_Type;
 
-typedef int(user_function_int_char_t)(const char *paramString, ...);
+typedef int (*user_function_int_char_t)(const char *paramString, ...);
 
-typedef bool(user_variable_bool_cb_t)(const char *paramString);
-typedef int(user_variable_int_cb_t)(const char *paramString);
-typedef double(user_variable_double_cb_t)(const char *paramString);
-typedef const char *(user_variable_char_cb_t)(const char *paramString);
+typedef bool *(*user_variable_bool_cb_t)(const char *paramString);
+typedef int *(*user_variable_int_cb_t)(const char *paramString);
+typedef double *(*user_variable_double_cb_t)(const char *paramString);
+typedef const char *(*user_variable_char_cb_t)(const char *paramString);
 
 typedef void (*EventHandler)(const char *name, const char *data);
 

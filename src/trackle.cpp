@@ -189,8 +189,8 @@ struct CloudVariableTypeBase
     char userVarKey[USER_VAR_KEY_LENGTH + 1];
     Data_TypeDef userVarType;
     Data_TypeDef stringVarType;
-    void (*funct)(const char *);
-    CloudVariableTypeBase(void (*fn)(const char *), const char *varKey, Data_TypeDef type)
+    void *(*funct)(const char *);
+    CloudVariableTypeBase(void *(*fn)(const char *), const char *varKey, Data_TypeDef type)
     {
         strncpy(userVarKey, varKey, sizeof(userVarKey) - 1);
         userVarKey[sizeof(userVarKey) - 1] = '\0';
@@ -260,7 +260,7 @@ bool Trackle::isEnabled()
     return cloudEnabled;
 }
 
-bool Trackle::addGet(const char *varKey, void (*fn)(const char *), Data_TypeDef userVarType)
+bool Trackle::addGet(const char *varKey, void *(*fn)(const char *), Data_TypeDef userVarType)
 {
     if (!varKey)
     {
@@ -342,121 +342,39 @@ bool Trackle::addGet(const char *varKey, void (*fn)(const char *), Data_TypeDef 
     return true;
 }
 
-/*bool Trackle::addGet(const char *varKey, void *userVar, Data_TypeDef userVarType)
-{
-    if (!varKey)
-    {
-        LOG(WARN, "Tried to set variable with NULL name");
-        return false;
-    }
-    if (varKey[0] == '\0')
-    {
-        LOG(WARN, "Tried to set variable with empty name");
-        return false;
-    }
-    if (!userVar)
-    {
-        LOG(WARN, "Tried to set variable \"%s\" with NULL pointer", varKey);
-        return false;
-    }
-
-    CloudVariableTypeBase *old_item = find_var_by_key(varKey);
-
-    if (old_item)
-    {
-        LOG(WARN, "Tried to add already-existing var \"%s\" (\"%s\" exists)", userVar, old_item->userVarKey);
-        return false;
-    }
-
-    // TODO CHECK MAX VAR NUMBER
-
-    if (userVarType == VAR_BOOLEAN)
-    {
-        CloudVariableTypeBase item = CloudVariableTypeBase(userVar, varKey, VAR_BOOLEAN);
-        vars.push_back(item);
-        LOG(TRACE, "Set variable \"%s\" as boolean with value \"%d\"", item.userVarKey, *(bool *)item.value);
-    }
-    else if (userVarType == VAR_INT)
-    {
-        CloudVariableTypeBase item = CloudVariableTypeBase(userVar, varKey, VAR_INT);
-        vars.push_back(item);
-        LOG(TRACE, "Set variable \"%s\" as int with value \"%d\"", item.userVarKey, *(int *)item.value);
-    }
-    else if (userVarType == VAR_LONG)
-    {
-        CloudVariableTypeBase item = CloudVariableTypeBase(userVar, varKey, VAR_LONG);
-        vars.push_back(item);
-        LOG(TRACE, "Set variable \"%s\" as long with value \"%d\"", item.userVarKey, *(long *)item.value);
-    }
-    else if (userVarType == VAR_STRING)
-    {
-        CloudVariableTypeBase item = CloudVariableTypeBase(userVar, varKey, VAR_STRING);
-        item.stringVarType = VAR_STRING;
-        vars.push_back(item);
-        LOG(TRACE, "Set variable \"%s\" as string value \"%s\"", item.userVarKey, (*(string *)item.value).c_str());
-    }
-    else if (userVarType == VAR_JSON)
-    {
-        CloudVariableTypeBase item = CloudVariableTypeBase(userVar, varKey, VAR_JSON);
-        item.stringVarType = VAR_JSON;
-        vars.push_back(item);
-        LOG(TRACE, "Set variable \"%s\" as string value \"%s\"", item.userVarKey, (*(string *)item.value).c_str());
-    }
-    else if (userVarType == VAR_CHAR)
-    {
-        CloudVariableTypeBase item = CloudVariableTypeBase(userVar, varKey, VAR_STRING);
-        item.stringVarType = VAR_CHAR;
-        vars.push_back(item);
-        LOG(TRACE, "Set variable \"%s\" as char value \"%s\"", item.userVarKey, item.value);
-    }
-    else if (userVarType == VAR_DOUBLE)
-    {
-        CloudVariableTypeBase item = CloudVariableTypeBase(userVar, varKey, VAR_DOUBLE);
-        vars.push_back(item);
-        LOG(TRACE, "Set variable \"%s\" as double with value \"%f\"", item.userVarKey, *(double *)item.value);
-    }
-    else
-    {
-        LOG(WARN, "Tried to set var \"%s\" with unknown type %d)", userVar, (int)userVarType);
-        return false;
-    }
-
-    return true;
-}*/
-
-bool Trackle::get(const char *varKey, user_variable_bool_cb_t *fn)
+bool Trackle::get(const char *varKey, user_variable_bool_cb_t fn)
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
-    return addGet(varKey, ((void (*)(const char *))(fn)), VAR_BOOLEAN);
+    return addGet(varKey, ((void *(*)(const char *))(fn)), VAR_BOOLEAN);
 #pragma GCC diagnostic pop
 }
 
-bool Trackle::get(const char *varKey, user_variable_int_cb_t *fn)
+bool Trackle::get(const char *varKey, user_variable_int_cb_t fn)
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
-    return addGet(varKey, ((void (*)(const char *))(fn)), VAR_INT);
+    return addGet(varKey, ((void *(*)(const char *))(fn)), VAR_INT);
 #pragma GCC diagnostic pop
 }
 
-bool Trackle::get(const char *varKey, user_variable_double_cb_t *fn)
+bool Trackle::get(const char *varKey, user_variable_double_cb_t fn)
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
-    return addGet(varKey, ((void (*)(const char *))(fn)), VAR_DOUBLE);
+    return addGet(varKey, ((void *(*)(const char *))(fn)), VAR_DOUBLE);
 #pragma GCC diagnostic pop
 }
 
-bool Trackle::get(const char *varKey, user_variable_char_cb_t *fn)
+bool Trackle::get(const char *varKey, user_variable_char_cb_t fn)
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
-    return addGet(varKey, ((void (*)(const char *))(fn)), VAR_CHAR);
+    return addGet(varKey, ((void *(*)(const char *))(fn)), VAR_CHAR);
 #pragma GCC diagnostic pop
 }
 
-bool Trackle::get(const char *varKey, void (*fn)(const char *), Data_TypeDef type)
+bool Trackle::get(const char *varKey, void *(*fn)(const char *), Data_TypeDef type)
 {
     return addGet(varKey, fn, type);
 }
