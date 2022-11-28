@@ -299,11 +299,6 @@ void deleteTrackle(Trackle *v)
 }
 
 // DIAGNOSTICA
-void trackleDiagnosticPower(Trackle *v, Power key, double value)
-{
-    v->diagnosticPower(key, value);
-}
-
 void trackleDiagnosticSystem(Trackle *v, System key, double value)
 {
     v->diagnosticSystem(key, value);
@@ -312,4 +307,9 @@ void trackleDiagnosticSystem(Trackle *v, System key, double value)
 void trackleDiagnosticNetwork(Trackle *v, Network key, double value)
 {
     v->diagnosticNetwork(key, value);
+}
+
+void trackleDiagnosticCloud(Trackle *v, Cloud key, double value)
+{
+    v->diagnosticCloud(key, value);
 }

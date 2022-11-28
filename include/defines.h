@@ -113,38 +113,47 @@ typedef enum
 
 typedef enum
 {
-    SOURCE = 24,
-    BATTERY_CHARGE = 3,
-    BATTERY_STATE = 7
-} Power;
-
-typedef enum
-{
-    UPTIME = 6,
-    MEMORY_TOTAL = 25,
-    MEMORY_USED = 26
+    SYSTEM_LAST_RESET_REASON = 1, // sys:reset
+    SYSTEM_FREE_MEMORY = 2,       // mem:free
+    SYSTEM_BATTERY_CHARGE = 3,    // batt:soc
+    SYSTEM_SYSTEM_LOOPS = 4,      // sys:loops
+    SYSTEM_APPLICATION_LOOPS = 5, // app:loops
+    SYSTEM_UPTIME = 6,            // sys:uptime
+    SYSTEM_BATTERY_STATE = 7,     // batt:state
+    SYSTEM_POWER_SOURCE = 24,     // pwr::src
+    SYSTEM_TOTAL_RAM = 25,        // sys:tram
+    SYSTEM_USED_RAM = 26,         // sys:uram
 } System;
 
 typedef enum
 {
-    CELLULAR_MOBILE_COUNTRY_CODE = 40,
-    CELLULAR_MOBILE_NETWORK_CODE = 41,
-    CELLULAR_LOCATION_AREA_CODE = 42,
-    CELLULAR_CELL_ID = 43,
-    SIGNAL_RSSI = 19,
-    SIGNAL_STRENGTH = 33,
-    SIGNAL_STRENGTH_V = 37,
-    SIGNAL_QUALITY = 34,
-    SIGNAL_QUALITY_V = 35,
-    SIGNAL_AT = 36
+    NETWORK_CONNECTION_STATUS = 8,      // net:stat
+    NETWORK_CONNECTION_ERROR_CODE = 9,  // net:err
+    NETWORK_DISCONNECTS = 12,           // net:dconn
+    NETWORK_CONNECTION_ATTEMPTS = 27,   // net:connatt
+    NETWORK_DISCONNECTION_REASON = 28,  // net:dconnrsn
+    NETWORK_IPV4_ADDRESS = 15,          // net:ip:addr
+    NETWORK_IPV4_GATEWAY = 16,          // net.ip:gw
+    NETWORK_FLAGS = 17,                 // net:flags
+    NETWORK_COUNTRY_CODE = 18,          // net:cntry
+    NETWORK_RSSI = 19,                  // net:rssi
+    NETWORK_SIGNAL_STRENGTH_VALUE = 37, // net:sigstrv
+    NETWORK_SIGNAL_STRENGTH = 33,       // net:sigstr
+    NETWORK_SIGNAL_QUALITY = 34,        // net:sigqual
+    NETWORK_SIGNAL_QUALITY_VALUE = 35,  // net:sigqualv
+    NETWORK_ACCESS_TECNHOLOGY = 36,     // net:at
 } Network;
 
 typedef enum
 {
-    CONNECTION_STATUS = 10,
-    CONNECTION_ERROR = 13,
-    CONNECTION_DISCONNECT = 14,
-    CONNECTION_ATTEMPS = 29
+    CLOUD_CONNECTION_STATUS = 10,       // cloud:stat
+    CLOUD_CONNECTION_ERROR_CODE = 13,   // cloud:err
+    CLOUD_DISCONNECTS = 14,             // cloud:dconn
+    CLOUD_CONNECTION_ATTEMPTS = 29,     // cloud:connatt
+    CLOUD_DISCONNECTION_REASON = 30,    // cloud:dconnrsn
+    CLOUD_REPEATED_MESSAGES = 21,       // coap:resend
+    CLOUD_UNACKNOWLEDGED_MESSAGES = 22, // coap:unack
+    CLOUD_RATE_LIMITED_EVENTS = 20,     // pub:throttle
 } Cloud;
 
 typedef enum

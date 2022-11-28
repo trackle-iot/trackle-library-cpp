@@ -619,12 +619,12 @@ public:
         void setProductId(int productid);
 
         /**
-         * @brief This takes a power diagnostic key and a value, and adds the key and value to the diagnostic buffer
+         * @brief This takes a cloud diagnostic key and a value, and adds the key and value to the diagnostic buffer
          *
          * @param key The key of the diagnostic.
          * @param value The value of the diagnostic.
          */
-        void diagnosticPower(Power key, double value);
+        void diagnosticCloud(Cloud key, double value);
 
         /**
          * @brief This takes a system diagnostic key and a value, and adds the key and value to the diagnostic buffer

@@ -383,11 +383,11 @@ extern "C"
     void trackleSetProductId(Trackle *v, int productid) DYNLIB;
 
     /*!
-     * @copybrief Trackle::diagnosticPower()
+     * @copybrief Trackle::diagnosticCloud()
      * @trackle
-     * @copydetails Trackle::diagnosticPower()
+     * @copydetails Trackle::diagnosticCloud()
      */
-    void trackleDiagnosticPower(Trackle *v, Power key, double value) DYNLIB;
+    void trackleDiagnosticCloud(Trackle *v, Cloud key, double value) DYNLIB;
 
     /*!
      * @copybrief Trackle::diagnosticSystem()

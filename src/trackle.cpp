@@ -1606,7 +1606,7 @@ void Trackle::loop()
     if (DIAGNOSTIC_TIMEOUT < millis_since_check_diagnostic)
     {
         millis_diagnostic = ((*callbacks.millis)() - millis_started_at) / 1000;
-        diagnosticSystem(UPTIME, millis_diagnostic);
+        diagnosticSystem(SYSTEM_UPTIME, millis_diagnostic);
         millis_last_check_diagnostic = (*callbacks.millis)();
     }
 
@@ -1890,34 +1890,34 @@ int32_t trans_float_diag(double value, int shift_bytes)
     return result;
 }
 
-void Trackle::diagnosticPower(Power key, double value)
+void Trackle::diagnosticCloud(Cloud key, double value)
+{
+    addDiagnostic(key, (int32_t)value);
+}
+
+void Trackle::diagnosticSystem(System key, double value)
 {
     int32_t right_value = (int32_t)value;
-    if (key == BATTERY_CHARGE)
+    if (key == SYSTEM_BATTERY_CHARGE)
     {
         right_value = trans_float_diag(value, 1);
     }
     addDiagnostic(key, right_value);
 }
 
-void Trackle::diagnosticSystem(System key, double value)
-{
-    addDiagnostic(key, (int32_t)value);
-}
-
 void Trackle::diagnosticNetwork(Network key, double value)
 {
     int32_t right_value = (int32_t)value;
-    if (key == CELLULAR_MOBILE_NETWORK_CODE)
+    if (key == NETWORK_COUNTRY_CODE)
     {
         if (right_value < 100)
             right_value = right_value * -1; // fix 2 digit format mnc
     }
-    else if (key == SIGNAL_RSSI || key == SIGNAL_STRENGTH || key == SIGNAL_QUALITY)
+    else if (key == NETWORK_RSSI || key == NETWORK_SIGNAL_STRENGTH || key == NETWORK_SIGNAL_QUALITY)
     {
         right_value = trans_float_diag(value, 1);
     }
-    else if (key == SIGNAL_STRENGTH_V || key == SIGNAL_QUALITY_V)
+    else if (key == NETWORK_SIGNAL_STRENGTH_VALUE || key == NETWORK_SIGNAL_QUALITY_VALUE)
     {
         right_value = trans_float_diag(value, 2);
     }
