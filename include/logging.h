@@ -441,7 +441,12 @@ static const char *const _log_category = NULL;
 
 // Macros using current category
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+
+#ifdef DEBUG
 #define MY_CATEGORY ((std::string(__FILENAME__) + std::string(":") + std::string(__FUNCTION__) + std::string(":") + std::to_string(__LINE__)).c_str())
+#else
+#define MY_CATEGORY (std::string(__FILENAME__).c_str())
+#endif
 
 #define LOG(_level, _fmt, ...) LOG_C(_level, MY_CATEGORY, _fmt, ##__VA_ARGS__)
 #define LOG_ATTR(_level, _attrs, _fmt, ...) LOG_ATTR_C(_level, LOG_THIS_CATEGORY(), _attrs, _fmt, ##__VA_ARGS__)
