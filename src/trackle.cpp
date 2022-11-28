@@ -143,11 +143,11 @@ Connection_Status_Type connectionStatus = SOCKET_NOT_CONNECTED;
 int cloudStatus = -1;
 
 trackle::protocol::Connection_Properties_Type connectionPropTypeList[6] = {
-    {30, 5, 2},   // UNDEFINED
-    {30, 5, 2},   // WIFI
-    {30, 5, 2},   // ETHERNET
-    {30, 5, 2},   // CELLULAR
-    {150, 10, 5}, // NBIOT
+    {30, 10, 2},  // UNDEFINED
+    {30, 10, 2},  // WIFI
+    {30, 10, 2},  // ETHERNET
+    {30, 10, 2},  // CELLULAR
+    {150, 20, 5}, // NBIOT
 };                // in seconds
 
 uint32_t pingInterval = 0;
