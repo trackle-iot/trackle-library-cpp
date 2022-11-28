@@ -367,8 +367,7 @@ namespace trackle
             channel.create(message);
 
             uint8_t flags = was_ota_upgrade_successful ? HELLO_FLAG_OTA_UPGRADE_SUCCESSFUL : 0;
-            // flags |= HELLO_FLAG_DIAGNOSTICS_SUPPORT | HELLO_FLAG_IMMEDIATE_UPDATES_SUPPORT;
-            flags |= HELLO_FLAG_IMMEDIATE_UPDATES_SUPPORT;
+            flags |= HELLO_FLAG_DIAGNOSTICS_SUPPORT | HELLO_FLAG_IMMEDIATE_UPDATES_SUPPORT;
             size_t len = build_hello(message, flags);
             message.set_length(len);
             message.set_confirm_received(true);
