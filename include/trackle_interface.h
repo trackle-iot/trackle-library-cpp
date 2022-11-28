@@ -383,13 +383,6 @@ extern "C"
     void trackleSetProductId(Trackle *v, int productid) DYNLIB;
 
     /*!
-     * @copybrief Trackle::setUsedMemoryCallback()
-     * @trackle
-     * @copydetails Trackle::setUsedMemoryCallback()
-     */
-    void trackleSetUsedMemoryCallback(Trackle *v, usedMemoryCallback *usedmemory) DYNLIB;
-
-    /*!
      * @copybrief Trackle::diagnosticPower()
      * @trackle
      * @copydetails Trackle::diagnosticPower()

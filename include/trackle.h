@@ -619,14 +619,6 @@ public:
         void setProductId(int productid);
 
         /**
-         * @brief This sets the usedMemoryCb to the usedmemory callback function.
-         *
-         * @param usedmemory A function pointer to a function that returns the amount of memory used by the
-         * application.
-         */
-        void setUsedMemoryCallback(usedMemoryCallback *usedmemory);
-
-        /**
          * @brief This takes a power diagnostic key and a value, and adds the key and value to the diagnostic buffer
          *
          * @param key The key of the diagnostic.

@@ -54,7 +54,6 @@ publishSendCallback *sendPublishCb = NULL;
 prepareFirmwareUpdateCallback *prepareFirmwareCb = NULL;
 firmwareChunkCallback *firmwareChunkCb = NULL;
 finishFirmwareUpdateCallback *finishUpdateCb = NULL;
-usedMemoryCallback *usedMemoryCb = NULL;
 randomNumberCallback *getRandomCb = NULL;
 rebootCallback *systemRebootCb = NULL;
 firmwareUrlUpdateCallback *firmwareUrlCb = NULL;
@@ -1608,8 +1607,6 @@ void Trackle::loop()
     {
         millis_diagnostic = ((*callbacks.millis)() - millis_started_at) / 1000;
         diagnosticSystem(UPTIME, millis_diagnostic);
-        if (usedMemoryCb)
-            diagnosticSystem(MEMORY_USED, usedMemoryCb()); // used memory
         millis_last_check_diagnostic = (*callbacks.millis)();
     }
 
@@ -1867,12 +1864,6 @@ Trackle::~Trackle()
 {
     delete file_content;
     file_content = NULL;
-}
-
-// DIAGNOSTICA
-void Trackle::setUsedMemoryCallback(usedMemoryCallback *usedmemory)
-{
-    usedMemoryCb = usedmemory;
 }
 
 /**

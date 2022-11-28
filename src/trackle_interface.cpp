@@ -299,11 +299,6 @@ void deleteTrackle(Trackle *v)
 }
 
 // DIAGNOSTICA
-void trackleSetUsedMemoryCallback(Trackle *v, usedMemoryCallback *usedmemory)
-{
-    v->setUsedMemoryCallback(usedmemory);
-}
-
 void trackleDiagnosticPower(Trackle *v, Power key, double value)
 {
     v->diagnosticPower(key, value);

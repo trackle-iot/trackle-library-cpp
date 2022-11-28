@@ -210,7 +210,6 @@ typedef void(finishFirmwareUpdateCallback)(char *data, uint32_t fileSize);
 typedef void(firmwareUrlUpdateCallback)(const char *data);
 typedef void(connectionStatusCallback)(Connection_Status_Type status);
 typedef int(updateStateCallback)(const char *function_key, const char *arg, ...);
-typedef int(usedMemoryCallback)(void);
 typedef void(signalCallback)(bool on, unsigned int param, void *reserved);
 typedef void(timeCallback)(time_t time, unsigned int param, void *);
 typedef void(rebootCallback)(const char *data);
