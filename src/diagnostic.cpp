@@ -1,8 +1,10 @@
+#include "logging.h"
+LOG_SOURCE_CATEGORY("comm.diagnostic")
+
 #include "diagnostic.h"
 #include <map>
 #include <vector>
 #include <math.h>
-#include <esp_log.h>
 
 std::map<int16_t, int32_t> diagnostic_array;
 
@@ -32,7 +34,7 @@ int32_t trans_float_diag(double value, int shift_bytes)
 
 void addDiagnostic(int key, int32_t value)
 {
-	ESP_LOGI("DIAG", "addDiagnostic %d: %d", key, value);
+	LOG(TRACE, "addDiagnostic %d: %d", key, value);
 	diagnostic_array[key] = value;
 }
 
