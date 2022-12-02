@@ -114,6 +114,11 @@ namespace trackle
 			std::function<void(Delivery)> *delivered;
 
 			/**
+			 * Time when the coap message is sent
+			 */
+			system_tick_t send_time;
+
+			/**
 			 * How many data bytes follow.
 			 */
 			uint16_t data_len;
@@ -213,6 +218,23 @@ namespace trackle
 				}
 				// other message types are not resent on timeout
 				return false;
+			}
+
+			/**
+			 * Sets the time a coap message is sent
+			 */
+			bool set_send_time(system_tick_t send_time)
+			{
+				this->send_time = send_time;
+				return true;
+			}
+
+			/**
+			 * Gets the time a coap message was sent
+			 */
+			system_tick_t get_send_time()
+			{
+				return this->send_time;
 			}
 
 			/**

@@ -1,6 +1,7 @@
 #include "coap_channel.h"
 #include "service_debug.h"
 #include "messages.h"
+#include "diagnostic.h"
 
 namespace trackle
 {
@@ -44,7 +45,11 @@ namespace trackle
 			// g_unacknowledgedMessageCounter++;
 			msg.notify_timeout();
 			if (msg.is_request())
+			{
+				WARN("CLOUD_UNACKNOWLEDGED_MESSAGES");
+				diagnostic::diagnosticCloud(CLOUD_UNACKNOWLEDGED_MESSAGES, 1);
 				channel.command(MessageChannel::CLOSE);
+			}
 		}
 
 		/**
@@ -87,11 +92,18 @@ namespace trackle
 				// confirmable message, create a CoAPMessage for this
 				CoAPMessage *coapmsg = CoAPMessage::create(msg);
 				if (coapmsg == nullptr)
+				{
 					return INSUFFICIENT_STORAGE;
+				}
 				if (coapType == CoAPType::CON)
+				{
+					coapmsg->set_send_time(time);
 					coapmsg->prepare_retransmit(time);
+				}
 				else
+				{
 					coapmsg->set_expiration(time + MAX_TRANSMIT_SPAN);
+				}
 				add(*coapmsg);
 			}
 			return NO_ERROR;
@@ -107,12 +119,18 @@ namespace trackle
 			if (msgtype == CoAPType::ACK || msgtype == CoAPType::RESET)
 			{
 				message_id_t id = msg.get_id();
+				CoAPMessage *coap_msg = from_id(id);
+				if (coap_msg)
+				{
+					int32_t round_trip = (time - coap_msg->get_send_time());
+					diagnostic::diagnosticCloud(CLOUD_COAP_ROUND_TRIP, round_trip);
+				}
+
 				if (msgtype == CoAPType::RESET)
 				{
-					CoAPMessage *msg = from_id(id);
-					if (msg)
+					if (coap_msg)
 					{
-						msg->notify_delivered_nak();
+						coap_msg->notify_delivered_nak();
 					}
 					// a RESET indicates that the session is invalid.
 					// Currently the device never sends a RESET, but if it were to do that
