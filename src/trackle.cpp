@@ -9,8 +9,6 @@
 #include "protocol_defs.h"
 #include "version.h"
 #include <vector>
-#include <map>
-#include <math.h>
 
 #include "hal_platform.h"
 
@@ -29,8 +27,6 @@
 #define USER_FUNC_ARG_LENGTH 622
 
 #define RECONNECTION_TIMEOUT 5000
-#define DIAGNOSTIC_TIMEOUT 5000
-
 #define MAX_COUNTER 9999999
 
 const uint32_t PUBLISH_EVENT_FLAG_PUBLIC = 0x0;
@@ -147,18 +143,39 @@ trackle::protocol::Connection_Properties_Type connectionPropTypeList[6] = {
     {30, 10, 2},  // ETHERNET
     {30, 10, 2},  // CELLULAR
     {150, 20, 5}, // NBIOT
+    {150, 20, 5}, // CAT_M
 };                // in seconds
 
+hal_net_access_tech_t getTecnologyAccess(Connection_Type con)
+{
+    if (con == CONNECTION_TYPE_WIFI)
+    {
+        return NET_ACCESS_TECHNOLOGY_WIFI;
+    }
+    else if (con == CONNECTION_TYPE_LTE)
+    {
+        return NET_ACCESS_TECHNOLOGY_LTE;
+    }
+    else if (con == CONNECTION_TYPE_NBIOT)
+    {
+        return NET_ACCESS_TECHNOLOGY_LTE_CAT_NB1;
+    }
+    else if (con == CONNECTION_TYPE_CAT_M)
+    {
+        return NET_ACCESS_TECHNOLOGY_LTE_CAT_M1;
+    }
+
+    return NET_ACCESS_TECHNOLOGY_UNKNOWN;
+}
+
 uint32_t pingInterval = 0;
-Connection_Type connectionType = UNDEFINED;
+Connection_Type connectionType = CONNECTION_TYPE_UNDEFINED;
 trackle::protocol::Connection_Properties_Type connectionPropType;
 
 bool cloudEnabled = true;
 bool connectToCloud = false;
 system_tick_t millis_last_disconnection = 0;
 system_tick_t millis_started_at = 0;
-system_tick_t millis_last_check_diagnostic = 0;
-system_tick_t millis_diagnostic = 0;
 
 // OTA
 Ota_Method otaMethod = NO_OTA;
@@ -178,7 +195,6 @@ char device_id[DEVICE_ID_LENGTH];
 // byte aggiuntivi dopo chiave: \x10\x74\x65\x73\x74\x2e\x69\x6f\x74\x72\x65\x61\x64\x79\x2e\x69\x74\x16\x33
 unsigned char server_public_key[PUBLIC_KEY_LENGTH] = {0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x02, 0x01, 0x06, 0x08, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00, 0x04, 0x2B, 0x19, 0x9D, 0xC9, 0xF2, 0xB0, 0x2D, 0xD1, 0xF1, 0x7D, 0xF0, 0x2B, 0xD1, 0xEC, 0xD1, 0x57, 0xD6, 0x74, 0x51, 0xD7, 0x9C, 0x09, 0xE1, 0x70, 0x43, 0x4A, 0x5B, 0xC2, 0x40, 0xC0, 0x49, 0x67, 0x34, 0xC8, 0xA4, 0xF8, 0xB4, 0xF7, 0xFB, 0xB4, 0xD0, 0x3F, 0xCC, 0xAF, 0x1F, 0xAA, 0x2E, 0x1D, 0x76, 0x82, 0xCF, 0x3A, 0x1A, 0x0B, 0x42, 0x38, 0x14, 0x6D, 0x54, 0x42, 0x05, 0xDC, 0x4D, 0x27};
 unsigned char client_private_key[PRIVATE_KEY_LENGTH];
-map<int16_t, int32_t> diagnostic;
 char claim_code[CLAIM_CODE_SIZE + 1];
 
 // TRACKLE.VARIABLE ------------------------------------------------------------
@@ -954,41 +970,6 @@ const void *getUserVar(const char *varKey)
 }
 
 /**
- * It takes the diagnostic map and appends it to the appender
- *
- * @param appender A function pointer to the appender function.
- * @param append This is the appender object that is passed in. It is used to append the metrics to the
- * buffer.
- * @param flags 0x00
- * @param page The page number of the metrics.
- * @param reserved reserved for future use
- *
- * @return A boolean value.
- */
-bool appendMetrics(appender_fn appender, void *append, uint32_t flags, uint32_t page, void *reserved)
-{
-
-    // add sys:loop (0x00 0x04 already in appender)
-    ((Appender *)append)->append(0x02);
-    ((Appender *)append)->append((char)0x00);
-    ((Appender *)append)->append(0x04);
-    ((Appender *)append)->append((char)0x00);
-
-    map<int16_t, int32_t>::iterator itr;
-    for (itr = diagnostic.begin(); itr != diagnostic.end(); ++itr)
-    {
-        ((Appender *)append)->append((char)(itr->first >> 0 & 0xff));
-        ((Appender *)append)->append((char)(itr->first >> 8 & 0xff));
-        ((Appender *)append)->append((char)(itr->second >> 0 & 0xff));
-        ((Appender *)append)->append((char)(itr->second >> 8 & 0xff));
-        ((Appender *)append)->append((char)(itr->second >> 16 & 0xff));
-        ((Appender *)append)->append((char)(itr->second >> 24 & 0xff));
-    }
-
-    return true;
-}
-
-/**
  * It returns a string with the system information
  *
  * @param appender A function pointer to the function that will be used to append the data to the
@@ -1170,8 +1151,17 @@ void setConnectionStatus(Connection_Status_Type newStatus)
  */
 void connectionError(int error_type, bool force = false)
 {
+
+    // only if it was connected before (real disconnection)
+    if (connectionStatus == SOCKET_READY)
+    {
+        diagnostic::diagnosticCloud(CLOUD_DISCONNECTS, 1);
+        diagnostic::diagnosticCloud(CLOUD_DISCONNECTION_REASON, error_type);
+    }
+
+    // if connected or trying to connect
     if (connectionStatus == SOCKET_READY || force)
-    { // if connected or trying to connect
+    {
         millis_last_disconnection = (*callbacks.millis)();
         LOG(ERROR, "Cloud connection error %d, %lu", error_type, millis_last_disconnection);
         setConnectionStatus(SOCKET_NOT_CONNECTED);
@@ -1195,7 +1185,7 @@ int wrapSend(const unsigned char *buf, uint32_t buflen, void *tmp)
     int bytes_sent = (*sendCb)(buf, buflen, tmp);
     if (bytes_sent < 0)
     { // if sending error
-        connectionError(bytes_sent);
+        connectionError(CON_ERROR_SEND);
     }
     if (bytes_sent > 0)
     {
@@ -1224,7 +1214,7 @@ int wrapReceive(unsigned char *buf, uint32_t buflen, void *tmp)
     int bytes_received = (*receiveCb)(buf, buflen, tmp);
     if (bytes_received < 0)
     { // if receive error
-        connectionError(bytes_received);
+        connectionError(CON_ERROR_RECEIVE);
         bytes_received = 0;
     }
     else if (bytes_received > 0)
@@ -1421,6 +1411,7 @@ const char *Trackle::getLogLevelName(int level)
 void Trackle::setConnectionType(Connection_Type conn)
 {
     connectionType = conn;
+    diagnostic::diagnosticNetwork(NETWORK_ACCESS_TECNHOLOGY, getTecnologyAccess(conn));
 }
 
 void Trackle::setPingInterval(uint32_t interval)
@@ -1469,6 +1460,7 @@ void Trackle::setPublishHealthCheckInterval(uint32_t interval)
 
 void Trackle::publishHealthCheck()
 {
+    LOG(TRACE, "publishing health check");
     trackle_protocol_post_description(protocol, trackle::protocol::DESCRIBE_METRICS);
 }
 
@@ -1490,7 +1482,8 @@ void Trackle::connectionCompleted()
     else if (result != 0)
     {
         LOG(ERROR, "Protocol beginning error: %d", result);
-        connectionError(2, true);
+        diagnostic::diagnosticCloud(CLOUD_CONNECTION_ERROR_CODE, 1);
+        connectionError(CON_ERROR_PROTOCOL, true);
         return;
     }
 
@@ -1577,9 +1570,12 @@ int Trackle::connect()
         // If it returns < 0, it's an immediate error
         if (res < 0)
         {
-            connectionError(res, true);
+            connectionError(CON_ERROR_SOCKET, true);
             return -1;
         }
+
+        // only if network is ok, if not connected to network not increment
+        diagnostic::diagnosticCloud(CLOUD_CONNECTION_ATTEMPTS, 1);
     }
     else
     {
@@ -1600,16 +1596,6 @@ void Trackle::disconnect()
 
 void Trackle::loop()
 {
-
-    // updating uptime
-    system_tick_t millis_since_check_diagnostic = (*callbacks.millis)() - millis_last_check_diagnostic;
-    if (DIAGNOSTIC_TIMEOUT < millis_since_check_diagnostic)
-    {
-        millis_diagnostic = ((*callbacks.millis)() - millis_started_at) / 1000;
-        diagnosticSystem(SYSTEM_UPTIME, millis_diagnostic);
-        millis_last_check_diagnostic = (*callbacks.millis)();
-    }
-
     // ignore if not enabled
     if (!cloudEnabled)
         return;
@@ -1619,7 +1605,7 @@ void Trackle::loop()
     {
         int res = trackle_protocol_event_loop(protocol);
         if (!res)
-            connectionError(3);
+            connectionError(CON_ERROR_LOOP);
         if (!res && cloudStatus != res)
         {
             LOG(ERROR, "Event loop error");
@@ -1649,7 +1635,7 @@ void Trackle::loop()
             LOG(INFO, "Cloud reconnection after %lu ms", millis_since_disconnection);
 
             if (connectionStatus > SOCKET_NOT_CONNECTED)
-                connectionError(4, true);
+                connectionError(CON_ERROR_RECONNECTION, true);
 
             millis_last_disconnection = (*callbacks.millis)();
             Trackle::connect();
@@ -1850,7 +1836,7 @@ Trackle::Trackle(void)
     descriptor.variable_type = wrapVarTypeInEnum;
     descriptor.get_variable = getUserVar;
     descriptor.append_system_info = appendSystemInfo;
-    descriptor.append_metrics = appendMetrics;
+    descriptor.append_metrics = diagnostic::appendMetrics;
 
 #ifdef PRODUCT_ID
     trackle_protocol_set_product_id(protocol, PRODUCT_ID);
@@ -1866,67 +1852,19 @@ Trackle::~Trackle()
     file_content = NULL;
 }
 
-/**
- * It converts a floating point number to a fixed point number
- *
- * @param value the value to be converted
- * @param shift_bytes the number of bytes to shift the integer part of the float value.
- *
- * @return a 32-bit integer.
- */
-int32_t trans_float_diag(double value, int shift_bytes)
-{
-    double fractpart, intpart;
-    fractpart = modf(value, &intpart);
-    int32_t result = 0;
-    if (shift_bytes == 1)
-    {
-        result = ((int32_t)(intpart) << 8) | ((int32_t)(fractpart * 256) & 0xff);
-    }
-    else if (shift_bytes == 2)
-    {
-        result = ((int32_t)(intpart) << 16) | ((int32_t)(fractpart * 256 * 256) & 0xffff);
-    }
-    return result;
-}
-
 void Trackle::diagnosticCloud(Cloud key, double value)
 {
-    addDiagnostic(key, (int32_t)value);
+    diagnostic::diagnosticCloud(key, value);
 }
 
 void Trackle::diagnosticSystem(System key, double value)
 {
-    int32_t right_value = (int32_t)value;
-    if (key == SYSTEM_BATTERY_CHARGE)
-    {
-        right_value = trans_float_diag(value, 1);
-    }
-    addDiagnostic(key, right_value);
+    diagnostic::diagnosticSystem(key, value);
 }
 
 void Trackle::diagnosticNetwork(Network key, double value)
 {
-    int32_t right_value = (int32_t)value;
-    if (key == NETWORK_COUNTRY_CODE)
-    {
-        if (right_value < 100)
-            right_value = right_value * -1; // fix 2 digit format mnc
-    }
-    else if (key == NETWORK_RSSI || key == NETWORK_SIGNAL_STRENGTH || key == NETWORK_SIGNAL_QUALITY)
-    {
-        right_value = trans_float_diag(value, 1);
-    }
-    else if (key == NETWORK_SIGNAL_STRENGTH_VALUE || key == NETWORK_SIGNAL_QUALITY_VALUE)
-    {
-        right_value = trans_float_diag(value, 2);
-    }
-    addDiagnostic(key, right_value);
-}
-
-void Trackle::addDiagnostic(int key, int32_t value)
-{
-    diagnostic[key] = value;
+    diagnostic::diagnosticNetwork(key, value);
 }
 
 uint32_t HAL_RNG_GetRandomNumber(void)

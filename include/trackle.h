@@ -9,6 +9,7 @@
 #define Trackle_h
 
 #include "defines.h"
+#include "diagnostic.h"
 #include <string>
 
 using namespace std;
@@ -19,14 +20,6 @@ class Trackle
 {
 
 private:
-        /**
-         * @brief It adds a diagnostic value to the diagnostic array
-         *
-         * @param key The key of the diagnostic. This is a unique identifier for the diagnostic.
-         * @param value The value of the diagnostic.
-         */
-        void addDiagnostic(int key, int32_t value);
-
         /**
          * @brief It sends a publish to the cloud
          *
