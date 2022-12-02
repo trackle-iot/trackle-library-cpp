@@ -36,6 +36,16 @@ typedef enum
     SOCKET_READY = 2
 } Connection_Status_Type;
 
+typedef enum
+{
+    CON_ERROR_SEND = -3,
+    CON_ERROR_RECEIVE = -2,
+    CON_ERROR_SOCKET = -1,
+    CON_ERROR_PROTOCOL = 2,
+    CON_ERROR_LOOP = 3,
+    CON_ERROR_RECONNECTION = 4,
+} Cloud_Connection_Error;
+
 typedef int (*user_function_int_char_t)(const char *paramString, ...);
 
 typedef bool *(*user_variable_bool_cb_t)(const char *paramString);
@@ -73,6 +83,12 @@ typedef enum
     ALL_DEVICES
 } Subscription_Scope_Type;
 
+typedef enum network_disconnect_reason
+{
+    NETWORK_DISCONNECT_REASON_RESET = 6,  ///< Disconnected to recover from a cloud connection error.
+    NETWORK_DISCONNECT_REASON_UNKNOWN = 7 ///< Unspecified disconnection reason.
+} network_disconnect_reason;
+
 typedef enum
 {
     BATTERY_STATE_UNKNOWN = 0,
@@ -99,17 +115,20 @@ typedef enum
     NET_ACCESS_TECHNOLOGY_UNKNOWN = 0,
     NET_ACCESS_TECHNOLOGY_NONE = 0,
     NET_ACCESS_TECHNOLOGY_WIFI = 1,
-    NET_ACCESS_TECHNOLOGY_GSM = 2,
-    NET_ACCESS_TECHNOLOGY_EDGE = 3,
-    NET_ACCESS_TECHNOLOGY_UMTS = 4,
-    NET_ACCESS_TECHNOLOGY_UTRAN = 4,
-    NET_ACCESS_TECHNOLOGY_WCDMA = 4,
-    NET_ACCESS_TECHNOLOGY_CDMA = 5,
     NET_ACCESS_TECHNOLOGY_LTE = 6,
-    NET_ACCESS_TECHNOLOGY_IEEE802154 = 7,
     NET_ACCESS_TECHNOLOGY_LTE_CAT_M1 = 8,
     NET_ACCESS_TECHNOLOGY_LTE_CAT_NB1 = 9,
 } hal_net_access_tech_t;
+
+typedef enum
+{
+    CONNECTION_TYPE_UNDEFINED = 0,
+    CONNECTION_TYPE_WIFI = 1,
+    CONNECTION_TYPE_ETHERNET = 2,
+    CONNECTION_TYPE_LTE = 3,
+    CONNECTION_TYPE_NBIOT = 4,
+    CONNECTION_TYPE_CAT_M = 5,
+} Connection_Type;
 
 typedef enum
 {
@@ -127,21 +146,25 @@ typedef enum
 
 typedef enum
 {
-    NETWORK_CONNECTION_STATUS = 8,      // net:stat
-    NETWORK_CONNECTION_ERROR_CODE = 9,  // net:err
-    NETWORK_DISCONNECTS = 12,           // net:dconn
-    NETWORK_CONNECTION_ATTEMPTS = 27,   // net:connatt
-    NETWORK_DISCONNECTION_REASON = 28,  // net:dconnrsn
-    NETWORK_IPV4_ADDRESS = 15,          // net:ip:addr
-    NETWORK_IPV4_GATEWAY = 16,          // net.ip:gw
-    NETWORK_FLAGS = 17,                 // net:flags
-    NETWORK_COUNTRY_CODE = 18,          // net:cntry
-    NETWORK_RSSI = 19,                  // net:rssi
-    NETWORK_SIGNAL_STRENGTH_VALUE = 37, // net:sigstrv
-    NETWORK_SIGNAL_STRENGTH = 33,       // net:sigstr
-    NETWORK_SIGNAL_QUALITY = 34,        // net:sigqual
-    NETWORK_SIGNAL_QUALITY_VALUE = 35,  // net:sigqualv
-    NETWORK_ACCESS_TECNHOLOGY = 36,     // net:at
+    NETWORK_CONNECTION_STATUS = 8,                                  // net:stat
+    NETWORK_CONNECTION_ERROR_CODE = 9,                              // net:err
+    NETWORK_DISCONNECTS = 12,                                       // net:dconn
+    NETWORK_CONNECTION_ATTEMPTS = 27,                               // net:connatt
+    NETWORK_DISCONNECTION_REASON = 28,                              // net:dconnrsn
+    NETWORK_IPV4_ADDRESS = 15,                                      // net:ip:addr
+    NETWORK_IPV4_GATEWAY = 16,                                      // net.ip:gw
+    NETWORK_FLAGS = 17,                                             // net:flags
+    NETWORK_COUNTRY_CODE = 18,                                      // net:cntry
+    NETWORK_RSSI = 19,                                              // net:rssi
+    NETWORK_SIGNAL_STRENGTH_VALUE = 37,                             // net:sigstrv
+    NETWORK_SIGNAL_STRENGTH = 33,                                   // net:sigstr
+    NETWORK_SIGNAL_QUALITY = 34,                                    // net:sigqual
+    NETWORK_SIGNAL_QUALITY_VALUE = 35,                              // net:sigqualv
+    NETWORK_ACCESS_TECNHOLOGY = 36,                                 // net:at
+    NETWORK_CELLULAR_CELL_GLOBAL_IDENTITY_MOBILE_COUNTRY_CODE = 40, // net:cell:cgi:mcc
+    NETWORK_CELLULAR_CELL_GLOBAL_IDENTITY_MOBILE_NETWORK_CODE = 41, // net:cell:cgi:mnc
+    NETWORK_CELLULAR_CELL_GLOBAL_IDENTITY_LOCATION_AREA_CODE = 42,  // net:cell:cgi:lac
+    NETWORK_CELLULAR_CELL_GLOBAL_IDENTITY_CELL_ID = 43,             // net:cell:cgi:ci
 } Network;
 
 typedef enum
@@ -154,6 +177,7 @@ typedef enum
     CLOUD_REPEATED_MESSAGES = 21,       // coap:resend
     CLOUD_UNACKNOWLEDGED_MESSAGES = 22, // coap:unack
     CLOUD_RATE_LIMITED_EVENTS = 20,     // pub:throttle
+    CLOUD_COAP_ROUND_TRIP = 31,         // coap:roundtrip
 } Cloud;
 
 typedef enum
@@ -172,15 +196,6 @@ typedef enum
     PUSH = 1,
     SEND_URL = 2
 } Ota_Method;
-
-typedef enum
-{
-    UNDEFINED = 0,
-    WIFI = 1,
-    ETHERNET = 2,
-    CELLULAR = 3,
-    NBIOT = 4
-} Connection_Type;
 
 struct Chunk
 {
