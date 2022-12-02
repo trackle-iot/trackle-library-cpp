@@ -262,6 +262,18 @@ void trackleLoop(Trackle *v)
     v->loop();
 }
 
+// DIAGNOSTIC
+
+void trackleSetPublishHealthCheckInterval(Trackle *v, uint32_t interval)
+{
+    v->setPublishHealthCheckInterval(interval);
+}
+
+void tracklePublishHealthCheck(Trackle *v)
+{
+    v->publishHealthCheck();
+}
+
 // SETTER
 
 void trackleSetFirmwareVersion(Trackle *v, int firmwareversion)

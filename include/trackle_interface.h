@@ -369,6 +369,20 @@ extern "C"
     void trackleLoop(Trackle *v) DYNLIB;
 
     /*!
+     * @copybrief Trackle::setPublishHealthCheckInterval()
+     * @trackle
+     * @copydetails Trackle::setPublishHealthCheckInterval()
+     */
+    void trackleSetPublishHealthCheckInterval(Trackle *v, uint32_t interval) DYNLIB;
+
+    /*!
+     * @copybrief Trackle::publishHealthCheck()
+     * @trackle
+     * @copydetails Trackle::publishHealthCheck()
+     */
+    void tracklePublishHealthCheck(Trackle *v) DYNLIB;
+
+    /*!
      * @copybrief Trackle::setFirmwareVersion()
      * @trackle
      * @copydetails Trackle::setFirmwareVersion()
