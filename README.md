@@ -10,10 +10,8 @@
 ````
 
 
-[![GitHub version](https://img.shields.io/badge/version-v2.0.0-blue)](https://github.com/trackle-iot/
-trackle-library-cpp/releases/latest) &nbsp; &nbsp;
-[![GitHub stars](https://img.shields.io/github/stars/trackle-iot/trackle-library?style=social)](https://github.com/trackle-iot/
-trackle-library-cpp/stargazers) 
+[![GitHub version](https://img.shields.io/badge/version-v2.0.0-blue)](https://github.com/trackle-iot/trackle-library-cpp/releases/latest) &nbsp; &nbsp;
+[![GitHub stars](https://img.shields.io/github/stars/trackle-iot/trackle-library?style=social)](https://github.com/trackle-iot/trackle-library-cpp/stargazers) 
 __________
 
 Complete documentation can be found [here](https://trackle-iot.github.io/trackle-library-cpp/).
