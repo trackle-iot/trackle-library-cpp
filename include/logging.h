@@ -238,7 +238,7 @@ extern "C"
 #endif
 
 #ifndef LOG_MAX_STRING_LENGTH
-#define LOG_MAX_STRING_LENGTH 160
+#define LOG_MAX_STRING_LENGTH 160 + 1024
 #endif
 
 #ifndef LOG_INCLUDE_SOURCE_INFO

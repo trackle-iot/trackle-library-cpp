@@ -88,8 +88,7 @@ namespace trackle
 #if PLATFORM_ID < 2
 #define PROTOCOL_BUFFER_SIZE 640
 #else
-//#define PROTOCOL_BUFFER_SIZE 800
-#define PROTOCOL_BUFFER_SIZE 1000 // per ota update fino a 1.9MB
+#define PROTOCOL_BUFFER_SIZE 1200 // per ota update fino a 1.9MB e publish fino a 1024
 #endif
 #endif
 
