@@ -39,7 +39,7 @@ This document provides instructions to use the Trackle library and connect your 
 Trackle library is hardware agnostic. It depends on tinydtls that is compatible with contiki, esp-idf, posix, riot, windows and zephyr.
 
 ### Download
-You can download last **Trackle Library** from [here](https://github.com/trackle-iot/trackle-library/releases/latest).
+You can download last **Trackle Library** from [here](https://github.com/trackle-iot/trackle-library-cpp/releases/latest).
 
 ### Usage and API
 
