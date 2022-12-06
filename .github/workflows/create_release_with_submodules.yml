@@ -9,7 +9,6 @@ jobs:
             - name: Check out code with submodules
               uses: actions/checkout@v2
               with:
-                ssh-key: ${{ secrets.SSH_PRIV_KEY }}
                 submodules: 'recursive'
             - name: Initialize mandatory git config
               run: |
