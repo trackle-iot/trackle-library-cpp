@@ -1,0 +1,60 @@
+name: Create release with submodules
+on:
+    push:
+        tags: ["v*"]
+jobs:
+    create_release_with_submodules:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out code with submodules
+              uses: actions/checkout@v2
+              with:
+                ssh-key: ${{ secrets.SSH_PRIV_KEY }}
+                submodules: 'recursive'
+            - name: Initialize mandatory git config
+              run: |
+                  git config user.name "GitHub Actions"
+                  git config user.email noreply@github.com
+            - name: Get repository name
+              run: |
+                  MY_REPO_NAME=$(echo -ne $GITHUB_REPOSITORY | cut -d'/' -f2)
+                  echo "MY_REPO_NAME=$MY_REPO_NAME" >> $GITHUB_ENV
+                  echo "TARBALL_NAME=$MY_REPO_NAME-$GITHUB_REF_NAME-src-with-deps" >> $GITHUB_ENV
+            - name: Tag Changelog
+              id: changelog
+              uses: loopwerk/tag-changelog@v1.0.4
+              with:
+                token: ${{ secrets.GITHUB_TOKEN }}
+            - name: Create release
+              id: create_release
+              uses: actions/create-release@v1
+              env:
+                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                tag_name: ${{ github.ref_name }}
+                release_name: Release ${{ github.ref_name }}
+                body: |
+                     ${{ steps.changelog.outputs.changes }}
+                     ## Assets description:
+                     - ```${{ env.TARBALL_NAME }}.tar.gz```: contains the complete sources of the project, along with required submodules.
+                     - ```Source code (zip)``` and ```Source code (tar.gz)```: archives generated automatically by GitHub, without submodules.
+                draft: false
+                prerelease: false
+            - name: Cleanup repo files
+              run: rm -fr .git*
+            - name: Make tarball and move to checked out repo
+              run: |
+                  cd ..
+                  cp -r $MY_REPO_NAME $TARBALL_NAME
+                  tar -zcf $TARBALL_NAME.tar.gz $TARBALL_NAME
+                  mv $TARBALL_NAME.tar.gz $MY_REPO_NAME
+            - name: Upload tarball to release
+              id: upload-release-asset 
+              uses: actions/upload-release-asset@v1
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                upload_url: ${{ steps.create_release.outputs.upload_url }}
+                asset_path: ${{ env.TARBALL_NAME }}.tar.gz
+                asset_name: ${{ env.TARBALL_NAME }}.tar.gz
+                asset_content_type: application/gzip
