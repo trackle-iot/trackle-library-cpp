@@ -1,4 +1,4 @@
-name: Doxygen GitHub Pages Deploy Action
+name: Update online Doxygen documentation
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  update_online_documentation:
     runs-on: ubuntu-latest
     steps:
       - uses: DenverCoder1/doxygen-github-pages-action@v1
