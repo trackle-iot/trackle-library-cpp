@@ -28,7 +28,7 @@ struct Dtls_data
 	void *channel;													  // DTLSMessageChannel
 	int (*send)(const unsigned char *buf, size_t len, void *channel); // Send callback
 	uint32_t read_len;												  // len of received packet
-	uint8_t read_buf[1024];											  // received buffer
+	uint8_t read_buf[PROTOCOL_BUFFER_SIZE];							  // received buffer
 };
 
 namespace trackle

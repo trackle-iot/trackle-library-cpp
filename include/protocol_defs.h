@@ -79,6 +79,7 @@ namespace trackle
         const size_t MAX_EVENT_NAME_LENGTH = 64;
         const size_t MAX_EVENT_DATA_LENGTH = 1024;
         const size_t MAX_FUNCTION_ARG_LENGTH = 1024;
+        const size_t MAX_VARIABLE_ARG_LENGTH = 1024;
         const size_t MAX_VARIABLE_VALUE_LENGTH = 1024;
 
         // Timeout in milliseconds given to receive an acknowledgement for a published event
