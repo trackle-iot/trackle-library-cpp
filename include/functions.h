@@ -84,12 +84,12 @@ namespace trackle
                     memcpy(user_caller_id, queue + o_index + 1, user_caller_id_length);
                 }
 
-                bool has_function = true;
+                bool arg_too_long = false;
                 // allocated memory bounds check
                 if (function_arg_length > MAX_FUNCTION_ARG_LENGTH)
                 {
                     function_arg_length = MAX_FUNCTION_ARG_LENGTH;
-                    has_function = false;
+                    arg_too_long = true;
                     // in case we got here due to inconceivable error, memset with null terminators
                     memset(function_arg, 0, sizeof(function_arg));
                 }
@@ -103,17 +103,16 @@ namespace trackle
                     return this->function_result(channel, result, resultType, token);
                 };
 
-                int result = call_function(function_key, function_arg, user_caller_id, callback, NULL);
+                int result = 0;
+                if (!arg_too_long)
+                {
+                    result = call_function(function_key, function_arg, user_caller_id, callback, NULL);
+                }
 
-                if (result > 0 || has_function)
+                if (result > 0 || arg_too_long)
                 {
                     int error_x = 4;
                     int error_y = result;
-
-                    if (!has_function)
-                    { // error 400
-                        error_y = 0;
-                    }
 
                     Message response;
                     channel.response(message, response, 16);

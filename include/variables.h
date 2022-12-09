@@ -15,7 +15,7 @@ namespace trackle
         {
 
         public:
-            ProtocolError decode_variable_request(char variable_key[MAX_VARIABLE_KEY_LENGTH + 1], char variable_arg[MAX_FUNCTION_ARG_LENGTH + 1], Message &message)
+            ProtocolError decode_variable_request(char variable_key[MAX_VARIABLE_KEY_LENGTH + 1], char variable_arg[MAX_VARIABLE_ARG_LENGTH + 1], Message &message)
             {
                 uint8_t *queue = message.buf();
                 uint8_t queue_offset = 8;
@@ -59,6 +59,12 @@ namespace trackle
                         variable_arg_length += 269;
                     }
 
+                    // allocated memory bounds check
+                    if (variable_arg_length > MAX_VARIABLE_ARG_LENGTH)
+                    {
+                        return IO_ERROR_GENERIC_RECEIVE;
+                    }
+
                     memcpy(variable_arg, queue + q_index + 1, variable_arg_length);
                     variable_arg[variable_arg_length] = 0; // null terminate string
                 }
@@ -74,6 +80,20 @@ namespace trackle
                                                   TrackleReturnType::Enum (*variable_type)(const char *variable_key),
                                                   const void *(*get_variable)(const char *variable_key))
             {
+
+                ProtocolError err = decode_variable_request(variable_key, variable_arg, message);
+
+                // args too long, send error 400
+                if (err == IO_ERROR_GENERIC_RECEIVE)
+                {
+                    Message response;
+                    channel.response(message, response, 16);
+                    size_t response_length = Messages::coded_ack(response.buf(), RESPONSE_CODE(4, 0), 0, 0);
+                    response.set_id(message_id);
+                    response.set_length(response_length);
+                    return channel.send(response);
+                }
+
                 uint8_t *queue = message.buf();
                 message.set_id(message_id);
 

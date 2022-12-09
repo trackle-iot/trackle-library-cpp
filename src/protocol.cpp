@@ -79,7 +79,6 @@ namespace trackle
             {
                 char variable_key[MAX_VARIABLE_KEY_LENGTH + 1];
                 char variable_args[MAX_FUNCTION_ARG_LENGTH + 1];
-                variables.decode_variable_request(variable_key, variable_args, message);
                 return variables.handle_variable_request(variable_key, variable_args, message,
                                                          channel, token, msg_id,
                                                          descriptor.variable_type,
