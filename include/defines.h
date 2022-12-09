@@ -46,7 +46,7 @@ typedef enum
     CON_ERROR_RECONNECTION = 4,
 } Cloud_Connection_Error;
 
-typedef int (*user_function_int_char_t)(const char *paramString, ...);
+typedef int(user_function_int_char_t)(const char *paramString, ...);
 
 typedef bool *(*user_variable_bool_cb_t)(const char *paramString);
 typedef int *(*user_variable_int_cb_t)(const char *paramString);
