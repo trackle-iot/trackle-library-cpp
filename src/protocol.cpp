@@ -352,19 +352,24 @@ namespace trackle
             return 0;
         }
 
-        const auto HELLO_FLAG_OTA_UPGRADE_SUCCESSFUL = 1;
-        const auto HELLO_FLAG_DIAGNOSTICS_SUPPORT = 2;
-        const auto HELLO_FLAG_IMMEDIATE_UPDATES_SUPPORT = 4;
+        const auto HELLO_FLAG_OTA_UPGRADE_SUCCESSFUL = 0x01;
+        const auto HELLO_FLAG_DIAGNOSTICS_SUPPORT = 0x02;
+        const auto HELLO_FLAG_IMMEDIATE_UPDATES_SUPPORT = 0x04;
+        // Flag 0x08 is reserved to indicate support for the HandshakeComplete message
+        const auto HELLO_FLAG_GOODBYE_SUPPORT = 0x10;
+        const auto HELLO_FLAG_DEVICE_INITIATED_DESCRIBE = 0x20;
+        const auto HELLO_FLAG_COMPRESSED_OTA = 0x40;
+        const auto HELLO_FLAG_OTA_PROTOCOL_V3 = 0x80;
 
         /**
          * Send the hello message over the channel.
          * @param was_ota_upgrade_successful {@code true} if the previous OTA update was successful.
          */
-        ProtocolError Protocol::hello(bool was_ota_upgrade_successful)
+        ProtocolError
+        Protocol::hello(bool was_ota_upgrade_successful)
         {
             Message message;
             channel.create(message);
-
             uint8_t flags = was_ota_upgrade_successful ? HELLO_FLAG_OTA_UPGRADE_SUCCESSFUL : 0;
             flags |= HELLO_FLAG_DIAGNOSTICS_SUPPORT | HELLO_FLAG_IMMEDIATE_UPDATES_SUPPORT;
             size_t len = build_hello(message, flags);
