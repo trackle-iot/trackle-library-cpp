@@ -120,22 +120,22 @@ namespace trackle
                 {
                     result = update_property(function_key, function_arg, user_caller_id, callback, NULL);
                 }
-
-                if (result > 0 || arg_too_long)
+                else
                 {
-                    int error_x = 4;
-                    int error_y = result;
+                    result = 4;
+                }
 
-                    Message response;
-                    channel.response(message, response, 16);
-                    size_t response_length = Messages::coded_ack(response.buf(), RESPONSE_CODE(error_x, error_y), 0, 0);
-                    response.set_id(message_id);
-                    response.set_length(response_length);
-                    ProtocolError error = channel.send(response);
-                    if (error)
-                    {
-                        return error;
-                    }
+                // response could be 0.0 ok, 4.0 args too long or 5.0 props cb not exists
+                LOG(TRACE, "handle_property_call %d.0", result);
+                Message response;
+                channel.response(message, response, 16);
+                size_t response_length = Messages::coded_ack(response.buf(), RESPONSE_CODE(result, 0), 0, 0);
+                response.set_id(message_id);
+                response.set_length(response_length);
+                ProtocolError error = channel.send(response);
+                if (error)
+                {
+                    return error;
                 }
 
                 return NO_ERROR;

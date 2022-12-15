@@ -109,21 +109,26 @@ namespace trackle
                     result = call_function(function_key, function_arg, user_caller_id, callback, NULL);
                 }
 
-                if (result > 0 || arg_too_long)
-                {
-                    int error_x = 4;
-                    int error_y = result;
+                // response could be 0.0 ok, 4.0 args too long, 4,03 user not allowed, 4,04 function not exists
+                int error_x = 0;
+                int error_y = 0;
 
-                    Message response;
-                    channel.response(message, response, 16);
-                    size_t response_length = Messages::coded_ack(response.buf(), RESPONSE_CODE(error_x, error_y), 0, 0);
-                    response.set_id(message_id);
-                    response.set_length(response_length);
-                    ProtocolError error = channel.send(response);
-                    if (error)
-                    {
-                        return error;
-                    }
+                if (arg_too_long || result > 0)
+                {
+                    error_x = 4;
+                    error_y = result;
+                } // else 0.0, ok
+
+                LOG(TRACE, "handle_function_call %d.%d", error_x, error_y);
+                Message response;
+                channel.response(message, response, 16);
+                size_t response_length = Messages::coded_ack(response.buf(), RESPONSE_CODE(error_x, error_y), 0, 0);
+                response.set_id(message_id);
+                response.set_length(response_length);
+                ProtocolError error = channel.send(response);
+                if (error)
+                {
+                    return error;
                 }
 
                 return NO_ERROR;
