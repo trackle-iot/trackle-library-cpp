@@ -137,18 +137,19 @@ std::string hexStr(char *data, int len)
 Connection_Status_Type connectionStatus = SOCKET_NOT_CONNECTED;
 int cloudStatus = -1;
 
-trackle::protocol::Connection_Properties_Type connectionPropTypeList[6] = {
+trackle::protocol::Connection_Properties_Type connectionPropTypeList[7] = {
     {30, 10, 2},  // UNDEFINED
     {30, 10, 2},  // WIFI
     {30, 10, 2},  // ETHERNET
     {30, 10, 2},  // CELLULAR
     {150, 20, 5}, // NBIOT
     {150, 20, 5}, // CAT_M
+    {30, 10, 5},  // WIFI POWER SAFE
 };                // in seconds
 
 hal_net_access_tech_t getTecnologyAccess(Connection_Type con)
 {
-    if (con == CONNECTION_TYPE_WIFI)
+    if (con == CONNECTION_TYPE_WIFI || con == CONNECTION_TYPE_WIFI_PS)
     {
         return NET_ACCESS_TECHNOLOGY_WIFI;
     }

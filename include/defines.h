@@ -128,6 +128,7 @@ typedef enum
     CONNECTION_TYPE_LTE = 3,
     CONNECTION_TYPE_NBIOT = 4,
     CONNECTION_TYPE_CAT_M = 5,
+    CONNECTION_TYPE_WIFI_PS = 6,
 } Connection_Type;
 
 typedef enum
