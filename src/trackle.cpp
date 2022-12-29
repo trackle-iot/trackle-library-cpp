@@ -12,6 +12,7 @@
 
 #include "hal_platform.h"
 
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <sstream>
@@ -26,7 +27,11 @@
 #define USER_FUNC_KEY_LENGTH 64
 #define USER_FUNC_ARG_LENGTH 622
 
-#define RECONNECTION_TIMEOUT 5000
+#define RECONNECTION_TIMEOUT 3750
+#define MAX_RECONNECTION_RETRY_INCREMENT 5 // 2^5 * 3750 = 60 seconds
+uint16_t connection_retry = 0;
+uint32_t connection_timeout = 1000;
+
 #define MAX_COUNTER 9999999
 
 const uint32_t PUBLISH_EVENT_FLAG_PUBLIC = 0x0;
@@ -167,6 +172,29 @@ hal_net_access_tech_t getTecnologyAccess(Connection_Type con)
     }
 
     return NET_ACCESS_TECHNOLOGY_UNKNOWN;
+}
+
+/**
+ * It increases the connection timeout by a factor of 2, and adds a random number between 0 and 0.512
+ */
+void increase_connection_timeout()
+{
+    if (connection_retry < MAX_RECONNECTION_RETRY_INCREMENT)
+    {
+        connection_retry++;
+    }
+    connection_timeout = pow(2, connection_retry) * RECONNECTION_TIMEOUT;
+    double x = (rand() % 512) / (double)1000; // rand between 0 and 0.512
+    connection_timeout += x * connection_timeout;
+}
+
+/**
+ * Resets the connection timeout to 1000 milliseconds and the connection retry to 0.
+ */
+void reset_connection_timeout()
+{
+    connection_timeout = 1000;
+    connection_retry = 0;
 }
 
 uint32_t pingInterval = 0;
@@ -1485,7 +1513,7 @@ void Trackle::connectionCompleted()
         LOG(ERROR, "Protocol beginning error: %d", result);
         diagnostic::diagnosticCloud(CLOUD_CONNECTION_ERROR_CODE, 1);
         connectionError(CON_ERROR_PROTOCOL, true);
-        return;
+        return -1;
     }
 
     if (!session_resumed)
@@ -1514,6 +1542,7 @@ void Trackle::connectionCompleted()
     }
 
     setConnectionStatus(SOCKET_READY);
+    return 1;
 }
 
 int Trackle::connect()
@@ -1631,15 +1660,32 @@ void Trackle::loop()
     {
         system_tick_t millis_since_disconnection = (*callbacks.millis)() - millis_last_disconnection;
 
-        if (RECONNECTION_TIMEOUT < millis_since_disconnection)
+        if (connection_timeout < millis_since_disconnection)
         {
-            LOG(INFO, "Cloud reconnection after %lu ms", millis_since_disconnection);
+            LOG(INFO, "Cloud reconnection after %d ms", connection_timeout);
 
             if (connectionStatus > SOCKET_NOT_CONNECTED)
                 connectionError(CON_ERROR_RECONNECTION, true);
 
             millis_last_disconnection = (*callbacks.millis)();
-            Trackle::connect();
+
+            // create socket
+            if (Trackle::connect() > 0)
+            { // socket creation ok
+                if (completeCloudConnection() < 0)
+                { // on cloud connection error, increase timeout
+                    LOG(TRACE, "Cloud connection error, increment reconnection timeout...");
+                    increase_connection_timeout();
+                }
+                else // on success connection, reset timeout
+                {
+                    reset_connection_timeout();
+                }
+            }
+            else // on socket creation error, reset timeout
+            {
+                reset_connection_timeout();
+            }
         }
     }
 }
