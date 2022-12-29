@@ -555,8 +555,8 @@ public:
 
         /**
          * @brief To be called when the socket connection is completed, it starts the Trackle protocol handshake
+         * @deprecated No need to call it anymore, will be removed in release 3.0
          *
-         * @return The result of the handshake.
          */
         void connectionCompleted();
 

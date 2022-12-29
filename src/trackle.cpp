@@ -1495,6 +1495,11 @@ void Trackle::publishHealthCheck()
 
 void Trackle::connectionCompleted()
 {
+    LOG(WARN, "DEPRECATED connectionCompleted - no need to call it anymore");
+}
+
+int completeCloudConnection()
+{
     LOG(INFO, "Socket connection completed, starting handshake");
     setConnectionStatus(SOCKET_CONNECTED);
     millis_last_sent_health_check = (*callbacks.millis)(); // reset health check timer on connect
@@ -1596,7 +1601,6 @@ int Trackle::connect()
         address = string_device_id + ".udp." + address;
         res = (*connectCb)(address.c_str(), 5684);
 
-        // when the connection is ok, connectCb must call connectionCompleted() and return >= 0
         // If it returns < 0, it's an immediate error
         if (res < 0)
         {
@@ -1614,7 +1618,7 @@ int Trackle::connect()
         return -1;
     }
 
-    return 0;
+    return 1;
 }
 
 void Trackle::disconnect()

@@ -91,7 +91,7 @@ void sleep_cb(uint32_t sleep)
 }
 
 /**
- * This creates a socket, sets the timeout and calls the trackleConnectionCompleted function
+ * This creates a socket, sets the timeout and return socket creation result
  */
 int connect_cb_udp(const char *address, int port)
 {
@@ -132,7 +132,6 @@ int connect_cb_udp(const char *address, int port)
     socket_timeout.tv_usec = 1000; // 1ms
     setsockopt(cloud_socket, SOL_SOCKET, SO_RCVTIMEO, (struct timeval *)&socket_timeout, sizeof(struct timeval));
 
-    trackleConnectionCompleted(trackle_s);
     return 1;
 }
 
