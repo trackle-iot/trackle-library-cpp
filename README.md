@@ -22,6 +22,7 @@ Complete documentation can be found [here](https://trackle-iot.github.io/trackle
   - [What is Trackle](#what-is-trackle)
   - [Overview](#overview)
     - [Supported hardware](#supported-hardware)
+    - [License](#license)
     - [Download](#download)
     - [Usage and API](#usage-and-api)
       - [Get a Device ID and a private key](#get-a-device-id-and-a-private-key)
@@ -37,6 +38,9 @@ This document provides instructions to use the Trackle library and connect your 
 
 ### Supported hardware
 Trackle library is hardware agnostic. It depends on tinydtls that is compatible with contiki, esp-idf, posix, riot, windows and zephyr.
+
+### License
+Unless stated elsewhere, file headers or otherwise, all files herein are licensed under an LGPLv3 license. For more information, please read the LICENSE file.
 
 ### Download
 You can download last **Trackle Library** from [here](https://github.com/trackle-iot/trackle-library-cpp/releases/latest).
