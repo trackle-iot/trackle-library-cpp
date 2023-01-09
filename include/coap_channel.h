@@ -22,7 +22,6 @@
 
 #include "message_channel.h"
 #include "coap.h"
-// #include "timer_hal.h"
 #include "stdlib.h"
 #include "service_debug.h"
 

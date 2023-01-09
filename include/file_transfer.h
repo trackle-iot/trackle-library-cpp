@@ -21,7 +21,6 @@
 #pragma once
 
 #include <stdint.h>
-// #include "static_assert.h"
 
 namespace FileTransfer
 {

@@ -30,7 +30,6 @@
 #include "protocol.h"
 #include "dtls_message_channel.h"
 #include "coap_channel.h"
-// #include "eckeygen.h"
 #include <limits>
 #include "logging.h"
 

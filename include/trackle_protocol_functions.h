@@ -23,10 +23,8 @@
 #include <stdint.h>
 #include <time.h>
 #include "protocol_defs.h"
-// #include "system_tick_hal.h"
 #include "trackle_descriptor.h"
 #include "events.h"
-// #include "eckeygen.h"
 #include "file_transfer.h"
 #include "protocol_selector.h"
 #include "protocol_defs.h"

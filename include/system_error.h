@@ -20,8 +20,6 @@
 #ifndef SERVICES_SYSTEM_ERROR_H
 #define SERVICES_SYSTEM_ERROR_H
 
-// #include "preprocessor.h"
-
 // List of all defined system errors
 #define SYSTEM_ERRORS                                 \
         (NONE, "", 0),                                \

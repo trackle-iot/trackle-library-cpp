@@ -23,7 +23,6 @@
 #include "protocol_defs.h"
 #include "file_transfer.h"
 #include "message_channel.h"
-// #include "system_tick_hal.h"
 #include "messages.h"
 
 namespace trackle

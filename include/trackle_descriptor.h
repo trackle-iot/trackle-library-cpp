@@ -21,7 +21,6 @@
 #pragma once
 
 #include "appender.h"
-// #include "static_assert.h"
 #include "events.h"
 #include <functional>
 
@@ -109,5 +108,3 @@ struct TrackleDescriptor
 
   void *reserved[1]; // add a few additional pointers
 };
-
-// TRACKLE_STATIC_ASSERT(TrackleDescriptor_size, sizeof(TrackleDescriptor)==60 || sizeof(void*)!=4);

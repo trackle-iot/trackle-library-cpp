@@ -2,7 +2,6 @@
 
 #include "hal_platform.h"
 #include <functional>
-//#include "system_tick_hal.h"
 
 #include "system_error.h"
 
