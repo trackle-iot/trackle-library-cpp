@@ -254,7 +254,7 @@ namespace trackle
 			memset(server_certificate, 0, DTLS_PUBLIC_KEY_LENGTH);
 		}
 
-		//#if defined(ESP32)
+		// #if defined(ESP32)
 		struct dtls_timing_context
 		{
 			uint32_t snapshot;
@@ -299,7 +299,7 @@ namespace trackle
 
 			return 0;
 		}
-		//#endif
+		// #endif
 
 		ProtocolError DTLSMessageChannel::setup_context()
 		{
@@ -542,8 +542,8 @@ namespace trackle
 			LOG_PRINT(TRACE, "\r\n");
 #endif
 
-			dtls_write(dtls_context, &dst, message.buf(), message.length());
-			return NO_ERROR;
+			int ret = dtls_write(dtls_context, &dst, message.buf(), message.length());
+			return (ret >= 0 ? NO_ERROR : IO_ERROR_GENERIC_ESTABLISH);
 		}
 
 		bool DTLSMessageChannel::is_unreliable()
