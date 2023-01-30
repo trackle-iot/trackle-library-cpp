@@ -1,6 +1,8 @@
 #pragma once
 
 #include "hal_platform.h"
+#include <stddef.h>
+#include <stdint.h>
 #include <functional>
 
 #include "system_error.h"

@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <time.h>
 
 #if defined(__arm__)
 #include <cstdlib>

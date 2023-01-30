@@ -4,7 +4,6 @@ LOG_SOURCE_CATEGORY("comm.dtls")
 #include "dtls_message_channel.h"
 
 #include "protocol.h"
-#include "esp_log.h"
 
 #include <stdio.h>
 #include <string.h>
