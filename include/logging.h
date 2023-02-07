@@ -131,6 +131,7 @@
 // #include "mbedtls/config.h"
 // #include "preprocessor.h"
 #include <stdio.h>
+#include "defines.h"
 
 // NOTE: This header defines various string constants. Ensure identical strings defined in different
 // translation units get merged during linking (may require enabled optimizations)
@@ -246,6 +247,7 @@ extern "C"
     void log_set_level(LogLevel level);
 
     // Sets logger callbacks
+    void log_set_millis_callback(millisCallback *millis);
     void log_set_callbacks(log_message_callback_type log_msg, log_write_callback_type log_write,
                            log_enabled_callback_type log_enabled, void *reserved);
 

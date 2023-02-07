@@ -27,16 +27,9 @@ namespace
     volatile log_message_callback_type log_msg_callback = 0;
     volatile log_write_callback_type log_write_callback = 0;
     volatile log_enabled_callback_type log_enabled_callback = 0;
-
+    system_tick_t (*getMillis)() = NULL;
 } // namespace
 
-static uint32_t getMillis(void)
-{
-    struct timeval tp;
-    gettimeofday(&tp, NULL);
-    long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
-    return (uint32_t)ms;
-}
 
 typedef LogLevel LoggerOutputLevel; // Compatibility typedef
 LoggerOutputLevel log_compat_level = DEFAULT_LEVEL;
@@ -47,6 +40,10 @@ debug_output_fn log_compat_callback = NULL;
 void log_set_level(LogLevel level)
 {
     log_compat_level = level;
+}
+
+void log_set_millis_callback(millisCallback *millis) {
+    getMillis = millis;
 }
 
 void log_set_callbacks(log_message_callback_type log_msg, log_write_callback_type log_write,
@@ -74,7 +71,7 @@ void log_message_v(int level, const char *category, LogAttributes *attr, void *r
     // Set default attributes
     if (!attr->has_time)
     {
-        LOG_ATTR_SET(*attr, time, getMillis());
+        LOG_ATTR_SET(*attr, time, (*getMillis)());
     }
     char buf[LOG_MAX_STRING_LENGTH];
     if (msg_callback)

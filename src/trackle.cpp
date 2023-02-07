@@ -1152,6 +1152,7 @@ void Trackle::test(string param)
 void Trackle::setMillis(millisCallback *millis)
 {
     callbacks.millis = millis;
+    log_set_millis_callback(millis);
     millis_started_at = (*callbacks.millis)();
 }
 
