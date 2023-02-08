@@ -61,7 +61,7 @@ int main()
     Trackle trackleInst;
 
     trackleInst.setLogCallback(Callbacks_log_cb);
-    trackleInst.setLogLevel(INFO);
+    trackleInst.setLogLevel(TRACKLE_INFO);
 
     // Initialize Trackle
     trackleInst.setEnabled(true);

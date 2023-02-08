@@ -59,7 +59,7 @@ int main()
     Trackle *trackle_s = newTrackle();
 
     trackleSetLogCallback(trackle_s, Callbacks_log_cb);
-    trackleSetLogLevel(trackle_s, INFO);
+    trackleSetLogLevel(trackle_s, TRACKLE_INFO);
 
     // Initialize Trackle
     trackleInit(trackle_s);

@@ -6,10 +6,6 @@
 #include <stdio.h>
 #include <time.h>
 
-#if defined(__arm__)
-#include <cstdlib>
-#endif
-
 #define DEFAULT_TTL 60
 
 typedef enum
@@ -183,12 +179,12 @@ typedef enum
 
 typedef enum
 {
-    TRACE = 1,
-    INFO = 30,
-    WARN = 40,
-    ERROR = 50,
-    PANIC = 60,
-    NO_LOG = 70
+    TRACKLE_TRACE = 1,
+    TRACKLE_INFO = 30,
+    TRACKLE_WARN = 40,
+    TRACKLE_ERROR = 50,
+    TRACKLE_PANIC = 60,
+    TRACKLE_NO_LOG = 70
 } Log_Level;
 
 typedef enum
