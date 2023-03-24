@@ -162,6 +162,8 @@ typedef enum
     NETWORK_CELLULAR_CELL_GLOBAL_IDENTITY_MOBILE_NETWORK_CODE = 41, // net:cell:cgi:mnc
     NETWORK_CELLULAR_CELL_GLOBAL_IDENTITY_LOCATION_AREA_CODE = 42,  // net:cell:cgi:lac
     NETWORK_CELLULAR_CELL_GLOBAL_IDENTITY_CELL_ID = 43,             // net:cell:cgi:ci
+    NETWORK_MAC_ADDRESS_OUI = 91,                                   // net:mac:oui
+    NETWORK_MAC_ADDRESS_NIC = 92,                                   // net:mac:nic
 } Network;
 
 typedef enum
