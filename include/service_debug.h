@@ -68,12 +68,6 @@ extern "C"
 }
 #endif
 
-#define DEBUG(fmt, ...) LOG_DEBUG(TRACE, fmt, ##__VA_ARGS__)
-#define INFO(fmt, ...) LOG(INFO, fmt, ##__VA_ARGS__)
-#define WARN(fmt, ...) LOG(WARN, fmt, ##__VA_ARGS__)
-#define ERROR(fmt, ...) LOG(ERROR, fmt, ##__VA_ARGS__)
-#define DEBUG_D(fmt, ...) LOG_DEBUG_PRINTF(TRACE, fmt, ##__VA_ARGS__)
-
 #if PLATFORM_ID != 3
 #define TRACKLE_ASSERT(predicate) 0
 #else

@@ -30,7 +30,7 @@ namespace trackle
                     {
                         flags &= ~(1 << 0); // disabled
                     }
-                    DEBUG("Fast OTA: %s", fast_ota_value ? "enabled" : "disabled");
+                    LOG_DEBUG(TRACE, "Fast OTA: %s", fast_ota_value ? "enabled" : "disabled");
                 }
 
                 file.chunk_size = decode_uint16(queue + 9);
@@ -66,9 +66,9 @@ namespace trackle
             {
                 if (!callbacks->prepare_for_firmware_update(file, 0, NULL))
                 {
-                    DEBUG("starting file length %d chunks %d chunk_size %d",
-                          file.file_length, file.chunk_count(file.chunk_size),
-                          file.chunk_size);
+                    LOG_DEBUG(TRACE, "starting file length %d chunks %d chunk_size %d",
+                              file.file_length, file.chunk_count(file.chunk_size),
+                              file.chunk_size);
                     last_chunk_millis = callbacks->millis();
                     chunk_index = 0;
                     chunk_size = file.chunk_size; // save chunk size since the descriptor size is overwritten
@@ -90,7 +90,7 @@ namespace trackle
                     updateReady.set_confirm_received(true);
                     error = channel.send(updateReady);
                     if (error)
-                        DEBUG("error sending updateReady");
+                        LOG_DEBUG(TRACE, "error sending updateReady");
                 }
             }
             return error;
@@ -109,7 +109,7 @@ namespace trackle
 
             if (!is_updating())
             {
-                WARN("got chunk when not updating");
+                LOG(WARN, "got chunk when not updating");
                 // TODO: return INVALID_STATE after we add a way to have
                 // the server ACK our UpdateDone ACK before we reset_updating().
                 return NO_ERROR;
@@ -158,14 +158,14 @@ namespace trackle
                 file.chunk_address = file.file_address + (chunk_index * chunk_size);
                 if (chunk_index >= MAX_CHUNKS)
                 {
-                    WARN("invalid chunk index %d", chunk_index);
+                    LOG(WARN, "invalid chunk index %d", chunk_index);
                     return NO_ERROR;
                 }
                 uint32_t crc = callbacks->calculate_crc(chunk, file.chunk_size);
                 uint16_t response_size = 0;
                 bool crc_valid = (crc == given_crc);
-                DEBUG("chunk idx=%d crc=%d fast=%d updating=%d", chunk_index,
-                      crc_valid, fast_ota, updating);
+                LOG_DEBUG(TRACE, "chunk idx=%d crc=%d fast=%d updating=%d", chunk_index,
+                          crc_valid, fast_ota, updating);
                 if (crc_valid)
                 {
                     callbacks->save_firmware_chunk(file, chunk, NULL);
@@ -179,7 +179,7 @@ namespace trackle
                 }
                 else
                 {
-                    WARN("chunk crc bad %d: wanted %x got %x", chunk_index, given_crc, crc);
+                    LOG(WARN, "chunk crc bad %d: wanted %x got %x", chunk_index, given_crc, crc);
                     if (!fast_ota)
                     {
                         response_size = Messages::chunk_received(response.buf(), 0, token, ChunkReceivedCode::BAD, channel.is_unreliable());
@@ -241,7 +241,7 @@ namespace trackle
             // send ACK 2.04
             Message response;
 
-            DEBUG("update done received");
+            LOG_DEBUG(TRACE, "update done received");
             chunk_index_t index = next_chunk_missing(0);
             bool missing = index != NO_CHUNKS_MISSING;
             uint8_t *queue = message.buf();
@@ -264,14 +264,14 @@ namespace trackle
 
             if (!missing)
             {
-                DEBUG("update done - all done!");
+                LOG_DEBUG(TRACE, "update done - all done!");
                 reset_updating();
                 callbacks->finish_firmware_update(file, UpdateFlag::SUCCESS, NULL);
             }
             else
             {
                 updating = 2; // flag that we are sending missing chunks.
-                DEBUG("update done - missing chunks starting at %d", index);
+                LOG_DEBUG(TRACE, "update done - missing chunks starting at %d", index);
                 chunk_index_t increase = std::max(unsigned(chunk_count * 0.2), (unsigned)MINIMUM_CHUNK_INCREASE); // ensure always some growth
                 chunk_index_t resend_chunk_count = std::min(unsigned(chunk_count + increase), (unsigned)MISSED_CHUNKS_TO_SEND);
                 chunk_count = 0;
@@ -311,7 +311,7 @@ namespace trackle
 
             if (sent > 0)
             {
-                DEBUG("Sent %d missing chunks", sent);
+                LOG_DEBUG(TRACE, "Sent %d missing chunks", sent);
                 size_t message_size = 7 + (sent * 2);
                 message.set_length(message_size);
                 message.set_confirm_received(true); // send synchronously
@@ -334,7 +334,7 @@ namespace trackle
             if (is_updating())
             {
                 // was updating but had an error, inform the client
-                WARN("handle received message failed - aborting transfer");
+                LOG(WARN, "handle received message failed - aborting transfer");
                 callbacks->finish_firmware_update(file, 0, NULL);
             }
         }

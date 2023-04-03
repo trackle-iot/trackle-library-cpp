@@ -46,7 +46,7 @@ namespace trackle
 			msg.notify_timeout();
 			if (msg.is_request())
 			{
-				WARN("CLOUD_UNACKNOWLEDGED_MESSAGES");
+				LOG(WARN, "CLOUD_UNACKNOWLEDGED_MESSAGES");
 				diagnostic::diagnosticCloud(CLOUD_UNACKNOWLEDGED_MESSAGES, 1);
 				channel.command(MessageChannel::CLOSE);
 			}
@@ -85,7 +85,7 @@ namespace trackle
 			if (!msg.has_id())
 				return MISSING_MESSAGE_ID;
 
-			DEBUG("sending message id=%x", msg.get_id());
+			LOG_DEBUG(TRACE, "sending message id=%x", msg.get_id());
 			CoAPType::Enum coapType = CoAP::type(msg.buf());
 			if (coapType == CoAPType::CON || coapType == CoAPType::ACK || coapType == CoAPType::RESET)
 			{
@@ -137,7 +137,7 @@ namespace trackle
 					// then we should track which direction we are sending
 					channel.command(Channel::DISCARD_SESSION, nullptr);
 				}
-				DEBUG("received ACK for message id=%x", id);
+				LOG_DEBUG(TRACE, "received ACK for message id=%x", id);
 				if (!clear_message(id))
 				{ // message didn't exist, means it's already been acknoweldged or is unknown.
 					msg.set_length(0);

@@ -230,12 +230,12 @@ namespace trackle
 				size_t len = 0;
 				if (!forceCoAP)
 				{
-					DEBUG("Sending dumb ping");
+					LOG_DEBUG(TRACE, "Sending dumb ping");
 					len = Messages::keep_alive(message.buf());
 				}
 				else
 				{
-					DEBUG("Sending application ping");
+					LOG_DEBUG(TRACE, "Sending application ping");
 					len = Messages::ping(message.buf(), 0);
 				}
 				last_message_millis = callbacks.millis();

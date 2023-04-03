@@ -668,7 +668,7 @@ namespace trackle
 			ProtocolError send_synchronous(Message &msg)
 			{
 				message_id_t id = msg.get_id();
-				DEBUG("sending message id=%x synchronously", id);
+				LOG_DEBUG(INFO, "sending message id=%x synchronously", id);
 				CoAPType::Enum coapType = CoAP::type(msg.buf());
 				const bool had_client_messages = client.has_messages();
 				ProtocolError error = client.send(msg, millis());

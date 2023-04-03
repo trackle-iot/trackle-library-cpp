@@ -40,11 +40,11 @@ namespace trackle
 											   (const uint8_t *)device_id, channelCallbacks, &channel.next_id_ref());
 			if (error)
 			{
-				WARN("error initializing DTLS channel: %d", error);
+				LOG(WARN, "error initializing DTLS channel: %d", error);
 			}
 			else
 			{
-				INFO("channel inited");
+				LOG(INFO, "channel inited");
 				Protocol::init(callbacks, descriptor);
 			}
 		}

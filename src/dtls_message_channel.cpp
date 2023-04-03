@@ -196,7 +196,7 @@ namespace trackle
 			// if (move_session && len && data[0] == 0x70)
 			if (move_session && len && data[0] == 23)
 			{
-				LOG(INFO, "DTLSMessageChannel -> move_session");
+				LOG(TRACE, "DTLSMessageChannel -> move_session");
 				// buffer for a new packet that contains the device ID length and a byte for the length appended to the existing data.
 				uint8_t d[len + DEVICE_ID_LEN + 1];
 				memcpy(d, data, len);					   // original application data
@@ -450,13 +450,13 @@ namespace trackle
 				int res = memcmp(dtls_data.read_buf, malformed, dtls_data.read_len);
 				if (res == 0)
 				{
-					LOG(INFO, "Malformed dtls packet");
+					LOG(TRACE, "Malformed dtls packet");
 					malformed_counter++;
 
 					// todo scrivere funzionamento
 					if (malformed_counter == 1)
 					{
-						LOG(INFO, "Handle ip change");
+						LOG(TRACE, "Handle ip change");
 						this->command(MessageChannel::MOVE_SESSION, nullptr);
 
 						// send ping
@@ -470,7 +470,7 @@ namespace trackle
 					}
 					else
 					{
-						LOG(INFO, "Too much malformed packet, disconnecting.....");
+						LOG(TRACE, "Too much malformed packet, disconnecting.....");
 						this->command(MessageChannel::CLOSE, nullptr);
 
 						return IO_ERROR_GENERIC_RECEIVE;

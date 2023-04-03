@@ -42,7 +42,7 @@ namespace trackle
 			{
 				if (minimum_size > sizeof(queue) - prefix - suffix)
 				{
-					WARN("Insufficient storage for message size %d", minimum_size);
+					LOG(WARN, "Insufficient storage for message size %d", minimum_size);
 					return INSUFFICIENT_STORAGE;
 				}
 				message.clear();

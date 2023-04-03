@@ -124,7 +124,6 @@ namespace trackle
                 if (TrackleReturnType::BOOLEAN == var_type)
                 {
                     bool *result = ((bool *(*)(const char *))(get_variable(variable_key)))(variable_arg);
-                    printf("\n%u %d\n", (uint32_t)result, *result);
                     response = Messages::variable_value(queue, message_id, token, *result);
                 }
                 else if (TrackleReturnType::INT == var_type)
