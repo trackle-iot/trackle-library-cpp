@@ -27,10 +27,9 @@ typedef enum
 
 typedef enum
 {
-    SOCKET_NOT_CONNECTED = -1,
-    SOCKET_CONNECTING = 0,
-    SOCKET_CONNECTED = 1,
-    SOCKET_READY = 2
+    SOCKET_NOT_CONNECTED = 0,
+    SOCKET_CONNECTING,
+    SOCKET_READY
 } Connection_Status_Type;
 
 typedef enum
