@@ -257,15 +257,12 @@ namespace trackle
 		struct dtls_timing_context
 		{
 			uint32_t snapshot;
-			uint32_t int_ms;
 			uint32_t fin_ms;
 		};
 
-		void dtls_timing_set_delay(void *data, uint32_t int_ms, uint32_t fin_ms)
+		void dtls_timing_set_delay(void *data, uint32_t fin_ms)
 		{
 			struct dtls_timing_context *ctx = (struct dtls_timing_context *)data;
-
-			ctx->int_ms = int_ms;
 			ctx->fin_ms = fin_ms;
 
 			if (fin_ms != 0)
@@ -287,11 +284,6 @@ namespace trackle
 			elapsed_ms = (*getMillis)() - ctx->snapshot;
 
 			if (elapsed_ms >= ctx->fin_ms)
-			{
-				return 2;
-			}
-
-			if (elapsed_ms >= ctx->int_ms)
 			{
 				return 1;
 			}
