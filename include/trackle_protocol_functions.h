@@ -65,7 +65,6 @@ extern "C"
 
 		int (*send)(const unsigned char *buf, uint32_t buflen, void *handle);
 		int (*receive)(unsigned char *buf, uint32_t buflen, void *handle);
-		void (*sleep)(uint32_t millis);
 
 		/**
 		 * @param flags 1 dry run only.

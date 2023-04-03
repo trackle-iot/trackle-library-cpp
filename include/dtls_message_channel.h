@@ -73,7 +73,6 @@ namespace trackle
 				void (*handle_seed)(const uint8_t *seed, size_t length);
 				int (*send)(const unsigned char *buf, uint32_t buflen, void *handle);
 				int (*receive)(unsigned char *buf, uint32_t buflen, void *handle);
-				void (*sleep)(uint32_t millis);
 
 				// persistence
 				/**

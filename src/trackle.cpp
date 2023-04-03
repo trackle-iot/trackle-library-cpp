@@ -1376,7 +1376,7 @@ void Trackle::setPincodeCallback(pincodeCallback *pincode)
 
 void Trackle::setSleepCallback(sleepCallback *sleep)
 {
-    callbacks.sleep = sleep;
+    LOG(WARN, "DEPRECATED setSleepCallback - no need to call it anymore");
 }
 
 void Trackle::setConnectionStatusCallback(connectionStatusCallback *connectionStatus)
@@ -1883,7 +1883,6 @@ Trackle::Trackle(void)
     callbacks.send = wrapSend;
     callbacks.save = default_save_session;
     callbacks.restore = default_restore_session;
-    callbacks.sleep = NULL;
 
     memset(&descriptor, 0, sizeof(descriptor));
     descriptor.size = sizeof(descriptor);

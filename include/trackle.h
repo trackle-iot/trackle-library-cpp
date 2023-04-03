@@ -413,6 +413,7 @@ public:
          * @brief This function sets the sleep callback function.
          *
          * @param sleep The sleep callback is called when need to sleep.
+         * @deprecated No need to call it anymore, will be removed in release 3.0
          */
         void setSleepCallback(sleepCallback *sleep);
 

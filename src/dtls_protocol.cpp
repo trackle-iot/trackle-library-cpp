@@ -11,7 +11,6 @@ namespace trackle
 								const TrackleDescriptor &descriptor,
 								const trackle::protocol::Connection_Properties_Type &conPropType)
 		{
-			set_protocol_flags(0);
 			memcpy(device_id, id, sizeof(device_id));
 
 			DTLSMessageChannel::Callbacks channelCallbacks = {};
@@ -19,7 +18,6 @@ namespace trackle
 			channelCallbacks.handle_seed = handle_seed;
 			channelCallbacks.receive = callbacks.receive;
 			channelCallbacks.send = callbacks.send;
-			channelCallbacks.sleep = callbacks.sleep;
 			channelCallbacks.calculate_crc = callbacks.calculate_crc;
 			if (callbacks.size >= 52)
 			{ // todo - get rid of this magic number and define it by the size of some struct.
