@@ -1193,7 +1193,10 @@ void connectionError(int error_type, bool force = false)
     if (connectionStatus == SOCKET_READY || force)
     {
         millis_last_disconnection = (*callbacks.millis)();
-        LOG(ERROR, "Cloud connection error %d, %lu", error_type, millis_last_disconnection);
+
+        if (error_type != CON_ERROR_SOCKET)
+            LOG(ERROR, "Cloud connection error %d, %lu", error_type, millis_last_disconnection);
+
         setConnectionStatus(SOCKET_NOT_CONNECTED);
         (*disconnectCb)();
     }
