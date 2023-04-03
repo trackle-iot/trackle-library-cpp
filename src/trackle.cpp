@@ -137,7 +137,6 @@ std::string hexStr(char *data, int len)
 /*
  SOCKET_NOT_CONNECTED
  SOCKET_CONNECTING
- SOCKET_CONNECTED
  SOCKET_READY
  */
 Connection_Status_Type connectionStatus = SOCKET_NOT_CONNECTED;
@@ -1509,31 +1508,34 @@ void Trackle::connectionCompleted()
     LOG(WARN, "DEPRECATED connectionCompleted - no need to call it anymore");
 }
 
+/*
+ * Return:
+ * - negative number in case of error
+ * - positive number in case of success
+ * - 0 in case we need to run again. Handshake is not completed
+ */
 int completeCloudConnection()
 {
-    LOG(INFO, "Socket connection completed, starting handshake");
-    setConnectionStatus(SOCKET_CONNECTED);
     millis_last_sent_health_check = (*callbacks.millis)(); // reset health check timer on connect
 
     int result = trackle_protocol_handshake(protocol);
 
-    bool session_resumed = false;
-
+    /*
+     * Handshake completed?
+     */
     if (result == trackle::protocol::SESSION_RESUMED)
     {
         LOG(TRACE, "Session resumed");
-        session_resumed = true;
-    }
-    else if (result != 0)
-    {
-        LOG(ERROR, "Protocol beginning error: %d", result);
-        diagnostic::diagnosticCloud(CLOUD_CONNECTION_ERROR_CODE, 1);
-        connectionError(CON_ERROR_PROTOCOL, true);
-        return -1;
-    }
+        LOG(INFO, "Cloud connected from existing session.");
+        setConnectionStatus(SOCKET_READY);
 
-    if (!session_resumed)
+        return 1;
+    }
+    else if (result == trackle::protocol::SESSION_CONNECTED)
     {
+        /*
+         * New session created
+         */
         LOG(INFO, "Protocol begun successfully");
         uint32_t flags = PRIVATE | EMPTY_FLAGS;
         flags = convert(flags);
@@ -1551,14 +1553,29 @@ int completeCloudConnection()
         LOG(TRACE, "Send device subscriptions sent");
         trackle_protocol_send_time_request(protocol);
         LOG(TRACE, "Time request sent");
+
+        setConnectionStatus(SOCKET_READY);
+
+        return 1;
+    }
+    else if (result != 0) /* Handshake error? */
+    {
+        LOG(ERROR, "Protocol beginning error: %d", result);
+        diagnostic::diagnosticCloud(CLOUD_CONNECTION_ERROR_CODE, 1);
+        connectionError(CON_ERROR_PROTOCOL, true);
+        return -1;
     }
     else
     {
-        LOG(INFO, "Cloud connected from existing session.");
+        /*
+         * Handshake in progress...NO_ERROR
+         */
     }
 
-    setConnectionStatus(SOCKET_READY);
-    return 1;
+    /*
+     * Need run again...
+     */
+    return 0;
 }
 
 int Trackle::connect()
@@ -1646,7 +1663,7 @@ void Trackle::loop()
         return;
 
     // ready or disconnected
-    if (connectionStatus == SOCKET_READY || connectionStatus == SOCKET_NOT_CONNECTED)
+    if (connectionStatus == SOCKET_READY /* || connectionStatus == SOCKET_NOT_CONNECTED*/)
     {
         int res = trackle_protocol_event_loop(protocol);
         if (!res)
@@ -1670,8 +1687,11 @@ void Trackle::loop()
         }
     }
 
-    // reconnect
-    if (connectionStatus < SOCKET_READY && connectToCloud == true)
+    /*
+     * At startup or after a disconnection event, try to create a new socket.
+     * When a new socket is created correctly, connectionStatus is set to SOCKET_CONNECTING
+     */
+    if (connectionStatus == SOCKET_NOT_CONNECTED && connectToCloud == true)
     {
         system_tick_t millis_since_disconnection = (*callbacks.millis)() - millis_last_disconnection;
 
@@ -1679,28 +1699,44 @@ void Trackle::loop()
         {
             LOG(INFO, "Cloud reconnection after %d ms", connection_timeout);
 
-            if (connectionStatus > SOCKET_NOT_CONNECTED)
-                connectionError(CON_ERROR_RECONNECTION, true);
-
             millis_last_disconnection = (*callbacks.millis)();
 
             // create socket
             if (Trackle::connect() > 0)
             { // socket creation ok
-                if (completeCloudConnection() < 0)
-                { // on cloud connection error, increase timeout
-                    LOG(TRACE, "Cloud connection error, increment reconnection timeout...");
-                    increase_connection_timeout();
-                }
-                else // on success connection, reset timeout
-                {
-                    reset_connection_timeout();
-                }
+                LOG(INFO, "Socket connection completed, starting handshake");
             }
             else // on socket creation error, reset timeout
             {
                 reset_connection_timeout();
             }
+        }
+    }
+
+    /*
+     * A new socket was created correctly. Now we need to handshake the connection
+     */
+    if (connectionStatus == SOCKET_CONNECTING && connectToCloud == true)
+    {
+        int32_t ret = completeCloudConnection();
+
+        /*
+         * There was an error?
+         */
+        if (ret < 0)
+        { // on cloud connection error, increase timeout
+            LOG(TRACE, "Cloud connection error, increment reconnection timeout...");
+            increase_connection_timeout();
+        }
+        else if (ret > 0) /* on success connection, reset timeout */
+        {
+            reset_connection_timeout();
+        }
+        else
+        {
+            /*
+             * Handshake is not completed. Run again.
+             */
         }
     }
 }

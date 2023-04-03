@@ -292,6 +292,11 @@ namespace trackle
 		}
 		// #endif
 
+		void DTLSMessageChannel::init_status()
+		{
+			this->status = INIT;
+		}
+
 		ProtocolError DTLSMessageChannel::setup_context()
 		{
 			return NO_ERROR;
@@ -304,112 +309,114 @@ namespace trackle
 #define MAX_READ_BUF 1000
 			static uint8 buf[MAX_READ_BUF];
 
-			dtls_timing_context time_cb;
-			dtls_timing_set_delay(&time_cb, this->handshake_timeout, this->handshake_timeout);
+			static dtls_timing_context time_cb;
 			int8_t connection_status = -1;
 			int8_t timeout_status = 0;
 			int res = 0;
 			bool toConnect = false;
 
-			// delete peer if not connected
-			dtls_peer_t *peer = dtls_get_peer(dtls_context, &dst);
+			switch (this->status)
+			{
+			case INIT:
+			{
 
-			if (!peer)
-			{
-				LOG(TRACE, "peer not extists");
-				toConnect = true;
-			}
-			else if (peer && peer->state != DTLS_STATE_CONNECTED)
-			{
-				LOG(TRACE, "dtls_reset_peer");
-				peer->state = DTLS_STATE_CLOSING;
-				dtls_reset_peer(dtls_context, peer);
-				toConnect = true;
-			}
-			else
-			{
-				LOG(TRACE, "DTLS_STATE_CONNECTED");
-				toConnect = false;
-			}
+				dtls_timing_set_delay(&time_cb, this->handshake_timeout);
 
-			if (toConnect)
-			{
-				res = dtls_connect(dtls_context, &dst);
-				LOG(TRACE, "dtls_connect: %d", res);
-			}
+				/* delete peer if not connected */
+				dtls_peer_t *peer = dtls_get_peer(dtls_context, &dst);
 
-			if (res < 0)
-			{
-				LOG(TRACE, "dtls_connect error %d", res);
-				return IO_ERROR_GENERIC_ESTABLISH;
-			}
-			else if (res == 0)
-			{
-				// resume session
-				LOG(TRACE, "trying to restore session....");
-				flags |= Protocol::SKIP_SESSION_RESUME_HELLO;
-				return SESSION_RESUMED;
-			}
-			else
-			{
-				LOG(TRACE, "starting handshake");
-
-				do
+				if (!peer)
 				{
-					dtls_data.read_len = 0;
-					int len = callbacks.receive(buf, MAX_READ_BUF, callbacks.tx_context);
+					LOG(TRACE, "peer not extists");
+					toConnect = true;
+				}
+				else if (peer && peer->state != DTLS_STATE_CONNECTED)
+				{
+					LOG(TRACE, "dtls_reset_peer");
+					peer->state = DTLS_STATE_CLOSING;
+					dtls_reset_peer(dtls_context, peer);
+					toConnect = true;
+				}
+				else
+				{
+					LOG(TRACE, "DTLS_STATE_CONNECTED");
+					toConnect = false;
+				}
 
-					if (len > 0)
-					{
-						dtls_handle_message(dtls_context, &dst, buf, len);
-						memset(buf, 0, MAX_READ_BUF);
-						memcpy(buf, dtls_data.read_buf, dtls_data.read_len);
-					}
+				if (toConnect)
+				{
+					res = dtls_connect(dtls_context, &dst);
+					LOG(TRACE, "dtls_connect: %d", res);
+				}
 
-					dtls_peer_t *peer = dtls_get_peer(dtls_context, &dst);
-					if (peer && peer->state == DTLS_STATE_CONNECTED)
-					{
-						ret = 0;
-					}
-					else
-					{
-						// todo add delay
-						timeout_status = dtls_timing_get_delay(&time_cb);
+				if (res < 0)
+				{
+					LOG(TRACE, "dtls_connect error %d", res);
+					return IO_ERROR_GENERIC_ESTABLISH;
+				}
+				else if (res == 0)
+				{
+					// resume session
+					LOG(TRACE, "trying to restore session....");
+					flags |= Protocol::SKIP_SESSION_RESUME_HELLO;
+					return SESSION_RESUMED;
+				}
+				else
+				{
+					LOG(TRACE, "starting handshake");
+					this->status = HANDSHAKE;
+				}
 
-						if (connection_status != timeout_status)
+				break;
+			}
+
+			case HANDSHAKE:
+			{
+
+				dtls_data.read_len = 0;
+				int len = callbacks.receive(buf, MAX_READ_BUF, callbacks.tx_context);
+
+				if (len > 0)
+				{
+					dtls_handle_message(dtls_context, &dst, buf, len);
+					memset(buf, 0, MAX_READ_BUF);
+					memcpy(buf, dtls_data.read_buf, dtls_data.read_len);
+				}
+
+				dtls_peer_t *peer = dtls_get_peer(dtls_context, &dst);
+				if (peer && peer->state == DTLS_STATE_CONNECTED)
+				{
+					ret = 0;
+				}
+				else
+				{
+					timeout_status = dtls_timing_get_delay(&time_cb);
+
+					if (connection_status != timeout_status)
+					{
+						connection_status = timeout_status;
+
+						if (connection_status == 1)
 						{
-							connection_status = timeout_status;
-
-							if (connection_status == 1)
-							{
-								dtls_renegotiate(dtls_context, &dst);
-								dtls_notice("start dtls_renegotiate\n");
-							}
-							else if (connection_status == 2)
-							{
-								dtls_notice("timeout\n");
-								ret = 1;
-							}
+							LOG(TRACE, "timeout\n");
+							return IO_ERROR_GENERIC_ESTABLISH;
 						}
 					}
+				}
 
-					// call sleep callback
-					if (callbacks.sleep)
-					{
-						callbacks.sleep(10);
-					}
-
-				} while (ret < 0);
-
-				// new session created
+				/* new session created */
 				if (ret == 0)
 				{
 					LOG(TRACE, "valid session created");
 					valid_dtls_session = true;
+					return SESSION_CONNECTED;
 				}
+
+				break;
+			}
 			}
 
-			return ret == 0 ? NO_ERROR : IO_ERROR_GENERIC_ESTABLISH;
+			return NO_ERROR;
 		}
 
 		ProtocolError DTLSMessageChannel::notify_established()

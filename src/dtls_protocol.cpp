@@ -47,6 +47,8 @@ namespace trackle
 				LOG(INFO, "channel inited");
 				Protocol::init(callbacks, descriptor);
 			}
+
+			this->status = CHANNEL_INIT;
 		}
 
 		int DTLSProtocol::wait_confirmable(uint32_t timeout)

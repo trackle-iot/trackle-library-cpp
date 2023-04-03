@@ -231,6 +231,12 @@ namespace trackle
 			virtual ProtocolError establish(uint32_t &flags, uint32_t app_state_crc) = 0;
 
 			/**
+			 * Send the given message to the endpoint
+			 * @return an error value !=0 on error.
+			 */
+			virtual ProtocolError wait_ack(message_id_t id) = 0;
+
+			/**
 			 * Retrieves a new message object containing the message buffer.
 			 */
 			virtual ProtocolError create(Message &message, size_t minimum_size = 0) = 0;
@@ -251,6 +257,11 @@ namespace trackle
 			 * Notify the upper layer that all client messages have been processed.
 			 */
 			virtual void notify_client_messages_processed() = 0;
+
+			/**
+			 *
+			 */
+			virtual void init_status() = 0;
 		};
 
 		class AbstractMessageChannel : public MessageChannel

@@ -158,7 +158,7 @@ namespace trackle
 
 			uint8_t initialized;
 
-			uint8_t flags;
+			// uint8_t flags;
 
 		public:
 			enum Flags
@@ -182,6 +182,16 @@ namespace trackle
 			};
 
 		protected:
+			enum StateEnum
+			{
+				CHANNEL_INIT,
+				CHANNEL_ESTABLISHED,
+				SEND_HELLO,
+				ACK_WAITING
+			};
+
+			enum StateEnum status;
+
 			/**
 			 * Manages Ping functionality.
 			 */
@@ -191,11 +201,6 @@ namespace trackle
 			 * Completion handlers for messages with confirmable delivery.
 			 */
 			CompletionHandlerMap<message_id_t> ack_handlers;
-
-			void set_protocol_flags(int flags)
-			{
-				this->flags = flags;
-			}
 
 			/**
 			 * Retrieves the next token.
@@ -211,7 +216,12 @@ namespace trackle
 			 * Send the hello message over the channel.
 			 * @param was_ota_upgrade_successful {@code true} if the previous OTA update was successful.
 			 */
-			ProtocolError hello(bool was_ota_upgrade_successful);
+			ProtocolError hello(bool was_ota_upgrade_successful, message_id_t *id);
+
+			/**
+			 * Wait an ACK from server
+			 */
+			ProtocolError wait_ack(message_id_t id);
 
 			/**
 			 * Send a hello response

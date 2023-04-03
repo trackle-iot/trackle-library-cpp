@@ -602,6 +602,16 @@ namespace trackle
 			}
 
 			/**
+			 * Wait an ACK from server
+			 * @return
+			 */
+			ProtocolError wait_ack(message_id_t id) override
+			{
+				Message msg;
+				return wait_ack_from_server(msg, id);
+			}
+
+			/**
 			 * Receives a message from the channel and passes it to the message store for processing before
 			 * passing on to the application.
 			 *
@@ -689,23 +699,14 @@ namespace trackle
 					if (coapmsg)
 						coapmsg->set_delivered_handler(&flag_delivered);
 					else
-						ERROR("no coapmessage for msg id=%x", id);
-					while (client.from_id(id) != nullptr && !error)
-					{
-						msg.clear();
-						msg.set_length(0);
-						error = delegateChannel.receive(msg);
+						LOG_DEBUG(ERROR, "no coapmessage for msg id=%x", id);
 
-						if (!error && msg.decode_id() && is_ack_or_reset(msg.buf(), msg.length()))
-						{
-							// handle acknowledgements, waiting for the one that
-							// acknowledges the original confirmation.
-							ProtocolError receive_error = client.receive(msg, delegateChannel, millis());
-							if (!error)
-								error = receive_error;
-						}
-						// drop CON messages on the floor since we cannot handle them now
-						client.process(millis(), delegateChannel);
+					if (client.from_id(id) != nullptr && !error)
+					{
+						/*
+						 * Wait for ACK
+						 */
+						return WAIT_FOR_ACK;
 					}
 				}
 				client.clear_message(id);
@@ -713,6 +714,47 @@ namespace trackle
 				{
 					channel::notify_client_messages_processed();
 				}
+				// todo - if msg contains a delivery callback then call that with the outcome of this
+				return error;
+			}
+
+			ProtocolError wait_ack_from_server(Message &msg, message_id_t id)
+			{
+				ProtocolError error;
+				const bool had_client_messages = client.has_messages();
+
+				msg.clear();
+				msg.set_length(0);
+				error = delegateChannel.receive(msg);
+
+				LOG(ERROR, "wait_ack_from_server");
+
+				if (!error && msg.decode_id() && is_ack_or_reset(msg.buf(), msg.length()))
+				{
+					// handle acknowledgements, waiting for the one that
+					// acknowledges the original confirmation.
+					error = client.receive(msg, delegateChannel, millis());
+
+					// drop CON messages on the floor since we cannot handle them now
+					client.process(millis(), delegateChannel);
+
+					if (client.from_id(id) == nullptr && !error)
+					{
+						client.clear_message(id);
+						if (had_client_messages && !client.has_messages())
+						{
+							channel::notify_client_messages_processed();
+						}
+
+						/*
+						 * ACK received
+						 */
+						LOG(ERROR, "ACK_RECEIVED");
+
+						return ACK_RECEIVED;
+					}
+				}
+
 				// todo - if msg contains a delivery callback then call that with the outcome of this
 				return error;
 			}

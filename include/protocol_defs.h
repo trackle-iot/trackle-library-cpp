@@ -56,6 +56,9 @@ namespace trackle
             /* 24 */ IO_ERROR_LIGHTSSL_HANDSHAKE_NONCE,
             /* 25 */ IO_ERROR_LIGHTSSL_HANDSHAKE_RECV_KEY,
             /* 26 */ NOT_IMPLEMENTED,
+            /* 27 */ SESSION_CONNECTED,
+            /* 28 */ WAIT_FOR_ACK,
+            /* 29 */ ACK_RECEIVED,
 
             /*
              * NOTE: when adding more ProtocolError codes, be sure to update toSystemError() in protocol_defs.cpp

@@ -126,6 +126,14 @@ namespace trackle
 
 			void reset_session();
 
+			enum StateEnum
+			{
+				INIT,
+				HANDSHAKE
+			};
+
+			enum StateEnum status;
+
 		public:
 			DTLSMessageChannel() : coap_state(nullptr), move_session(false) {}
 
@@ -167,6 +175,8 @@ namespace trackle
 					callbacks.notify_client_messages_processed(nullptr);
 				}
 			}
+
+			virtual void init_status() override;
 		};
 
 	}
