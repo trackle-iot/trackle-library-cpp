@@ -33,6 +33,7 @@ uint16_t connection_retry = 0;
 uint32_t connection_timeout = 1000;
 
 #define MAX_COUNTER 9999999
+#define MAX_PING_INTERVAL 1000
 
 const uint32_t PUBLISH_EVENT_FLAG_PUBLIC = 0x0;
 const uint32_t PUBLISH_EVENT_FLAG_PRIVATE = 0x1;
@@ -1445,7 +1446,14 @@ void Trackle::setConnectionType(Connection_Type conn)
 
 void Trackle::setPingInterval(uint32_t interval)
 {
-    pingInterval = interval;
+    if (interval > MAX_PING_INTERVAL)
+    {
+        LOG(ERROR, "setPingInterval failed! interval too high (max %d seconds)!", MAX_PING_INTERVAL);
+    }
+    else
+    {
+        pingInterval = interval;
+    }
 }
 
 void Trackle::setOtaMethod(Ota_Method method)
