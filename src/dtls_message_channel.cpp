@@ -171,17 +171,21 @@ namespace trackle
 				.verify_ecdsa_key = verify_ecdsa_key,
 			};
 
-			// dtls_data.send = callbacks.send; // send callback
 			dtls_data.send = sendCallback; // send callback
 			dtls_data.channel = (void *)this;
 
-			// dtls_context = dtls_new_context(&cloud_socket);f
 			dtls_context = dtls_new_context(&dtls_data);
 			if (!dtls_context)
 			{
 				LOG(TRACE, "Cannot create context");
 				exit(-1);
 			}
+
+			// fake sockaddr_in data to make _dtls_address_equals_impl work
+			memset(&dst.addr.sin, '\0', sizeof(dst.addr.sin));
+			dst.addr.sin.sin_family = AF_INET;
+			dst.addr.sin.sin_addr.s_addr = htonl(INADDR_ANY);
+			dst.addr.sin.sin_port = htons(5684);
 
 			dtls_set_handler(dtls_context, &cb);
 			return NO_ERROR;
