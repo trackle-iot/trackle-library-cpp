@@ -727,7 +727,7 @@ namespace trackle
 				msg.set_length(0);
 				error = delegateChannel.receive(msg);
 
-				LOG(ERROR, "wait_ack_from_server");
+				LOG_DEBUG(TRACE, "wait_ack_from_server");
 
 				if (!error && msg.decode_id() && is_ack_or_reset(msg.buf(), msg.length()))
 				{
@@ -749,7 +749,7 @@ namespace trackle
 						/*
 						 * ACK received
 						 */
-						LOG(ERROR, "ACK_RECEIVED");
+						LOG_DEBUG(TRACE, "ACK_RECEIVED");
 
 						return ACK_RECEIVED;
 					}
