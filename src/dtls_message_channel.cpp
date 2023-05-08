@@ -181,12 +181,6 @@ namespace trackle
 				exit(-1);
 			}
 
-			// fake sockaddr_in data to make _dtls_address_equals_impl work
-			memset(&dst.addr.sin, '\0', sizeof(dst.addr.sin));
-			dst.addr.sin.sin_family = AF_INET;
-			dst.addr.sin.sin_addr.s_addr = htonl(INADDR_ANY);
-			dst.addr.sin.sin_port = htons(5684);
-
 			dtls_set_handler(dtls_context, &cb);
 			return NO_ERROR;
 		}
