@@ -10,7 +10,7 @@
 ````
 
 
-[![GitHub version](https://img.shields.io/badge/version-v2.0.0-blue)](https://github.com/trackle-iot/trackle-library-cpp/releases/latest) &nbsp; &nbsp;
+[![GitHub version](https://img.shields.io/badge/version-v2.6.0-blue)](https://github.com/trackle-iot/trackle-library-cpp/releases/latest) &nbsp; &nbsp;
 [![GitHub stars](https://img.shields.io/github/stars/trackle-iot/trackle-library?style=social)](https://github.com/trackle-iot/trackle-library-cpp/stargazers) 
 __________
 
@@ -81,17 +81,6 @@ static system_tick_t getMillis(void)
     gettimeofday(&tp, NULL);
     long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000;
     return (uint32_t)ms;
-}
-
-/**
- * The Trackle library calls the sleep_cb function when it needs to sleep for a specified number of
- * milliseconds.
- */
-void sleep_cb(uint32_t sleep)
-{
-    printf("sleep_cb: %d", sleep);
-    usleep(sleep * 1000);
-    return;
 }
 
 /**
@@ -186,7 +175,6 @@ int main(int argc, char *argv[]) {
     trackle.setReceiveCallback(receive_cb_udp);
     trackle.setConnectCallback(connect_cb_udp);
     trackle.setDisconnectCallback(disconnect_cb);
-    trackle.setSleepCallback(sleep_cb);
 
     trackle.connect();
 
@@ -231,18 +219,7 @@ static system_tick_t getMillis(void)
 }
 
 /**
- * The Trackle library calls the sleep_cb function when it needs to sleep for a specified number of
- * milliseconds.
- */
-void sleep_cb(uint32_t sleep)
-{
-    printf("sleep_cb: %d", sleep);
-	usleep(sleep * 1000);
-    return;
-}
-
-/**
- * This creates a socket, sets the timeout and calls the trackleConnectionCompleted function
+ * This creates a socket and sets the timeout
  */
 int connect_cb_udp(const char *address, int port)
 {
@@ -283,7 +260,6 @@ int connect_cb_udp(const char *address, int port)
     socket_timeout.tv_usec = 1000; // 1ms
     setsockopt(cloud_socket, SOL_SOCKET, SO_RCVTIMEO, (struct timeval *)&socket_timeout, sizeof(struct timeval));
 
-    trackleConnectionCompleted(trackle_s);
     return 1;
 }
 
@@ -337,7 +313,6 @@ int main(int argc, char *argv[]) {
     trackleSetReceiveCallback(trackle_s, receive_cb_udp);
     trackleSetConnectCallback(trackle_s, connect_cb_udp);
     trackleSetDisconnectCallback(trackle_s, disconnect_cb);
-    trackleSetSleepCallback(trackle_s, sleep_cb);
 
     trackleConnect(trackle_s);
 
@@ -375,9 +350,6 @@ The minimal usage flow for Trackle client is as follows (C++ and C):
 
 - **trackle.setDisconnectCallback(disconnect_cb) - trackleSetDisconnectCallback(trackle_s, disconnect_cb)**:
 	configure a callback to disconnect the udp cloud socket
-
-- **trackle.setSleepCallback(sleep_cb) - trackleSetSleepCallback(trackle_s, sleep_cb)**:
-	configure a callback that pause the execution of the program for given milliseconds
 
 - **trackle.connect() - trackleConnect(trackle_s)**:
 	start the cloud connection flow
