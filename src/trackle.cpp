@@ -1428,6 +1428,7 @@ void Trackle::setSystemRebootCallback(rebootCallback *reboot)
 void Trackle::setLogCallback(logCallback *log)
 {
     log_set_callbacks((log_message_callback_type)log, NULL, NULL, NULL);
+    TrackleLib_set_latest_log_callback_for_tinydtls(log);
 }
 
 void Trackle::setLogLevel(Log_Level level)
@@ -1934,6 +1935,8 @@ Trackle::Trackle(void)
     descriptor.get_variable = getUserVar;
     descriptor.append_system_info = appendSystemInfo;
     descriptor.append_metrics = diagnostic::appendMetrics;
+
+    TinyDtls_set_log_callback(TrackleLib_tinydtls_log_wrapper);
 
 #ifdef PRODUCT_ID
     trackle_protocol_set_product_id(protocol, PRODUCT_ID);

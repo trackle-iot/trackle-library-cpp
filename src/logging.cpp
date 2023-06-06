@@ -2,11 +2,12 @@
 
 #include <algorithm>
 #include <cstdio>
-//#include "timer_hal.h"
+// #include "timer_hal.h"
 #include "service_debug.h"
-//#include "static_assert.h"
+// #include "static_assert.h"
 
 #include <sys/time.h>
+#include "dtls_debug.h"
 
 #define STATIC_ASSERT_FIELD_SIZE(struct, field, size) \
     STATIC_ASSERT(field_size_changed_##struct##_##field, sizeof(struct ::field) == size);
@@ -30,7 +31,6 @@ namespace
     system_tick_t (*getMillis)() = NULL;
 } // namespace
 
-
 typedef LogLevel LoggerOutputLevel; // Compatibility typedef
 LoggerOutputLevel log_compat_level = DEFAULT_LEVEL;
 
@@ -42,7 +42,8 @@ void log_set_level(LogLevel level)
     log_compat_level = level;
 }
 
-void log_set_millis_callback(millisCallback *millis) {
+void log_set_millis_callback(millisCallback *millis)
+{
     getMillis = millis;
 }
 
@@ -252,4 +253,73 @@ const char *log_level_name(int level, void *reserved)
         "PANIC"};
     const int i = std::max(0, std::min<int>(level / 10, sizeof(names) / sizeof(names[0]) - 1));
     return names[i];
+}
+
+// ------------------------------------------ TINYDTLS LOGGING -------------------------------------------------
+
+/**
+ * Discard any log printed with this function.
+ * This is meant to be used as default function for \ref latest_log_callback.
+ * This is done so that \ref latest_log_callback is never invalid, and calling it before set would simply discard the message.
+ */
+static void discard_log_callback(const char *msg, int level, const char *category, void *attributes, void *reserved)
+{
+    // Discard log.
+}
+
+/**
+ * Pointer to the latest log callback function set on a Trackle class.
+ * Please note that, since Trackle instances can be many and tinydtls has only one instance, it doesn't matter which Trackle instance set the callback.
+ */
+static void (*latest_log_callback)(const char *msg, int level, const char *category, void *attributes, void *reserved) = discard_log_callback;
+
+/**
+ * @brief Callback for logging to be passed to tinyDTLS.
+ * It performs conversion of logging levels between tinyDTLS and Trackle library, and forwards tinyDTLS logs to log callback set for Trackle library.
+ *
+ * @param tinydtlsLogLevel Level of the log as given by tinyDTLS
+ * @param format Format string of log message (in printf format)
+ * @param ... Parameters
+ */
+void TrackleLib_tinydtls_log_wrapper(unsigned int tinydtlsLogLevel, const char *format, ...)
+{
+    // Convert tinyDTLS log levels to Trackle library log levels
+    unsigned int tracklelibLogLevel = 0;
+    switch (tinydtlsLogLevel)
+    {
+    case DTLS_LOG_EMERG:
+        tracklelibLogLevel = LOG_LEVEL_PANIC;
+        break;
+    case DTLS_LOG_ALERT:
+    case DTLS_LOG_CRIT:
+        tracklelibLogLevel = LOG_LEVEL_ERROR;
+        break;
+    case DTLS_LOG_WARN:
+    case DTLS_LOG_NOTICE:
+        tracklelibLogLevel = LOG_LEVEL_WARN;
+        break;
+    case DTLS_LOG_INFO:
+    case DTLS_LOG_DEBUG:
+        tracklelibLogLevel = LOG_LEVEL_INFO;
+        break;
+    }
+
+    // Build message from format string and parameters
+    va_list args;
+    char builtMsg[256] = {0};
+    va_start(args, format);
+    vsprintf(builtMsg, format, args);
+    va_end(args);
+
+    // Call set callback to display log message
+    latest_log_callback(builtMsg, tracklelibLogLevel, "", NULL, NULL);
+}
+
+/**
+ * Set latest log callback to be used by tinydtls.
+ * @param new_latest_log_callback
+ */
+void TrackleLib_set_latest_log_callback_for_tinydtls(void (*new_latest_log_callback)(const char *, int, const char *, void *, void *))
+{
+    latest_log_callback = new_latest_log_callback;
 }
