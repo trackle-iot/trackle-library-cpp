@@ -19,6 +19,7 @@
 #include <iomanip>
 
 #include "dtls_protocol.h"
+#include "tinydtls_set_rand.h"
 
 #define USER_VAR_MAX_COUNT 10
 #define USER_VAR_KEY_LENGTH 64
@@ -1937,6 +1938,7 @@ Trackle::Trackle(void)
     descriptor.append_metrics = diagnostic::appendMetrics;
 
     TinyDtls_set_log_callback(TrackleLib_tinydtls_log_wrapper);
+    TinyDtls_set_rand(HAL_RNG_GetRandomNumber);
 
 #ifdef PRODUCT_ID
     trackle_protocol_set_product_id(protocol, PRODUCT_ID);
