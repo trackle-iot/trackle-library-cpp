@@ -80,6 +80,13 @@ extern "C"
     bool trackleSyncState(Trackle *v, const char *data) DYNLIB;
 
     /*!
+     * @copybrief Trackle::getTime()
+     * @trackle
+     * @copydetails Trackle::getTime()
+     */
+    bool trackleGetTime(Trackle *v) DYNLIB;
+
+    /*!
      * @copybrief Trackle::subscribe()
      * @trackle
      * @copydetails Trackle::subscribe()

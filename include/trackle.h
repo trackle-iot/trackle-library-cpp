@@ -263,6 +263,13 @@ public:
         bool syncState(string data);
 
         /**
+         * @brief It sends a time request to the server
+         *
+         * @return The return value is a boolean value.
+         */
+        bool getTime();
+
+        /**
          * @brief It subscribes to an event.
          *
          * @param eventName The name of the event to subscribe to.

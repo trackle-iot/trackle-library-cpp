@@ -54,6 +54,11 @@ bool trackleSyncState(Trackle *v, const char *data)
     return v->syncState(data);
 }
 
+bool trackleGetTime(Trackle *v)
+{
+    return v->getTime();
+}
+
 // TRACKLE.SUBSCRIBE
 bool trackleSubscribe(Trackle *v, const char *eventName, EventHandler handler, Subscription_Scope_Type scope, const char *deviceID)
 {

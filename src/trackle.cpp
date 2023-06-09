@@ -611,6 +611,11 @@ bool Trackle::syncState(string data)
     return sendPublish("trackle/p", data.c_str(), DEFAULT_TTL, PUBLIC, EMPTY_FLAGS, "");
 }
 
+bool Trackle::getTime()
+{
+    return trackle_protocol_send_time_request(protocol);
+}
+
 // TRACKLE.SUBSCRIBE
 
 /**
