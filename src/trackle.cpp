@@ -1442,6 +1442,7 @@ void Trackle::setLogCallback(logCallback *log)
 void Trackle::setLogLevel(Log_Level level)
 {
     log_set_level((LoggerOutputLevel)level);
+    TrackleLib_set_latest_log_level_for_tinydtls(level);
 }
 
 const char *Trackle::getLogLevelName(int level)

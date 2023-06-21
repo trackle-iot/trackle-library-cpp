@@ -9,6 +9,8 @@
 #include <sys/time.h>
 #include "dtls_debug.h"
 
+#include "tinydtls.h"
+
 #define STATIC_ASSERT_FIELD_SIZE(struct, field, size) \
     STATIC_ASSERT(field_size_changed_##struct##_##field, sizeof(struct ::field) == size);
 
@@ -258,6 +260,51 @@ const char *log_level_name(int level, void *reserved)
 // ------------------------------------------ TINYDTLS LOGGING -------------------------------------------------
 
 /**
+ * @brief Map log level from TinyDTLS to Trackle Library
+ * Mapping performed is best-effort, since there isn't a one-to-one relationships between levels in TinyDTLS and in Trackle Library.
+ * @param level TinyDTLS log level
+ * @return int Trackle Library log level
+ */
+static int LogLevel_tinyDtlsToTrackleLib(int level) {
+    switch (level)
+    {
+    case DTLS_LOG_EMERG:
+        return LOG_LEVEL_PANIC;
+    case DTLS_LOG_ALERT:
+    case DTLS_LOG_CRIT:
+        return LOG_LEVEL_ERROR;
+    case DTLS_LOG_WARN:
+    case DTLS_LOG_NOTICE:
+        return LOG_LEVEL_WARN;
+    case DTLS_LOG_INFO:
+    case DTLS_LOG_DEBUG:
+        return LOG_LEVEL_INFO;
+    }
+}
+
+/**
+ * @brief Map log level from Trackle Library to TinyDTLS
+ * Mapping performed is best-effort, since there isn't a one-to-one relationships between levels in TinyDTLS and in Trackle Library.
+ * @param level Trackle Library log level
+ * @return int TinyDTLS log level
+ */
+static int LogLevel_trackleLibToTinyDtls(int level) {
+    switch (level)
+    {
+    case LOG_LEVEL_NONE:
+    case LOG_LEVEL_PANIC:
+        return DTLS_LOG_EMERG;
+    case LOG_LEVEL_ERROR:
+        return DTLS_LOG_CRIT;
+    case LOG_LEVEL_WARN:
+        return DTLS_LOG_NOTICE;
+    case LOG_LEVEL_INFO:
+    case LOG_LEVEL_TRACE:
+        return DTLS_LOG_DEBUG;
+    }
+}
+
+/**
  * Discard any log printed with this function.
  * This is meant to be used as default function for \ref latest_log_callback.
  * This is done so that \ref latest_log_callback is never invalid, and calling it before set would simply discard the message.
@@ -274,6 +321,12 @@ static void discard_log_callback(const char *msg, int level, const char *categor
 static void (*latest_log_callback)(const char *msg, int level, const char *category, void *attributes, void *reserved) = discard_log_callback;
 
 /**
+ * Latest log level set on a Trackle class.
+ * Please note that, since Trackle instances can be many and tinydtls has only one instance, it doesn't matter which Trackle instance set the log level.
+ */
+static int latest_log_level = LOG_LEVEL_PANIC;
+
+/**
  * @brief Callback for logging to be passed to tinyDTLS.
  * It performs conversion of logging levels between tinyDTLS and Trackle library, and forwards tinyDTLS logs to log callback set for Trackle library.
  *
@@ -284,25 +337,7 @@ static void (*latest_log_callback)(const char *msg, int level, const char *categ
 void TrackleLib_tinydtls_log_wrapper(unsigned int tinydtlsLogLevel, const char *format, ...)
 {
     // Convert tinyDTLS log levels to Trackle library log levels
-    unsigned int tracklelibLogLevel = 0;
-    switch (tinydtlsLogLevel)
-    {
-    case DTLS_LOG_EMERG:
-        tracklelibLogLevel = LOG_LEVEL_PANIC;
-        break;
-    case DTLS_LOG_ALERT:
-    case DTLS_LOG_CRIT:
-        tracklelibLogLevel = LOG_LEVEL_ERROR;
-        break;
-    case DTLS_LOG_WARN:
-    case DTLS_LOG_NOTICE:
-        tracklelibLogLevel = LOG_LEVEL_WARN;
-        break;
-    case DTLS_LOG_INFO:
-    case DTLS_LOG_DEBUG:
-        tracklelibLogLevel = LOG_LEVEL_INFO;
-        break;
-    }
+    const unsigned int tracklelibLogLevel = LogLevel_tinyDtlsToTrackleLib(tinydtlsLogLevel);
 
     // Build message from format string and parameters
     va_list args;
@@ -322,4 +357,15 @@ void TrackleLib_tinydtls_log_wrapper(unsigned int tinydtlsLogLevel, const char *
 void TrackleLib_set_latest_log_callback_for_tinydtls(void (*new_latest_log_callback)(const char *, int, const char *, void *, void *))
 {
     latest_log_callback = new_latest_log_callback;
+}
+
+/**
+ * Set latest log level to tinydtls.
+ * @param new_latest_log_level
+ */
+void TrackleLib_set_latest_log_level_for_tinydtls(int new_latest_log_level)
+{
+    latest_log_level = new_latest_log_level;
+    const unsigned int tinyDtlsLogLevel = LogLevel_trackleLibToTinyDtls(new_latest_log_level);
+    TinyDtls_set_log_level(tinyDtlsLogLevel);
 }
