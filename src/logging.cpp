@@ -280,6 +280,7 @@ static int LogLevel_tinyDtlsToTrackleLib(int level) {
     case DTLS_LOG_DEBUG:
         return LOG_LEVEL_INFO;
     }
+    return LOG_LEVEL_INFO;
 }
 
 /**
@@ -302,6 +303,7 @@ static int LogLevel_trackleLibToTinyDtls(int level) {
     case LOG_LEVEL_TRACE:
         return DTLS_LOG_DEBUG;
     }
+    return DTLS_LOG_INFO;
 }
 
 /**
