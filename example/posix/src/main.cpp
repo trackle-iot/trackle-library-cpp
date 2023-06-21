@@ -60,6 +60,8 @@ int main()
     // Create Trackle instance
     Trackle trackleInst;
 
+    trackleInst.setDeviceId(HARDCODED_DEVICE_ID);
+
     trackleInst.setLogCallback(Callbacks_log_cb);
     trackleInst.setLogLevel(TRACKLE_INFO);
 
@@ -68,7 +70,6 @@ int main()
 
     // Set cloud credentials
     trackleInst.setKeys(HARDCODED_PRIVATE_KEY);
-    trackleInst.setDeviceId(HARDCODED_DEVICE_ID);
     trackleInst.setFirmwareVersion(SOFTWARE_VERSION);
     trackleInst.setOtaMethod(NO_OTA);
     trackleInst.setConnectionType(CONNECTION_TYPE_WIFI);
