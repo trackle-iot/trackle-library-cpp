@@ -58,16 +58,16 @@ int main()
     // Create Trackle instance
     Trackle *trackle_s = newTrackle();
 
+    trackleSetDeviceId(trackle_s, HARDCODED_DEVICE_ID);
+
     trackleSetLogCallback(trackle_s, Callbacks_log_cb);
     trackleSetLogLevel(trackle_s, TRACKLE_INFO);
 
     // Initialize Trackle
-    trackleInit(trackle_s);
     trackleSetEnabled(trackle_s, true);
 
     // Set cloud credentials
     trackleSetKeys(trackle_s, HARDCODED_PRIVATE_KEY);
-    trackleSetDeviceId(trackle_s, HARDCODED_DEVICE_ID);
     trackleSetFirmwareVersion(trackle_s, SOFTWARE_VERSION);
     trackleSetOtaMethod(trackle_s, NO_OTA);
     trackleSetConnectionType(trackle_s, CONNECTION_TYPE_WIFI);

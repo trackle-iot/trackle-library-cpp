@@ -19,6 +19,9 @@
 #include <iomanip>
 
 #include "dtls_protocol.h"
+#include "tinydtls.h"
+#include "tinydtls_set_rand.h"
+#include "tinydtls_set_get_millis.h"
 
 #define USER_VAR_MAX_COUNT 10
 #define USER_VAR_KEY_LENGTH 64
@@ -40,6 +43,10 @@ const uint32_t PUBLISH_EVENT_FLAG_PRIVATE = 0x1;
 const int CLAIM_CODE_SIZE = 63;
 
 // DICHIARAZIONI  ------------------------------------------------------------
+
+void TrackleLib_tinydtls_millis_wrapper(uint32_t *t);
+void TrackleLib_set_latest_millis_callback_for_tinydtls(uint32_t (*new_latest_millis_callback)());
+
 trackle::protocol::DTLSProtocol protocol_instance;
 ProtocolFacade *protocol = &protocol_instance;
 
@@ -1158,6 +1165,7 @@ void Trackle::setMillis(millisCallback *millis)
 {
     callbacks.millis = millis;
     log_set_millis_callback(millis);
+    TrackleLib_set_latest_millis_callback_for_tinydtls(millis);
     millis_started_at = (*callbacks.millis)();
 }
 
@@ -1433,11 +1441,13 @@ void Trackle::setSystemRebootCallback(rebootCallback *reboot)
 void Trackle::setLogCallback(logCallback *log)
 {
     log_set_callbacks((log_message_callback_type)log, NULL, NULL, NULL);
+    TrackleLib_set_latest_log_callback_for_tinydtls(log);
 }
 
 void Trackle::setLogLevel(Log_Level level)
 {
     log_set_level((LoggerOutputLevel)level);
+    TrackleLib_set_latest_log_level_for_tinydtls(level);
 }
 
 const char *Trackle::getLogLevelName(int level)
@@ -1940,6 +1950,10 @@ Trackle::Trackle(void)
     descriptor.append_system_info = appendSystemInfo;
     descriptor.append_metrics = diagnostic::appendMetrics;
 
+    TinyDtls_set_log_callback(TrackleLib_tinydtls_log_wrapper);
+    TinyDtls_set_rand(HAL_RNG_GetRandomNumber);
+    TinyDtls_set_get_millis(TrackleLib_tinydtls_millis_wrapper);
+
 #ifdef PRODUCT_ID
     trackle_protocol_set_product_id(protocol, PRODUCT_ID);
 #endif
@@ -1972,4 +1986,33 @@ void Trackle::diagnosticNetwork(Network key, double value)
 uint32_t HAL_RNG_GetRandomNumber(void)
 {
     return getRandomCb ? (*getRandomCb)() : default_random_callback();
+}
+
+// ------------------------------------------ TINYDTLS MILLIS -------------------------------------------------
+
+/**
+ * Placeholder millis function that always returns 0.
+ */
+static uint32_t dumb_millis_callback()
+{
+    return 0;
+}
+
+/**
+ * Pointer to the latest millis callback function set on a Trackle class.
+ * Please note that, since Trackle instances can be many and tinydtls has only one instance, it doesn't matter which Trackle instance set the callback.
+ */
+static uint32_t (*latest_millis_callback)() = dumb_millis_callback;
+
+void TrackleLib_tinydtls_millis_wrapper(uint32_t* t) {
+    *t = latest_millis_callback();
+}
+
+/**
+ * Set latest log callback to be used by tinydtls.
+ * @param new_latest_millis_callback
+ */
+void TrackleLib_set_latest_millis_callback_for_tinydtls(uint32_t (*new_latest_millis_callback)())
+{
+    latest_millis_callback = new_latest_millis_callback;
 }

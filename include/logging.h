@@ -143,6 +143,10 @@ extern "C"
 {
 #endif
 
+    void TrackleLib_tinydtls_log_wrapper(unsigned int tinydtlsLogLevel, const char *format, ...);
+    void TrackleLib_set_latest_log_callback_for_tinydtls(void (*new_latest_log_callback)(const char *, int, const char *, void *, void *));
+    void TrackleLib_set_latest_log_level_for_tinydtls(int new_latest_log_level);
+
     // Log level. Ensure log_level_name() is updated for newly added levels
     typedef enum LogLevel
     {

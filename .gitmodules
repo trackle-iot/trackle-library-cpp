@@ -1,6 +1,0 @@
-[submodule "lib/micro-ecc"]
-	path = lib/micro-ecc
-	url = https://github.com/trackle-iot/micro-ecc.git
-[submodule "lib/tinydtls"]
-	path = lib/tinydtls
-	url = https://github.com/trackle-iot/tinydtls.git

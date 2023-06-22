@@ -148,11 +148,6 @@ namespace trackle
 
 			getMillis = callbacks.millis;
 
-			// dtls_set_log_level(DTLS_LOG_NOTICE);
-			// dtls_set_log_level(DTLS_LOG_INFO);
-			// dtls_set_log_level(DTLS_LOG_WARN);
-			dtls_set_log_level(DTLS_LOG_ALERT);
-
 			dtls_init();
 
 			extract_pub_priv_keys(core_private); // extract client public and private key

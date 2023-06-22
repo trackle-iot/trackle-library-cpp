@@ -15,12 +15,12 @@ TINY_SRCS = $(TRACKLE_LIB)/lib/tinydtls/ccm.c \
 			$(TRACKLE_LIB)/lib/tinydtls/dtls_config.h.cmake.in \
 			$(TRACKLE_LIB)/lib/tinydtls/dtls_debug.c \
 			$(TRACKLE_LIB)/lib/tinydtls/dtls_time.c \
+			$(TRACKLE_LIB)/lib/tinydtls/dtls_prng.c \
 			$(TRACKLE_LIB)/lib/tinydtls/hmac.c \
 			$(TRACKLE_LIB)/lib/tinydtls/netq.c \
 			$(TRACKLE_LIB)/lib/tinydtls/peer.c \
 			$(TRACKLE_LIB)/lib/tinydtls/session.c \
 			$(TRACKLE_LIB)/lib/tinydtls/aes/*.c \
-			$(TRACKLE_LIB)/lib/tinydtls/platform-specific/dtls_prng_posix.c \
 			$(TRACKLE_LIB)/lib/tinydtls/sha2/sha2.c
 TINY_INCLUDES = -I"$(TRACKLE_LIB)/lib/tinydtls" \
 			    -I"$(TRACKLE_LIB)/lib/tinydtls/aes" \
@@ -52,7 +52,7 @@ uecc:
 	$(CC) -w -c $(UECC_SRCS) $(UECC_INCLUDES)
 
 tinydtls:
-	$(CC) -w -c $(TINY_SRCS) $(TINY_INCLUDES) $(UECC_INCLUDES) -DWITH_POSIX -DWITH_SHA256 -DWITH_SHA384 -DWITH_SHA512 -DSHA2_USE_INTTYPES_H
+	$(CC) -w -c $(TINY_SRCS) $(TINY_INCLUDES) $(UECC_INCLUDES) -DWITH_SHA256
 
 callbacks:
 	$(CC) -w -c $(SHARED_SRCS) $(SHARED_INCLUDES) $(TRACKLE_LIB_INCLUDES) $(UECC_INCLUDES) $(TINY_INCLUDES)
