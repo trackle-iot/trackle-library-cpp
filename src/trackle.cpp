@@ -27,8 +27,10 @@
 #define USER_FUNC_KEY_LENGTH 64
 #define USER_FUNC_ARG_LENGTH 622
 
+#define DEFAULT_CONNECTION_TIMEOUT 1000
 #define RECONNECTION_TIMEOUT 3750
-#define MAX_RECONNECTION_RETRY_INCREMENT 5 // 2^5 * 3750 = 60 seconds
+#define MAX_RECONNECTION_RETRY_INCREMENT 4 // 2^4 * 3750 = 60 seconds
+bool first_connection_completed = false;
 uint16_t connection_retry = 0;
 uint32_t connection_timeout = 1000;
 
@@ -192,7 +194,7 @@ void increase_connection_timeout()
  */
 void reset_connection_timeout()
 {
-    connection_timeout = 1000;
+    connection_timeout = DEFAULT_CONNECTION_TIMEOUT;
     connection_retry = 0;
 }
 
@@ -1729,12 +1731,23 @@ void Trackle::loop()
          * There was an error?
          */
         if (ret < 0)
-        { // on cloud connection error, increase timeout
-            LOG(TRACE, "Cloud connection error, increment reconnection timeout...");
-            increase_connection_timeout();
+        {
+            if (!first_connection_completed)
+            {
+                // if never connected, don't increase connection retry timeout
+                LOG(TRACE, "Cloud connection error, never connected successfull...");
+                reset_connection_timeout();
+            }
+            else
+            {
+                // on cloud connection error, increase connection retry timeout
+                LOG(TRACE, "Cloud connection error, increment reconnection timeout...");
+                increase_connection_timeout();
+            }
         }
         else if (ret > 0) /* on success connection, reset timeout */
         {
+            first_connection_completed = true;
             reset_connection_timeout();
         }
         else
