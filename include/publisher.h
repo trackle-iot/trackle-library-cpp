@@ -128,6 +128,38 @@ namespace trackle
 				return result;
 			}
 
+			ProtocolError send_event_in_blocks(MessageChannel &channel, int ttl, EventType::Enum event_type, int flags,
+											 system_tick_t time, CompletionHandler handler)
+			{
+				bool is_system_event = is_system(Messages::currEventName.c_str());
+				bool rate_limited = is_rate_limited(is_system_event, time);
+				if (rate_limited)
+				{
+					// g_rateLimitedEventsCounter++;
+					return BANDWIDTH_EXCEEDED;
+				}
+
+				Message message;
+				channel.create(message);
+				
+				size_t msglen = Messages::event_in_blocks(message.buf(), 0, ttl, event_type);
+				message.set_length(msglen);
+				const ProtocolError result = channel.send(message);
+				if (result == NO_ERROR)
+				{
+					// Register completion handler only if acknowledgement was requested explicitly
+					if ((flags & EventType::WITH_ACK) && message.has_id())
+					{
+						add_ack_handler(message.get_id(), std::move(handler));
+					}
+					else
+					{
+						handler.setResult();
+					}
+				}
+				return result;
+			}
+
 		private:
 			Protocol *protocol;
 

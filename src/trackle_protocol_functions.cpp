@@ -1,7 +1,7 @@
 #include "protocol_defs.h"
 #include "protocol_selector.h"
 #include "trackle_protocol_functions.h"
-//#include "mbedtls/debug.h"
+// #include "mbedtls/debug.h"
 #include <stdlib.h>
 
 using trackle::CompletionHandler;
@@ -86,6 +86,21 @@ bool trackle_protocol_send_event(ProtocolFacade *protocol, const char *event_nam
     EventType::Enum event_type = EventType::extract_event_type(flags);
     return protocol->send_event(event_name, data, ttl, event_type, flags, std::move(handler));
 }
+
+bool trackle_protocol_send_event_in_blocks(ProtocolFacade *protocol,
+                                 int ttl, uint32_t flags, void *reserved)
+{
+    ASSERT_ON_SYSTEM_THREAD();
+    CompletionHandler handler;
+    if (reserved)
+    {
+        auto r = static_cast<const trackle_protocol_send_event_data *>(reserved);
+        handler = CompletionHandler(r->handler_callback, r->handler_data);
+    }
+    EventType::Enum event_type = EventType::extract_event_type(flags);
+    return protocol->send_event_in_blocks(ttl, event_type, flags, std::move(handler));
+}
+
 
 bool trackle_protocol_send_subscription_device(ProtocolFacade *protocol, const char *event_name, const char *device_id, void *)
 {

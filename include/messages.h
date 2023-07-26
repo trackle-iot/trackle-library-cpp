@@ -24,6 +24,9 @@
 #include "protocol_defs.h"
 #include "events.h"
 
+#define MAX_BLOCK_SIZE 1024
+#define MAX_BLOCKS_NUMBER 10
+
 namespace trackle
 {
     namespace protocol
@@ -49,6 +52,15 @@ namespace trackle
         class Messages
         {
         public:
+
+            // Multiblock transfer options
+            static uint8_t blocksBuffer[MAX_BLOCK_SIZE * MAX_BLOCKS_NUMBER];
+            static size_t totBytesNumber;
+            static bool blockTransmissionRunning;
+            static size_t currBlockIndex;
+            static uint16_t currentToken;
+            static std::string currEventName;
+
             static CoAPMessageType::Enum decodeType(const uint8_t *buf, size_t length);
             static size_t describe_post_header(uint8_t buf[], size_t buffer_size, uint16_t message_id, uint8_t desc_flags);
             static size_t hello(uint8_t *buf, message_id_t message_id, uint8_t flags,
@@ -90,6 +102,8 @@ namespace trackle
 
             static size_t event(uint8_t buf[], uint16_t message_id, const char *event_name,
                                 const char *data, int ttl, EventType::Enum event_type, bool confirmable);
+
+            static size_t event_in_blocks(uint8_t buf[], uint16_t message_id, int ttl, EventType::Enum event_type);
 
             static inline size_t empty_ack(unsigned char *buf,
                                            unsigned char message_id_msb,

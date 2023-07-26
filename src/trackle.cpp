@@ -576,7 +576,26 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
     LOG(TRACE, "sendPublish %s: %s ", eventName, data);
     int res = 0;
     if (connectionStatus == SOCKET_READY)
-        res = trackle_protocol_send_event(protocol, eventName, data, ttl, flags, &d);
+    {
+        using namespace trackle::protocol;
+        
+        if (strlen(data) > MAX_BLOCK_SIZE)
+        {
+            assert(strlen(data) < MAX_BLOCK_SIZE);
+            memcpy(Messages::blocksBuffer, data, strlen(data));
+            Messages::currBlockIndex = 0;
+            Messages::totBytesNumber = strlen(data);
+            Messages::currEventName = std::string(eventName);
+            Messages::currentToken = static_cast<uint16_t>(HAL_RNG_GetRandomNumber() & 0xFFFF);
+            Messages::blockTransmissionRunning = true;
+            res = trackle_protocol_send_event_in_blocks(protocol, ttl, flags, &d);
+        }
+        else
+        {
+            res = trackle_protocol_send_event(protocol, eventName, data, ttl, flags, &d);
+        }
+    }
+
     return res;
 }
 
