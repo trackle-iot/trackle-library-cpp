@@ -23,6 +23,7 @@
 #include "coap.h"
 #include "protocol_defs.h"
 #include "events.h"
+#include "defines.h"
 
 #define MAX_BLOCK_SIZE 1024
 #define MAX_BLOCKS_NUMBER 10
@@ -53,13 +54,17 @@ namespace trackle
         {
         public:
 
-            // Multiblock transfer options
-            static uint8_t blocksBuffer[MAX_BLOCK_SIZE * MAX_BLOCKS_NUMBER];
-            static size_t totBytesNumber;
-            static bool blockTransmissionRunning;
-            static size_t currBlockIndex;
-            static uint16_t currentToken;
-            static std::string currEventName;
+            // ----- BEGIN static fields for multiblock transfer status ------
+            static uint8_t blocksBuffer[MAX_BLOCK_SIZE * MAX_BLOCKS_NUMBER]; // Bytes of the message (both sent and not sent)
+            static size_t totBytesNumber; // Total number of bytes in the message
+            static bool blockTransmissionRunning; // 
+            static size_t currBlockIndex; // Sequence number of the current block
+            static uint16_t currentToken; // Current token (for future applications)
+            static std::string currEventName; // Current event name of the multiblock packet
+            static int ttl; // Time to live
+            static uint32_t flags; // Flags
+            static publishCompletionCallback* completionCb; // Callback called on last block
+            // ------ END static fields for multiblock transfer status -------
 
             static CoAPMessageType::Enum decodeType(const uint8_t *buf, size_t length);
             static size_t describe_post_header(uint8_t buf[], size_t buffer_size, uint16_t message_id, uint8_t desc_flags);

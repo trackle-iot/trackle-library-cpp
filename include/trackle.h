@@ -28,6 +28,8 @@ using namespace std;
 
 #ifdef __cplusplus
 
+uint32_t getNextPublishCounter();
+
 class Trackle
 {
 

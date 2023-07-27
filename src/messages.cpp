@@ -4,12 +4,18 @@ namespace trackle
 {
 	namespace protocol
 	{
-
+		
+		// ----- BEGIN static fields for multiblock transfer status ------
+		uint8_t Messages::blocksBuffer[MAX_BLOCK_SIZE*MAX_BLOCKS_NUMBER];
 		bool Messages::blockTransmissionRunning = false;
 		size_t Messages::totBytesNumber = 0;
 		size_t Messages::currBlockIndex = 0;
 		uint16_t Messages::currentToken = 0;
 		std::string Messages::currEventName = std::string("");
+		int Messages::ttl = 0;
+		uint32_t Messages::flags = 0;
+		publishCompletionCallback* Messages::completionCb = nullptr; // Callback called on last block
+		// ------ END static fields for multiblock transfer status -------
 
 		CoAPMessageType::Enum Messages::decodeType(const uint8_t *buf, size_t length)
 		{
@@ -409,10 +415,20 @@ namespace trackle
 			
 			*p++ = 0xff;
 
+			/*
+			printf("SENT BLOCK %d\n", Messages::currBlockIndex);
+			for (int i = 0; i < p-buf; i++)
+			{
+				printf("0x%02X ", buf[i]);
+			}
+			printf("\n");
+			fflush(stdout);
+			*/
+
 			// Copy payload block in packet
 			{
 				const size_t payloadLength = std::min(static_cast<size_t>(MAX_BLOCK_SIZE), totBytesNumber - currBlockIndex * MAX_BLOCK_SIZE);
-				memcpy(p, &blocksBuffer[currBlockIndex], payloadLength);
+				memcpy(p, &blocksBuffer[currBlockIndex * MAX_BLOCK_SIZE], payloadLength);
 				p += payloadLength;
 			}
 			
