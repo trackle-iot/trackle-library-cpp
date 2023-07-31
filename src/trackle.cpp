@@ -1663,11 +1663,10 @@ int Trackle::connect()
         LOG(TRACE, "Protocol already initialized");
         setConnectionStatus(SOCKET_CONNECTING);
         int res = -1;
-        /*
+        
         string address = "device.trackle.io";
         address = string_device_id + ".udp." + address;
-        */
-       string address = "192.168.1.124";
+        
         res = (*connectCb)(address.c_str(), 5684);
 
         // If it returns < 0, it's an immediate error
