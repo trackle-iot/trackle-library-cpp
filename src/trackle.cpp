@@ -35,7 +35,7 @@
 #define MAX_RECONNECTION_RETRY_INCREMENT 4 // 2^4 * 3750 = 60 seconds
 bool first_connection_completed = false;
 uint16_t connection_retry = 0;
-uint32_t connection_timeout = 1000;
+uint32_t connection_timeout = DEFAULT_CONNECTION_TIMEOUT;
 
 #define MAX_COUNTER 9999999
 #define MAX_PING_INTERVAL 1000
