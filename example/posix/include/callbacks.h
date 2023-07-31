@@ -39,6 +39,7 @@ extern "C"
     int Callbacks_receive_udp_cb(unsigned char *buf, uint32_t buflen, void *tmp);
     void Callbacks_log_cb(const char *msg, int level, const char *category, void *attribute, void *reserved);
     void Callbacks_reboot_cb(const char *data);
+    void Callbacks_complete_publish(int error, const void *data, void *callbackData, void *reserved);
 
 #ifdef __cplusplus
 }

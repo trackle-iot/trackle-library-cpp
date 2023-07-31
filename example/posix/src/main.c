@@ -57,7 +57,7 @@ int main()
 
     // Create Trackle instance
     Trackle *trackle_s = newTrackle();
-
+    trackleInit(trackle_s);
     trackleSetDeviceId(trackle_s, HARDCODED_DEVICE_ID);
 
     trackleSetLogCallback(trackle_s, Callbacks_log_cb);
@@ -82,6 +82,7 @@ int main()
     trackleSetSleepCallback(trackle_s, Callbacks_sleep_ms_cb);
     trackleSetSystemRebootCallback(trackle_s, Callbacks_reboot_cb);
     trackleSetPublishHealthCheckInterval(trackle_s, 60 * 60 * 1000);
+    trackleSetCompletedPublishCallback(trackle_s, Callbacks_complete_publish);
 
     // Registering POST functions callable from cloud
     tracklePost(trackle_s, "funSuccess", funSuccess, ALL_USERS);
@@ -103,7 +104,7 @@ int main()
         Callbacks_sleep_ms_cb(MAIN_LOOP_PERIOD_MS);
         if (Callbacks_get_millis_cb() - prevPubMillis > 5000)
         {
-            tracklePublish(trackle_s, "greetings", "Hello world!", 30, PRIVATE, EMPTY_FLAGS);
+            tracklePublish(trackle_s, "greetings", "Hello world!", 30, PRIVATE, WITH_ACK);
             prevPubMillis = Callbacks_get_millis_cb();
         }
     }

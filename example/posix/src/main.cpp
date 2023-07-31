@@ -84,6 +84,7 @@ int main()
     trackleInst.setSleepCallback(Callbacks_sleep_ms_cb);
     trackleInst.setSystemRebootCallback(Callbacks_reboot_cb);
     trackleInst.setPublishHealthCheckInterval(60 * 60 * 1000);
+    trackleInst.setCompletedPublishCallback(Callbacks_complete_publish);
 
     // Registering POST functions callable from cloud
     trackleInst.post("funSuccess", funSuccess, ALL_USERS);
@@ -105,7 +106,7 @@ int main()
         Callbacks_sleep_ms_cb(MAIN_LOOP_PERIOD_MS);
         if (Callbacks_get_millis_cb() - prevPubMillis > 5000)
         {
-            trackleInst.publish("greetings", "Hello world!", 30, PRIVATE, EMPTY_FLAGS);
+            trackleInst.publish("greetings", "Hello world!", 30, PRIVATE, WITH_ACK);
             prevPubMillis = Callbacks_get_millis_cb();
         }
     }

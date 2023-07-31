@@ -12,7 +12,6 @@ UECC_INCLUDES = -I"$(TRACKLE_LIB)/lib/micro-ecc"
 TINY_SRCS = $(TRACKLE_LIB)/lib/tinydtls/ccm.c \
 			$(TRACKLE_LIB)/lib/tinydtls/crypto.c \
 			$(TRACKLE_LIB)/lib/tinydtls/dtls.c \
-			$(TRACKLE_LIB)/lib/tinydtls/dtls_config.h.cmake.in \
 			$(TRACKLE_LIB)/lib/tinydtls/dtls_debug.c \
 			$(TRACKLE_LIB)/lib/tinydtls/dtls_time.c \
 			$(TRACKLE_LIB)/lib/tinydtls/dtls_prng.c \

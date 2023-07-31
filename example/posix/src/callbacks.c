@@ -168,3 +168,9 @@ void Callbacks_reboot_cb(const char *data)
 {
     printf("Reboot request ignored\n");
 }
+
+void Callbacks_complete_publish(int error, const void *data, void *callbackData, void *reserved)
+{
+    uint32_t *b = (uint32_t *)callbackData;
+    printf("callback_complete_publish %d...\n", b);
+}
