@@ -149,7 +149,22 @@ namespace trackle
         // Callback for blocks in a block publish except the last, that must be handled differently.
         void genericBlockCompletionCallback(int error, const void *data, void *callbackData, void *reserved)
         {
-            // Do nothing....
+
+            // If there was an error in sending a block, then the whole blockwise transfer failed.
+            // So it was completed with an error and the completion callback must be called.
+
+            if (error != SYSTEM_ERROR_NONE)
+            {
+                if (Messages::completionCb == nullptr)
+                {
+                    LOG(WARN, "publish completed, but no completion callback specified!");
+                    return;
+                }
+                Messages::completionCb(error, data, callbackData, reserved);
+            }
+
+            // Otherwise, do nothing.
+
         }
 
         void Protocol::notify_message_complete(message_id_t msg_id, CoAPCode::Enum responseCode)
