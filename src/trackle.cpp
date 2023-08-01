@@ -590,6 +590,7 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
             Messages::ttl = ttl;
             Messages::flags = flags;
             Messages::completionCb = completedPublishCb;
+            d.handler_callback = trackle::protocol::genericBlockCompletionCallback;
             res = trackle_protocol_send_event_in_blocks(protocol, ttl, flags, &d);
         }
         else
