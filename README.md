@@ -10,7 +10,7 @@
 ````
 
 
-[![GitHub version](https://img.shields.io/badge/version-v2.6.0-blue)](https://github.com/trackle-iot/trackle-library-cpp/releases/latest) &nbsp; &nbsp;
+[![GitHub version](https://img.shields.io/badge/version-v3.1.0-blue)](https://github.com/trackle-iot/trackle-library-cpp/releases/latest) &nbsp; &nbsp;
 [![GitHub stars](https://img.shields.io/github/stars/trackle-iot/trackle-library?style=social)](https://github.com/trackle-iot/trackle-library-cpp/stargazers) 
 __________
 
