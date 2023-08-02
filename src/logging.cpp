@@ -300,6 +300,7 @@ static int LogLevel_trackleLibToTinyDtls(int level) {
     case LOG_LEVEL_WARN:
         return DTLS_LOG_NOTICE;
     case LOG_LEVEL_INFO:
+        return DTLS_LOG_INFO;
     case LOG_LEVEL_TRACE:
         return DTLS_LOG_DEBUG;
     }
