@@ -24,6 +24,7 @@
 #include "events.h"
 #include "message_channel.h"
 #include "messages.h"
+#include "service_debug.h"
 
 #include "completion_handler.h"
 
@@ -80,6 +81,7 @@ namespace trackle
 					if (now - recent_event_ticks[evt_tick_idx] < 1000)
 					{
 						// exceeded allowable burst of 4 events per second
+						LOG(WARN, "rate limited, BANDWIDTH_EXCEEDED");
 						return true;
 					}
 				}
@@ -132,11 +134,15 @@ namespace trackle
 											 system_tick_t time, CompletionHandler handler)
 			{
 				bool is_system_event = is_system(Messages::currEventName.c_str());
-				bool rate_limited = is_rate_limited(is_system_event, time);
-				if (rate_limited)
-				{
-					// g_rateLimitedEventsCounter++;
-					return BANDWIDTH_EXCEEDED;
+
+				// Check rate limit only on first packet
+				if(Messages::currBlockIndex == 0) {
+					bool rate_limited = is_rate_limited(is_system_event, time);
+					if (rate_limited)
+					{
+						// g_rateLimitedEventsCounter++;
+						return BANDWIDTH_EXCEEDED;
+					}
 				}
 
 				Message message;
