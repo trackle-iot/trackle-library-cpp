@@ -151,10 +151,14 @@ namespace trackle
         {
 
             // If there was an error in sending a block, then the whole blockwise transfer failed.
-            // So it was completed with an error and the completion callback must be called.
+            // So it was completed with an error or if last packet was sent.
+            // In both case the completion callback must be called.
 
-            if (error != SYSTEM_ERROR_NONE)
+            if ((error != SYSTEM_ERROR_NONE) || ((Messages::currBlockIndex + 1) * MAX_BLOCK_SIZE >= Messages::totBytesNumber) )
             {
+                // Reset trasmission running status
+                Messages::blockTransmissionRunning = false;
+
                 if (Messages::completionCb == nullptr)
                 {
                     LOG(WARN, "publish completed, but no completion callback specified!");
@@ -181,15 +185,16 @@ namespace trackle
                 Messages::currBlockIndex++;
                 const uint32_t messageId = getNextPublishCounter();
                 trackle_protocol_send_event_data eventHandler;
-                if (Messages::currBlockIndex * MAX_BLOCK_SIZE >= Messages::totBytesNumber)
-                    eventHandler.handler_callback = Messages::completionCb;
-                else
-                    eventHandler.handler_callback = genericBlockCompletionCallback;
-                eventHandler.handler_data = reinterpret_cast<void*>(messageId);
+                eventHandler.handler_callback = genericBlockCompletionCallback;
+                eventHandler.handler_data = reinterpret_cast<void *>(messageId);
                 trackle_protocol_send_event_in_blocks(this, Messages::ttl, Messages::flags, &eventHandler);
             }
             else if (CoAPCode::is_success(responseCode))
             {
+                // Reset trasmission running status
+                if (Messages::blockTransmissionRunning)
+                    Messages::blockTransmissionRunning = false;
+
                 ack_handlers.setResult(msg_id);
             }
             else
