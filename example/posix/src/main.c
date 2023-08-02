@@ -97,15 +97,18 @@ int main()
 
     trackleConnect(trackle_s);
 
+    uint32_t msg_key = 0;
     uint32_t prevPubMillis = 0;
+
     for (;;)
     {
         trackleLoop(trackle_s);
         Callbacks_sleep_ms_cb(MAIN_LOOP_PERIOD_MS);
         if (Callbacks_get_millis_cb() - prevPubMillis > 5000)
         {
-            tracklePublish(trackle_s, "greetings", "Hello world!", 30, PRIVATE, WITH_ACK);
+            tracklePublish(trackle_s, "greetings", "Hello world!", 30, PRIVATE, WITH_ACK, msg_key);
             prevPubMillis = Callbacks_get_millis_cb();
+            msg_key++;
         }
     }
 

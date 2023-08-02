@@ -161,7 +161,7 @@ int Callbacks_receive_udp_cb(unsigned char *buf, uint32_t buflen, void *tmp)
 
 void Callbacks_log_cb(const char *msg, int level, const char *category, void *attribute, void *reserved)
 {
-    printf("Log_cb(lvl=%d): (%s) -> %s\n", level, (category ? category : ""), msg);
+    printf("%u - Log_cb(lvl=%d): (%s) -> %s\n", Callbacks_get_millis_cb(), level, (category ? category : ""), msg);
 }
 
 void Callbacks_reboot_cb(const char *data)
@@ -172,5 +172,8 @@ void Callbacks_reboot_cb(const char *data)
 void Callbacks_complete_publish(int error, const void *data, void *callbackData, void *reserved)
 {
     uint32_t *b = (uint32_t *)callbackData;
-    printf("callback_complete_publish %d...\n", b);
+    const char *c = (const char *)data;
+
+    printf("callback_complete_publish (%d) result : %d...\n", b, error);
+    printf("message: %s...\n", c);
 }
