@@ -575,8 +575,33 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
 
     LOG(TRACE, "sendPublish %s: %s ", eventName, data);
     int res = 0;
-    if (connectionStatus == SOCKET_READY)
-        res = trackle_protocol_send_event(protocol, eventName, data, ttl, flags, &d);
+    if (connectionStatus == SOCKET_READY && strlen(data) <= MAX_BLOCK_SIZE * MAX_BLOCKS_NUMBER)
+    {
+        using namespace trackle::protocol;
+        
+        if (strlen(data) > MAX_BLOCK_SIZE)
+        {
+            if (Messages::blockTransmissionRunning)
+                return false;
+
+            memcpy(Messages::blocksBuffer, data, strlen(data));
+            Messages::currBlockIndex = 0;
+            Messages::totBytesNumber = strlen(data);
+            Messages::currEventName = std::string(eventName);
+            Messages::currentToken = static_cast<uint16_t>(HAL_RNG_GetRandomNumber() & 0xFFFF);
+            Messages::blockTransmissionRunning = true;
+            Messages::ttl = ttl;
+            Messages::flags = flags;
+            Messages::completionCb = completedPublishCb;
+            d.handler_callback = trackle::protocol::genericBlockCompletionCallback;
+            res = trackle_protocol_send_event_in_blocks(protocol, ttl, flags, &d);
+        }
+        else
+        {
+            res = trackle_protocol_send_event(protocol, eventName, data, ttl, flags, &d);
+        }
+    }
+
     return res;
 }
 
@@ -1642,8 +1667,10 @@ int Trackle::connect()
         LOG(TRACE, "Protocol already initialized");
         setConnectionStatus(SOCKET_CONNECTING);
         int res = -1;
+        
         string address = "device.trackle.io";
         address = string_device_id + ".udp." + address;
+        
         res = (*connectCb)(address.c_str(), 5684);
 
         // If it returns < 0, it's an immediate error

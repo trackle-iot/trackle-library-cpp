@@ -28,6 +28,13 @@ using namespace std;
 
 #ifdef __cplusplus
 
+uint32_t getNextPublishCounter();
+
+namespace trackle::protocol
+{
+        void genericBlockCompletionCallback(int error, const void *data, void *callbackData, void *reserved);
+}
+
 class Trackle
 {
 

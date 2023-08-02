@@ -454,6 +454,24 @@ namespace trackle
 				return true;
 			}
 
+			// Returns true on success, false on sending timeout or rate-limiting failure
+			bool send_event_in_blocks(int ttl, EventType::Enum event_type, int flags, CompletionHandler handler)
+			{
+				if (chunkedTransfer.is_updating())
+				{
+					handler.setError(SYSTEM_ERROR_BUSY);
+					return false;
+				}
+				const ProtocolError error = publisher.send_event_in_blocks(channel, ttl, event_type, flags,
+																 callbacks.millis(), std::move(handler));
+				if (error != NO_ERROR)
+				{
+					handler.setError(toSystemError(error));
+					return false;
+				}
+				return true;
+			}
+
 			inline bool send_subscription(const char *event_name, const char *device_id)
 			{
 				bool success = !subscriptions.send_subscription(channel, event_name, device_id);

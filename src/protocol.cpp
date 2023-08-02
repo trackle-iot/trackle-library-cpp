@@ -1,4 +1,5 @@
 #include "logging.h"
+#include "trackle.h"
 LOG_SOURCE_CATEGORY("comm.protocol")
 
 #include "protocol.h"
@@ -41,6 +42,7 @@ namespace trackle
             if (CoAPType::is_reply(type))
             {
                 LOG(TRACE, "Reply received: type=%d, code=%d", type, code);
+                //printf("Reply received: type=%d, code=%d\n", type, code);
                 // todo - this is a little too simple in the case of an empty ACK for a separate response
                 // the message should then be bound to the token. see CH19037
                 if (type == CoAPType::RESET)
@@ -144,13 +146,55 @@ namespace trackle
             return error;
         }
 
+        // Callback for blocks in a block publish except the last, that must be handled differently.
+        void genericBlockCompletionCallback(int error, const void *data, void *callbackData, void *reserved)
+        {
+
+            // If there was an error in sending a block, then the whole blockwise transfer failed.
+            // So it was completed with an error or if last packet was sent.
+            // In both case the completion callback must be called.
+
+            if ((error != SYSTEM_ERROR_NONE) || ((Messages::currBlockIndex + 1) * MAX_BLOCK_SIZE >= Messages::totBytesNumber) )
+            {
+                // Reset trasmission running status
+                Messages::blockTransmissionRunning = false;
+
+                if (Messages::completionCb == nullptr)
+                {
+                    LOG(WARN, "publish completed, but no completion callback specified!");
+                    return;
+                }
+                Messages::completionCb(error, data, callbackData, reserved);
+            }
+
+            // Otherwise, do nothing.
+
+        }
+
         void Protocol::notify_message_complete(message_id_t msg_id, CoAPCode::Enum responseCode)
         {
             const auto codeClass = (int)responseCode >> 5;
             const auto codeDetail = (int)responseCode & 0x1f;
             LOG(TRACE, "message id %d complete with code %d.%02d", msg_id, codeClass, codeDetail);
-            if (CoAPCode::is_success(responseCode))
+
+            // Server received previous block, send the next.
+            if (responseCode == CoAPCode::CONTINUE)
             {
+                //printf("RECEIVED CONTINUE\n");
+                ack_handlers.setResult(msg_id);
+                Messages::currBlockIndex++;
+                const uint32_t messageId = getNextPublishCounter();
+                trackle_protocol_send_event_data eventHandler;
+                eventHandler.handler_callback = genericBlockCompletionCallback;
+                eventHandler.handler_data = reinterpret_cast<void *>(messageId);
+                trackle_protocol_send_event_in_blocks(this, Messages::ttl, Messages::flags, &eventHandler);
+            }
+            else if (CoAPCode::is_success(responseCode))
+            {
+                // Reset trasmission running status
+                if (Messages::blockTransmissionRunning)
+                    Messages::blockTransmissionRunning = false;
+
                 ack_handlers.setResult(msg_id);
             }
             else

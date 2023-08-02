@@ -20,9 +20,14 @@
 
 #pragma once
 
+#include <string>
 #include "coap.h"
 #include "protocol_defs.h"
 #include "events.h"
+#include "defines.h"
+
+#define MAX_BLOCK_SIZE 1024
+#define MAX_BLOCKS_NUMBER 5
 
 namespace trackle
 {
@@ -49,6 +54,19 @@ namespace trackle
         class Messages
         {
         public:
+
+            // ----- BEGIN static fields for multiblock transfer status ------
+            static uint8_t blocksBuffer[MAX_BLOCK_SIZE * MAX_BLOCKS_NUMBER]; // Bytes of the message (both sent and not sent)
+            static size_t totBytesNumber; // Total number of bytes in the message
+            static bool blockTransmissionRunning; // 
+            static size_t currBlockIndex; // Sequence number of the current block
+            static uint16_t currentToken; // Current token (for future applications)
+            static std::string currEventName; // Current event name of the multiblock packet
+            static int ttl; // Time to live
+            static uint32_t flags; // Flags
+            static publishCompletionCallback* completionCb; // Callback called on last block
+            // ------ END static fields for multiblock transfer status -------
+
             static CoAPMessageType::Enum decodeType(const uint8_t *buf, size_t length);
             static size_t describe_post_header(uint8_t buf[], size_t buffer_size, uint16_t message_id, uint8_t desc_flags);
             static size_t hello(uint8_t *buf, message_id_t message_id, uint8_t flags,
@@ -90,6 +108,8 @@ namespace trackle
 
             static size_t event(uint8_t buf[], uint16_t message_id, const char *event_name,
                                 const char *data, int ttl, EventType::Enum event_type, bool confirmable);
+
+            static size_t event_in_blocks(uint8_t buf[], uint16_t message_id, int ttl, EventType::Enum event_type);
 
             static inline size_t empty_ack(unsigned char *buf,
                                            unsigned char message_id_msb,

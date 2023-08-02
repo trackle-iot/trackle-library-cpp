@@ -31,6 +31,8 @@ namespace trackle
                 return CoAPCode::NOT_MODIFIED;
             case CoAPCode::CONTENT:
                 return CoAPCode::CONTENT;
+            case CoAPCode::CONTINUE:
+                return CoAPCode::CONTINUE;
             default:
                 // todo - add all recognised codes. Via a smart macro to void manually repeating them.
                 if (CoAPCode::is_success(code))

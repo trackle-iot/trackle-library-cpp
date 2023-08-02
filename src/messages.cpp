@@ -4,6 +4,18 @@ namespace trackle
 {
 	namespace protocol
 	{
+		
+		// ----- BEGIN static fields for multiblock transfer status ------
+		uint8_t Messages::blocksBuffer[MAX_BLOCK_SIZE*MAX_BLOCKS_NUMBER];
+		bool Messages::blockTransmissionRunning = false;
+		size_t Messages::totBytesNumber = 0;
+		size_t Messages::currBlockIndex = 0;
+		uint16_t Messages::currentToken = 0;
+		std::string Messages::currEventName = std::string("");
+		int Messages::ttl = 0;
+		uint32_t Messages::flags = 0;
+		publishCompletionCallback* Messages::completionCb = nullptr; // Callback called on last block
+		// ------ END static fields for multiblock transfer status -------
 
 		CoAPMessageType::Enum Messages::decodeType(const uint8_t *buf, size_t length)
 		{
@@ -353,6 +365,73 @@ namespace trackle
 				p += name_data_len;
 			}
 
+			return p - buf;
+		}
+
+		size_t Messages::event_in_blocks(uint8_t buf[], uint16_t message_id, int ttl, EventType::Enum event_type)
+		{
+			uint8_t *p = buf;
+			*p++ = 0x42; // non-confirmable /confirmable, 2 bytes token
+			*p++ = 0x02;					  // code 0.02 POST request
+			*p++ = message_id >> 8;
+			*p++ = message_id & 0xff;
+			*p++ = currentToken >> 8;
+			*p++ = currentToken & 0xff;
+			*p++ = 0xb1; // one-byte Uri-Path option
+			*p++ = event_type;
+
+			// Add event name as URI in message
+			{
+				const size_t name_data_len = std::min(currEventName.length(), MAX_EVENT_NAME_LENGTH);
+				p += event_name_uri_path(p, currEventName.c_str(), name_data_len);
+			}
+
+			if (60 != ttl)
+			{
+				*p++ = 0x33;
+				*p++ = (ttl >> 16) & 0xff;
+				*p++ = (ttl >> 8) & 0xff;
+				*p++ = ttl & 0xff;
+
+				*p++ = 0xd1; // Block1 option if TTL option before
+				*p++ = 0x00;
+			}
+			else
+			{
+				*p++ = 0xd1; // Block1 option if first option
+				*p++ = 0x03;
+			}
+
+			// Specify block1 option value
+			{
+				uint8_t blockOptByte = 0x06; // 1024 bytes block size
+				blockOptByte |= Messages::currBlockIndex << 4; // put actual block sequence number in first 4 bits 
+				if ((Messages::currBlockIndex+1) * MAX_BLOCK_SIZE < Messages::totBytesNumber)
+				{
+					blockOptByte |= 0x08; // if NOT last block, set 4th bit to 1 ("MORE blocks follow")
+				}
+				*p++ = blockOptByte;
+			}
+			
+			*p++ = 0xff;
+
+			/*
+			printf("SENT BLOCK %d\n", Messages::currBlockIndex);
+			for (int i = 0; i < p-buf; i++)
+			{
+				printf("0x%02X ", buf[i]);
+			}
+			printf("\n");
+			fflush(stdout);
+			*/
+
+			// Copy payload block in packet
+			{
+				const size_t payloadLength = std::min(static_cast<size_t>(MAX_BLOCK_SIZE), totBytesNumber - currBlockIndex * MAX_BLOCK_SIZE);
+				memcpy(p, &blocksBuffer[currBlockIndex * MAX_BLOCK_SIZE], payloadLength);
+				p += payloadLength;
+			}
+			
 			return p - buf;
 		}
 

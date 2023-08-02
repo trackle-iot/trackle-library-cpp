@@ -24,6 +24,7 @@
 #include "events.h"
 #include "message_channel.h"
 #include "messages.h"
+#include "service_debug.h"
 
 #include "completion_handler.h"
 
@@ -80,6 +81,7 @@ namespace trackle
 					if (now - recent_event_ticks[evt_tick_idx] < 1000)
 					{
 						// exceeded allowable burst of 4 events per second
+						LOG(WARN, "rate limited, BANDWIDTH_EXCEEDED");
 						return true;
 					}
 				}
@@ -111,6 +113,42 @@ namespace trackle
 				}
 				size_t msglen = Messages::event(message.buf(), 0, event_name, data, ttl,
 												event_type, confirmable);
+				message.set_length(msglen);
+				const ProtocolError result = channel.send(message);
+				if (result == NO_ERROR)
+				{
+					// Register completion handler only if acknowledgement was requested explicitly
+					if ((flags & EventType::WITH_ACK) && message.has_id())
+					{
+						add_ack_handler(message.get_id(), std::move(handler));
+					}
+					else
+					{
+						handler.setResult();
+					}
+				}
+				return result;
+			}
+
+			ProtocolError send_event_in_blocks(MessageChannel &channel, int ttl, EventType::Enum event_type, int flags,
+											 system_tick_t time, CompletionHandler handler)
+			{
+				bool is_system_event = is_system(Messages::currEventName.c_str());
+
+				// Check rate limit only on first packet
+				if(Messages::currBlockIndex == 0) {
+					bool rate_limited = is_rate_limited(is_system_event, time);
+					if (rate_limited)
+					{
+						// g_rateLimitedEventsCounter++;
+						return BANDWIDTH_EXCEEDED;
+					}
+				}
+
+				Message message;
+				channel.create(message);
+				
+				size_t msglen = Messages::event_in_blocks(message.buf(), 0, ttl, event_type);
 				message.set_length(msglen);
 				const ProtocolError result = channel.send(message);
 				if (result == NO_ERROR)
