@@ -87,7 +87,7 @@ namespace trackle
         const size_t MAX_VARIABLE_VALUE_LENGTH = 1024;
 
         // Timeout in milliseconds given to receive an acknowledgement for a published event
-        const unsigned SEND_EVENT_ACK_TIMEOUT = 20000;
+        const unsigned SEND_EVENT_ACK_TIMEOUT = 30000; // MAX_TRANSMIT_WAIT - max_rand (15*1000)
 
 #ifndef PROTOCOL_BUFFER_SIZE
 #if PLATFORM_ID < 2
