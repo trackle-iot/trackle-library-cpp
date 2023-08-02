@@ -70,7 +70,7 @@ extern "C"
      * @trackle
      * @copydetails Trackle::publish()
      */
-    bool tracklePublish(Trackle *v, const char *eventName, const char *data, int ttl, Event_Type eventType, Event_Flags eventFlag) DYNLIB;
+    bool tracklePublish(Trackle *v, const char *eventName, const char *data, int ttl, Event_Type eventType, Event_Flags eventFlag, uint32_t msg_key) DYNLIB;
 
     /*!
      * @copybrief Trackle::syncState()

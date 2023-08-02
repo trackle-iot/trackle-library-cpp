@@ -58,10 +58,10 @@ bool tracklePost(Trackle *v, const char *funcKey, user_function_int_char_t *func
 
 // TRACKLE.PUBLISH
 
-bool tracklePublish(Trackle *v, const char *eventName, const char *data, int ttl, Event_Type eventType, Event_Flags eventFlag)
+bool tracklePublish(Trackle *v, const char *eventName, const char *data, int ttl, Event_Type eventType, Event_Flags eventFlag, uint32_t msg_key)
 {
     IF_NOT_INITIALIZED_WARNING();
-    return v->publish(eventName, data, ttl, (Event_Type)eventType, (Event_Flags)eventFlag, "");
+    return v->publish(eventName, data, ttl, (Event_Type)eventType, (Event_Flags)eventFlag, msg_key);
 }
 
 bool trackleSyncState(Trackle *v, const char *data)
