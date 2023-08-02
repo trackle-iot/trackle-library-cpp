@@ -47,11 +47,11 @@ private:
          * @param ttl Time to live in seconds.
          * @param eventType type of event, public or private.
          * @param eventFlag event flags, with or without ack.
-         * @param msg_id the message id, if you want to use it.
+         * @param msg_key the message key, if you want to use it.
          *
          * @return The return value is a boolean value.
          */
-        bool sendPublish(const char *eventName, const char *data, int ttl, Event_Type eventType, Event_Flags eventFlag, string msg_id);
+        bool sendPublish(const char *eventName, const char *data, int ttl, Event_Type eventType, Event_Flags eventFlag, uint32_t msg_key);
 
         /**
          * @brief It sends a subscription request to the server
@@ -188,11 +188,11 @@ public:
          * @param ttl Time to live in seconds.
          * @param eventType type of event, public or private.
          * @param eventFlag event flags, with or without ack.
-         * @param msg_id the message id, if you want to use it.
+         * @param msg_key the message key, if you want to use it.
          *
          * @return The return value is a boolean value.
          */
-        bool publish(const char *eventName, const char *data, int ttl = DEFAULT_TTL, Event_Type eventType = PUBLIC, Event_Flags eventFlag = EMPTY_FLAGS, string msg_id = "");
+        bool publish(const char *eventName, const char *data, int ttl = DEFAULT_TTL, Event_Type eventType = PUBLIC, Event_Flags eventFlag = EMPTY_FLAGS, uint32_t msg_key = 0);
 
         /**
          * @brief It sends a publish to the cloud
@@ -202,11 +202,11 @@ public:
          * @param ttl Time to live in seconds.
          * @param eventType type of event, public or private.
          * @param eventFlag event flags, with or without ack.
-         * @param msg_id the message id, if you want to use it.
+         * @param msg_key the message key, if you want to use it.
          *
          * @return The return value is a boolean value.
          */
-        bool publish(string eventName, const char *data, int ttl = DEFAULT_TTL, Event_Type eventType = PUBLIC, Event_Flags eventFlag = EMPTY_FLAGS, string msg_id = "");
+        bool publish(string eventName, const char *data, int ttl = DEFAULT_TTL, Event_Type eventType = PUBLIC, Event_Flags eventFlag = EMPTY_FLAGS, uint32_t msg_key = 0);
 
         /**
          * @brief It sends a publish to the cloud
@@ -215,11 +215,11 @@ public:
          * @param data the data to be sent
          * @param eventType type of event, public or private.
          * @param eventFlag event flags, with or without ack.
-         * @param msg_id the message id, if you want to use it.
+         * @param msg_key the message key, if you want to use it.
          *
          * @return The return value is a boolean value.
          */
-        bool publish(const char *eventName, const char *data, Event_Type eventType, Event_Flags eventFlag = EMPTY_FLAGS, string msg_id = "");
+        bool publish(const char *eventName, const char *data, Event_Type eventType, Event_Flags eventFlag = EMPTY_FLAGS, uint32_t msg_key = 0);
 
         /**
          * @brief It sends a publish to the cloud
@@ -227,11 +227,11 @@ public:
          * @param eventName the name of the event to publish
          * @param data the data to be sent
          * @param eventFlag event flags, with or without ack.
-         * @param msg_id the message id, if you want to use it.
+         * @param msg_key the message key, if you want to use it.
          *
          * @return The return value is a boolean value.
          */
-        bool publish(string eventName, const char *data, Event_Type eventType, Event_Flags eventFlag = EMPTY_FLAGS, string msg_id = "");
+        bool publish(string eventName, const char *data, Event_Type eventType, Event_Flags eventFlag = EMPTY_FLAGS, uint32_t msg_key = 0);
 
         /**
          * @brief It sends a publish to the cloud

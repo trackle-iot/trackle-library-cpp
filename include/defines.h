@@ -225,7 +225,7 @@ typedef int(receiveCallback)(unsigned char *buf, uint32_t buflen, void *tmp);
 typedef int(connectCallback)(const char *address, int port);
 typedef int(disconnectCallback)(void);
 typedef void(publishCompletionCallback)(int error, const void *data, void *callbackData, void *reserved);
-typedef void(publishSendCallback)(const char *eventName, const char *data, const char *key, bool published);
+typedef void(publishSendCallback)(const char *eventName, const char *data, uint32_t msg_key, bool published);
 typedef void(prepareFirmwareUpdateCallback)(struct Chunk data, uint32_t flags, void *reserved);
 typedef void(firmwareChunkCallback)(struct Chunk data, const unsigned char *chunk, void *);
 typedef void(finishFirmwareUpdateCallback)(char *data, uint32_t fileSize);
