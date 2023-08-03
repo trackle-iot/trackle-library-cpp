@@ -9,7 +9,7 @@ namespace trackle
 	{
 
 		uint32_t T_ACK_TIMEOUT;
-		uint32_t MAX_TRANSMIT_SPAN;
+		uint32_t MAX_TRANSMIT_WAIT;
 		uint16_t CoAPMessage::message_count = 0;
 
 		bool is_ack_or_reset(const uint8_t *buf, size_t len)
@@ -102,7 +102,7 @@ namespace trackle
 				}
 				else
 				{
-					coapmsg->set_expiration(time + MAX_TRANSMIT_SPAN);
+					coapmsg->set_expiration(time + MAX_TRANSMIT_WAIT);
 				}
 				add(*coapmsg);
 			}
@@ -163,7 +163,7 @@ namespace trackle
 						return INSUFFICIENT_STORAGE;
 					// the timeout here is ideally purely academic since the application will respond immediately with an ACK/RESET
 					// which will be stored in place of this message, with it's own timeout.
-					coapmsg->set_expiration(time + MAX_TRANSMIT_SPAN);
+					coapmsg->set_expiration(time + MAX_TRANSMIT_WAIT);
 					add(*coapmsg);
 				}
 			}

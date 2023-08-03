@@ -581,6 +581,9 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
         
         if (strlen(data) > MAX_BLOCK_SIZE)
         {
+            if (Messages::blockTransmissionRunning)
+                return false;
+
             memcpy(Messages::blocksBuffer, data, strlen(data));
             Messages::currBlockIndex = 0;
             Messages::totBytesNumber = strlen(data);

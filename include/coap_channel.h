@@ -33,7 +33,7 @@ namespace trackle
 		bool is_ack_or_reset(const uint8_t *buf, size_t len);
 
 		extern uint32_t T_ACK_TIMEOUT;
-		extern uint32_t MAX_TRANSMIT_SPAN;
+		extern uint32_t MAX_TRANSMIT_WAIT;
 
 		/**
 		 * Decorates a MessageChannel with message ID management as required by CoAP.
@@ -55,7 +55,7 @@ namespace trackle
 			CoAPChannel(message_id_t msg_seed = 0) : message_id(msg_seed)
 			{
 				T_ACK_TIMEOUT = 2000;
-				MAX_TRANSMIT_SPAN = 15 * T_ACK_TIMEOUT * 1.5;
+				MAX_TRANSMIT_WAIT = T_ACK_TIMEOUT * 15 * 1.5; // ACK_TIMEOUT * ((2 ^ (MAX_RETRANSMIT + 1)) -1) * ACK_RANDOM_FACTOR
 			}
 
 			/**
@@ -557,7 +557,7 @@ namespace trackle
 			void set_ack_timeout(uint32_t timeout)
 			{
 				T_ACK_TIMEOUT = timeout;
-				MAX_TRANSMIT_SPAN = 15 * T_ACK_TIMEOUT * 1.5;
+				MAX_TRANSMIT_WAIT = 15 * T_ACK_TIMEOUT * 1.5;
 			}
 
 			const CoAPMessageStore &client_messages() const

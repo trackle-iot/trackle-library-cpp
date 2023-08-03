@@ -22,13 +22,14 @@
 
 #include <string>
 
+#include <string>
 #include "coap.h"
 #include "protocol_defs.h"
 #include "events.h"
 #include "defines.h"
 
 #define MAX_BLOCK_SIZE 1024
-#define MAX_BLOCKS_NUMBER 10
+#define MAX_BLOCKS_NUMBER 5
 
 namespace trackle
 {
