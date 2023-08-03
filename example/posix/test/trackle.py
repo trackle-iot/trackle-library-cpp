@@ -70,12 +70,12 @@ setMillis = __lib.trackleSetMillis
 setMillis.argtypes = [ctypes.c_void_p, MILLIS_CB]
 setMillis.restype = None
 
-SEND_UDP_CB = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p, ctypes.c_uint32, ctypes.c_void_p)
+SEND_UDP_CB = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_void_p, ctypes.c_uint32, ctypes.c_void_p)
 setSendCallback = __lib.trackleSetSendCallback
 setSendCallback.argtypes = [ctypes.c_void_p, SEND_UDP_CB]
 setSendCallback.restype = None
 
-RECV_UDP_CB = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p, ctypes.c_uint32, ctypes.c_void_p)
+RECV_UDP_CB = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_void_p, ctypes.c_uint32, ctypes.c_void_p)
 setReceiveCallback = __lib.trackleSetReceiveCallback
 setReceiveCallback.argtypes = [ctypes.c_void_p, RECV_UDP_CB]
 setReceiveCallback.restype = None
