@@ -1,6 +1,7 @@
 CC = gcc
 CCX = g++
 TRACKLE_LIB = ../..
+DLL_EXTENSION = dylib
 
 # Trackle library and its components compilation variables
 TRACKLE_LIB_SRCS = $(TRACKLE_LIB)/src/*.cpp
@@ -12,7 +13,6 @@ UECC_INCLUDES = -I"$(TRACKLE_LIB)/lib/micro-ecc"
 TINY_SRCS = $(TRACKLE_LIB)/lib/tinydtls/ccm.c \
 			$(TRACKLE_LIB)/lib/tinydtls/crypto.c \
 			$(TRACKLE_LIB)/lib/tinydtls/dtls.c \
-			$(TRACKLE_LIB)/lib/tinydtls/dtls_config.h.cmake.in \
 			$(TRACKLE_LIB)/lib/tinydtls/dtls_debug.c \
 			$(TRACKLE_LIB)/lib/tinydtls/dtls_time.c \
 			$(TRACKLE_LIB)/lib/tinydtls/dtls_prng.c \
@@ -64,6 +64,22 @@ example_c: trackle_library uecc tinydtls callbacks
 example_cpp: trackle_library uecc tinydtls callbacks
 	mkdir -p bin
 	$(CCX) -w $(EXAMPLE_CPP_SRCS) $(OBJS) -o bin/example_cpp $(TRACKLE_LIB_INCLUDES) $(UECC_INCLUDES) $(TINY_INCLUDES) $(SHARED_INCLUDES) -lstdc++ -lm
+
+trackle_library_fpic:
+	$(CCX) -w -std=c++11 -fpermissive -fms-extensions -c -fPIC $(TRACKLE_LIB_SRCS) $(TRACKLE_LIB_INCLUDES) $(UECC_INCLUDES) $(TINY_INCLUDES)
+
+uecc_fpic:
+	$(CC) -w -c -fPIC $(UECC_SRCS) $(UECC_INCLUDES)
+
+tinydtls_fpic:
+	$(CC) -w -c -fPIC $(TINY_SRCS) $(TINY_INCLUDES) $(UECC_INCLUDES) -DWITH_SHA256
+
+callbacks_fpic:
+	$(CC) -w -c -fPIC $(SHARED_SRCS) $(SHARED_INCLUDES) $(TRACKLE_LIB_INCLUDES) $(UECC_INCLUDES) $(TINY_INCLUDES)
+
+dll: trackle_library_fpic uecc_fpic tinydtls_fpic callbacks_fpic
+	mkdir -p lib
+	$(CC) -w -shared $(OBJS) -o lib/trackle_library.$(DLL_EXTENSION) -lstdc++ -lm
 
 clean:
 	rm -f *.o

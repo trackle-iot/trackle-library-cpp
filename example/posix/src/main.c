@@ -57,11 +57,12 @@ int main()
 
     // Create Trackle instance
     Trackle *trackle_s = newTrackle();
+    trackleInit(trackle_s);
 
     trackleSetDeviceId(trackle_s, HARDCODED_DEVICE_ID);
 
     trackleSetLogCallback(trackle_s, Callbacks_log_cb);
-    trackleSetLogLevel(trackle_s, TRACKLE_INFO);
+    trackleSetLogLevel(trackle_s, TRACKLE_WARN);
 
     // Initialize Trackle
     trackleSetEnabled(trackle_s, true);
@@ -82,6 +83,7 @@ int main()
     trackleSetSleepCallback(trackle_s, Callbacks_sleep_ms_cb);
     trackleSetSystemRebootCallback(trackle_s, Callbacks_reboot_cb);
     trackleSetPublishHealthCheckInterval(trackle_s, 60 * 60 * 1000);
+    trackleSetCompletedPublishCallback(trackle_s, Callbacks_complete_publish);
 
     // Registering POST functions callable from cloud
     tracklePost(trackle_s, "funSuccess", funSuccess, ALL_USERS);

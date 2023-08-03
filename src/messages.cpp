@@ -1,12 +1,14 @@
+#include <algorithm>
+
 #include "messages.h"
 
 namespace trackle
 {
 	namespace protocol
 	{
-		
+
 		// ----- BEGIN static fields for multiblock transfer status ------
-		uint8_t Messages::blocksBuffer[MAX_BLOCK_SIZE*MAX_BLOCKS_NUMBER];
+		uint8_t Messages::blocksBuffer[MAX_BLOCK_SIZE * MAX_BLOCKS_NUMBER];
 		bool Messages::blockTransmissionRunning = false;
 		size_t Messages::totBytesNumber = 0;
 		size_t Messages::currBlockIndex = 0;
@@ -14,7 +16,7 @@ namespace trackle
 		std::string Messages::currEventName = std::string("");
 		int Messages::ttl = 0;
 		uint32_t Messages::flags = 0;
-		publishCompletionCallback* Messages::completionCb = nullptr; // Callback called on last block
+		publishCompletionCallback *Messages::completionCb = nullptr; // Callback called on last block
 		// ------ END static fields for multiblock transfer status -------
 
 		CoAPMessageType::Enum Messages::decodeType(const uint8_t *buf, size_t length)
@@ -372,7 +374,7 @@ namespace trackle
 		{
 			uint8_t *p = buf;
 			*p++ = 0x42; // non-confirmable /confirmable, 2 bytes token
-			*p++ = 0x02;					  // code 0.02 POST request
+			*p++ = 0x02; // code 0.02 POST request
 			*p++ = message_id >> 8;
 			*p++ = message_id & 0xff;
 			*p++ = currentToken >> 8;
@@ -404,15 +406,15 @@ namespace trackle
 
 			// Specify block1 option value
 			{
-				uint8_t blockOptByte = 0x06; // 1024 bytes block size
-				blockOptByte |= Messages::currBlockIndex << 4; // put actual block sequence number in first 4 bits 
-				if ((Messages::currBlockIndex+1) * MAX_BLOCK_SIZE < Messages::totBytesNumber)
+				uint8_t blockOptByte = 0x06;				   // 1024 bytes block size
+				blockOptByte |= Messages::currBlockIndex << 4; // put actual block sequence number in first 4 bits
+				if ((Messages::currBlockIndex + 1) * MAX_BLOCK_SIZE < Messages::totBytesNumber)
 				{
 					blockOptByte |= 0x08; // if NOT last block, set 4th bit to 1 ("MORE blocks follow")
 				}
 				*p++ = blockOptByte;
 			}
-			
+
 			*p++ = 0xff;
 
 			/*
@@ -431,7 +433,7 @@ namespace trackle
 				memcpy(p, &blocksBuffer[currBlockIndex * MAX_BLOCK_SIZE], payloadLength);
 				p += payloadLength;
 			}
-			
+
 			return p - buf;
 		}
 
