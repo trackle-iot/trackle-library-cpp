@@ -587,7 +587,7 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
             Messages::blockTransmissionRunning = true;
             Messages::ttl = ttl;
             Messages::flags = flags;
-            Messages::completionCb = completedPublishCb;
+            Messages::completionCb = d.handler_callback; // only if function has flag WITH_ACK 
             d.handler_callback = trackle::protocol::genericBlockCompletionCallback;
             res = trackle_protocol_send_event_in_blocks(protocol, ttl, flags, &d);
         }

@@ -191,10 +191,6 @@ namespace trackle
             }
             else if (CoAPCode::is_success(responseCode))
             {
-                // Reset trasmission running status
-                if (Messages::blockTransmissionRunning)
-                    Messages::blockTransmissionRunning = false;
-
                 ack_handlers.setResult(msg_id);
             }
             else
