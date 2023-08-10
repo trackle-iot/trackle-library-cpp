@@ -88,55 +88,21 @@ namespace trackle
 				return false;
 			}
 
-			ProtocolError send_event(MessageChannel &channel, const char *event_name,
-									 const char *data, int ttl, EventType::Enum event_type, int flags,
+			ProtocolError send_event(MessageChannel &channel, uint8_t token, const char *event_name,
+									 const char *data, uint16_t length, int ttl, uint8_t block_id,
+									 uint8_t block_num, EventType::Enum event_type, int flags,
 									 system_tick_t time, CompletionHandler handler)
 			{
+
+				block_messages_data *block = trackle_get_block_by_token(token);
+				if (block == NULL)
+					return INVALID_STATE;
+
 				bool is_system_event = is_system(event_name);
-				bool rate_limited = is_rate_limited(is_system_event, time);
-				if (rate_limited)
-				{
-					// g_rateLimitedEventsCounter++;
-					return BANDWIDTH_EXCEEDED;
-				}
-
-				Message message;
-				channel.create(message);
-				bool confirmable = channel.is_unreliable();
-				if (flags & EventType::NO_ACK)
-				{
-					confirmable = false;
-				}
-				else if (flags & EventType::WITH_ACK)
-				{
-					confirmable = true;
-				}
-				size_t msglen = Messages::event(message.buf(), 0, event_name, data, ttl,
-												event_type, confirmable);
-				message.set_length(msglen);
-				const ProtocolError result = channel.send(message);
-				if (result == NO_ERROR)
-				{
-					// Register completion handler only if acknowledgement was requested explicitly
-					if ((flags & EventType::WITH_ACK) && message.has_id())
-					{
-						add_ack_handler(message.get_id(), std::move(handler));
-					}
-					else
-					{
-						handler.setResult();
-					}
-				}
-				return result;
-			}
-
-			ProtocolError send_event_in_blocks(MessageChannel &channel, int ttl, EventType::Enum event_type, int flags,
-											 system_tick_t time, CompletionHandler handler)
-			{
-				bool is_system_event = is_system(Messages::currEventName.c_str());
 
 				// Check rate limit only on first packet
-				if(Messages::currBlockIndex == 0) {
+				if (block->currBlockIndex == 0)
+				{
 					bool rate_limited = is_rate_limited(is_system_event, time);
 					if (rate_limited)
 					{
@@ -147,8 +113,20 @@ namespace trackle
 
 				Message message;
 				channel.create(message);
-				
-				size_t msglen = Messages::event_in_blocks(message.buf(), 0, ttl, event_type);
+
+				bool confirmable = channel.is_unreliable();
+				if (flags & EventType::NO_ACK)
+				{
+					confirmable = false;
+				}
+				else if (flags & EventType::WITH_ACK)
+				{
+					confirmable = true;
+				}
+				size_t msglen = Messages::event(message.buf(), 0, token, event_name,
+												data, length, ttl, block_id,
+												block_num, event_type, confirmable);
+
 				message.set_length(msglen);
 				const ProtocolError result = channel.send(message);
 				if (result == NO_ERROR)

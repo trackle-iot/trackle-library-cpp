@@ -73,34 +73,20 @@ int trackle_protocol_post_description(ProtocolFacade *protocol, int desc_flags, 
     return protocol->post_description(desc_flags);
 }
 
-bool trackle_protocol_send_event(ProtocolFacade *protocol, const char *event_name, const char *data,
-                                 int ttl, uint32_t flags, void *reserved)
+bool trackle_protocol_send_event(ProtocolFacade *protocol, uint8_t token, const char *event_name, const char *data,
+                                 uint16_t length, int ttl, uint8_t block_id, uint8_t block_num, uint32_t flags, void *reserved)
 {
     ASSERT_ON_SYSTEM_THREAD();
     CompletionHandler handler;
     if (reserved)
     {
         auto r = static_cast<const trackle_protocol_send_event_data *>(reserved);
-        handler = CompletionHandler(r->handler_callback, r->handler_data);
+        handler = CompletionHandler(r->handler_callback, r->handler_data, r->handler_token);
     }
     EventType::Enum event_type = EventType::extract_event_type(flags);
-    return protocol->send_event(event_name, data, ttl, event_type, flags, std::move(handler));
-}
 
-bool trackle_protocol_send_event_in_blocks(ProtocolFacade *protocol,
-                                 int ttl, uint32_t flags, void *reserved)
-{
-    ASSERT_ON_SYSTEM_THREAD();
-    CompletionHandler handler;
-    if (reserved)
-    {
-        auto r = static_cast<const trackle_protocol_send_event_data *>(reserved);
-        handler = CompletionHandler(r->handler_callback, r->handler_data);
-    }
-    EventType::Enum event_type = EventType::extract_event_type(flags);
-    return protocol->send_event_in_blocks(ttl, event_type, flags, std::move(handler));
+    return protocol->send_event(token, event_name, data, length, ttl, block_id, block_num, event_type, flags, std::move(handler));
 }
-
 
 bool trackle_protocol_send_subscription_device(ProtocolFacade *protocol, const char *event_name, const char *device_id, void *)
 {

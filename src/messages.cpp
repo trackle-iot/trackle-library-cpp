@@ -4,18 +4,6 @@ namespace trackle
 {
 	namespace protocol
 	{
-		
-		// ----- BEGIN static fields for multiblock transfer status ------
-		uint8_t Messages::blocksBuffer[MAX_BLOCK_SIZE*MAX_BLOCKS_NUMBER];
-		bool Messages::blockTransmissionRunning = false;
-		size_t Messages::totBytesNumber = 0;
-		size_t Messages::currBlockIndex = 0;
-		uint16_t Messages::currentToken = 0;
-		std::string Messages::currEventName = std::string("");
-		int Messages::ttl = 0;
-		uint32_t Messages::flags = 0;
-		publishCompletionCallback* Messages::completionCb = nullptr; // Callback called on last block
-		// ------ END static fields for multiblock transfer status -------
 
 		CoAPMessageType::Enum Messages::decodeType(const uint8_t *buf, size_t length)
 		{
@@ -334,57 +322,34 @@ namespace trackle
 			return len;
 		}
 
-		size_t Messages::event(uint8_t buf[], uint16_t message_id, const char *event_name,
-							   const char *data, int ttl, EventType::Enum event_type, bool confirmable)
+		size_t Messages::event(uint8_t buf[], uint16_t message_id, uint8_t token, const char *event_name,
+							   const char *data, uint16_t length, int ttl, uint8_t block_id,
+							   uint8_t block_num, EventType::Enum event_type, bool confirmable)
 		{
+
 			uint8_t *p = buf;
-			*p++ = confirmable ? 0x40 : 0x50; // non-confirmable /confirmable, no token
-			*p++ = 0x02;					  // code 0.02 POST request
+
+			uint8_t cmd = confirmable ? 0x40 : 0x50; // confirmable / non-confirmable, no token
+			if (token > 0)
+				cmd = cmd + 1; // add 1 byte token
+
+			*p++ = cmd;	 // non-confirmable /confirmable, token
+			*p++ = 0x02; // code 0.02 POST request
 			*p++ = message_id >> 8;
 			*p++ = message_id & 0xff;
-			*p++ = 0xb1; // one-byte Uri-Path option
-			*p++ = event_type;
 
-			size_t name_data_len = strnlen(event_name, MAX_EVENT_NAME_LENGTH);
-			p += event_name_uri_path(p, event_name, name_data_len);
+			if (token > 0)
+				*p++ = token; // add 1 byte token
 
-			if (60 != ttl)
-			{
-				*p++ = 0x33;
-				*p++ = (ttl >> 16) & 0xff;
-				*p++ = (ttl >> 8) & 0xff;
-				*p++ = ttl & 0xff;
-			}
-
-			if (NULL != data)
-			{
-				name_data_len = strnlen(data, MAX_EVENT_DATA_LENGTH);
-
-				*p++ = 0xff;
-				memcpy(p, data, name_data_len);
-				p += name_data_len;
-			}
-
-			return p - buf;
-		}
-
-		size_t Messages::event_in_blocks(uint8_t buf[], uint16_t message_id, int ttl, EventType::Enum event_type)
-		{
-			uint8_t *p = buf;
-			*p++ = 0x42; // non-confirmable /confirmable, 2 bytes token
-			*p++ = 0x02;					  // code 0.02 POST request
-			*p++ = message_id >> 8;
-			*p++ = message_id & 0xff;
-			*p++ = currentToken >> 8;
-			*p++ = currentToken & 0xff;
 			*p++ = 0xb1; // one-byte Uri-Path option
 			*p++ = event_type;
 
 			// Add event name as URI in message
-			{
-				const size_t name_data_len = std::min(currEventName.length(), MAX_EVENT_NAME_LENGTH);
-				p += event_name_uri_path(p, currEventName.c_str(), name_data_len);
-			}
+			size_t name_data_len = strnlen(event_name, MAX_EVENT_NAME_LENGTH);
+			p += event_name_uri_path(p, event_name, name_data_len);
+
+			// Block1 option if no TTL option
+			uint8_t block1_opt_delta[2] = {0xd1, 0x03};
 
 			if (60 != ttl)
 			{
@@ -393,45 +358,34 @@ namespace trackle
 				*p++ = (ttl >> 8) & 0xff;
 				*p++ = ttl & 0xff;
 
-				*p++ = 0xd1; // Block1 option if TTL option before
-				*p++ = 0x00;
-			}
-			else
-			{
-				*p++ = 0xd1; // Block1 option if first option
-				*p++ = 0x03;
+				// Block1 option if TTL option before
+				block1_opt_delta[0] = 0xd1;
+				block1_opt_delta[1] = 0x00;
 			}
 
 			// Specify block1 option value
+			if (block_num > 1)
 			{
-				uint8_t blockOptByte = 0x06; // 1024 bytes block size
-				blockOptByte |= Messages::currBlockIndex << 4; // put actual block sequence number in first 4 bits 
-				if ((Messages::currBlockIndex+1) * MAX_BLOCK_SIZE < Messages::totBytesNumber)
+				*p++ = block1_opt_delta[0];
+				*p++ = block1_opt_delta[1];
+
+				uint8_t blockOptByte = 0x06;	// 1024 bytes block size
+				blockOptByte |= block_id << 4;	// put actual block sequence number in first 4 bits
+				if ((block_id + 1) < block_num) // block_id starts from 0
 				{
 					blockOptByte |= 0x08; // if NOT last block, set 4th bit to 1 ("MORE blocks follow")
 				}
 				*p++ = blockOptByte;
 			}
-			
-			*p++ = 0xff;
-
-			/*
-			printf("SENT BLOCK %d\n", Messages::currBlockIndex);
-			for (int i = 0; i < p-buf; i++)
-			{
-				printf("0x%02X ", buf[i]);
-			}
-			printf("\n");
-			fflush(stdout);
-			*/
 
 			// Copy payload block in packet
+			if (NULL != data)
 			{
-				const size_t payloadLength = std::min(static_cast<size_t>(MAX_BLOCK_SIZE), totBytesNumber - currBlockIndex * MAX_BLOCK_SIZE);
-				memcpy(p, &blocksBuffer[currBlockIndex * MAX_BLOCK_SIZE], payloadLength);
-				p += payloadLength;
+				*p++ = 0xff;
+				memcpy(p, data, length);
+				p += length;
 			}
-			
+
 			return p - buf;
 		}
 
@@ -448,6 +402,34 @@ namespace trackle
 			}
 
 			return sz;
+		}
+
+		block_messages_data block_messages[MAX_CONCURRENT_MESSAGES];
+
+		block_messages_data *trackle_get_free_block()
+		{
+			for (uint8_t i = 0; i < MAX_CONCURRENT_MESSAGES; i++)
+			{
+				if (block_messages[i].transmissionRunning == false)
+				{
+					return &block_messages[i];
+				}
+			}
+
+			return NULL;
+		}
+
+		block_messages_data *trackle_get_block_by_token(uint8_t token)
+		{
+			for (uint8_t i = 0; i < MAX_CONCURRENT_MESSAGES; i++)
+			{
+				if (block_messages[i].token == token)
+				{
+					return &block_messages[i];
+				}
+			}
+
+			return NULL;
 		}
 
 	}

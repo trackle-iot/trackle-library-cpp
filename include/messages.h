@@ -27,7 +27,8 @@
 #include "defines.h"
 
 #define MAX_BLOCK_SIZE 1024
-#define MAX_BLOCKS_NUMBER 5
+#define MAX_BLOCKS_NUMBER 4
+#define MAX_CONCURRENT_MESSAGES 4
 
 namespace trackle
 {
@@ -49,23 +50,30 @@ namespace trackle
             return buf[0];
         }
 
+        // Publish messages cache
+        typedef struct
+        {
+            uint8_t buffer[(MAX_BLOCK_SIZE - 1) * MAX_BLOCKS_NUMBER];
+            bool transmissionRunning;
+            size_t totBytesNumber;
+            size_t totBlockNumber;
+            size_t currBlockIndex;
+            uint8_t token;
+            uint32_t msg_key;
+            std::string eventName;
+            int ttl;
+            uint32_t flags;
+            publishCompletionCallback* completionCb; // Callback called on last block
+        } block_messages_data;
+
+        block_messages_data *trackle_get_free_block();
+        block_messages_data *trackle_get_block_by_token(uint8_t token);
+
 #define RESPONSE_CODE(x, y) (x << 5 | y)
 
         class Messages
         {
         public:
-
-            // ----- BEGIN static fields for multiblock transfer status ------
-            static uint8_t blocksBuffer[MAX_BLOCK_SIZE * MAX_BLOCKS_NUMBER]; // Bytes of the message (both sent and not sent)
-            static size_t totBytesNumber; // Total number of bytes in the message
-            static bool blockTransmissionRunning; // 
-            static size_t currBlockIndex; // Sequence number of the current block
-            static uint16_t currentToken; // Current token (for future applications)
-            static std::string currEventName; // Current event name of the multiblock packet
-            static int ttl; // Time to live
-            static uint32_t flags; // Flags
-            static publishCompletionCallback* completionCb; // Callback called on last block
-            // ------ END static fields for multiblock transfer status -------
 
             static CoAPMessageType::Enum decodeType(const uint8_t *buf, size_t length);
             static size_t describe_post_header(uint8_t buf[], size_t buffer_size, uint16_t message_id, uint8_t desc_flags);
@@ -106,10 +114,9 @@ namespace trackle
                                                          unsigned char token, unsigned char code, unsigned char *payload,
                                                          unsigned payload_len, bool confirmable);
 
-            static size_t event(uint8_t buf[], uint16_t message_id, const char *event_name,
-                                const char *data, int ttl, EventType::Enum event_type, bool confirmable);
-
-            static size_t event_in_blocks(uint8_t buf[], uint16_t message_id, int ttl, EventType::Enum event_type);
+            static size_t event(uint8_t buf[], uint16_t message_id, uint8_t token, const char *event_name, 
+										  const char *data, uint16_t length, int ttl, uint8_t block_id, 
+										  uint8_t block_num, EventType::Enum event_type, bool confirmable);
 
             static inline size_t empty_ack(unsigned char *buf,
                                            unsigned char message_id_msb,

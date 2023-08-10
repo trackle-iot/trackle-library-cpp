@@ -10,6 +10,8 @@
 #include "version.h"
 #include <vector>
 
+#include <algorithm>
+
 #include "hal_platform.h"
 
 #include <math.h>
@@ -22,6 +24,7 @@
 #include "tinydtls.h"
 #include "tinydtls_set_rand.h"
 #include "tinydtls_set_get_millis.h"
+#include "messages.h"
 
 #define USER_VAR_MAX_COUNT 10
 #define USER_VAR_KEY_LENGTH 64
@@ -74,6 +77,7 @@ updateStateCallback *updateStateCb = NULL;
 
 uint32_t counter = 0; // MAX_COUNTER 9.999.999
 uint32_t prefix = 0;  // 4.294.967.296 -> 1.990.000.000
+uint8_t token = 0;    // 1 - 255
 
 /**
  * It generates a random number in the range [1, 199] and uses it as the prefix for the publish counter
@@ -117,6 +121,27 @@ uint32_t getNextPublishCounter()
         counter = 0;
     }
     return p | counter;
+}
+
+/**
+ * It gives a token for a coap packet. Alway more then 0.
+ *
+ * @return The token.
+ */
+uint32_t getNextToken()
+{
+    if (token == UINT8_MAX)
+    {
+        // Handle special case when num is already the maximum value for uint8_t
+        // In this case, returning 1 to wrap around and stay greater than 0
+        return 1;
+    }
+    else
+    {
+        // Increment token and ensure it's always greater than 0
+        token++;
+        return token;
+    }
 }
 
 constexpr char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7',
@@ -541,59 +566,92 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
     uint32_t flags = eventType | eventFlag;
     flags = convert(flags);
 
-    trackle_protocol_send_event_data d = {};
+    bool res = false; // global return
 
-    if (eventFlag & WITH_ACK)
-    { // se c'è il flag WITH_ACK
+    // if packet size is ok, else return false
+    if (strlen(data) <= MAX_BLOCK_SIZE * MAX_BLOCKS_NUMBER)
+    {
 
-        if (msg_key == 0)
+        if (eventFlag & WITH_ACK) // se c'è il flag WITH_ACK
         {
-            msg_key = getNextPublishCounter();
-        }
 
-        d.handler_callback = completedPublishCb;
-        d.handler_data = (void *)msg_key;
+            // calculate msg_key if argument = 0
+            if (msg_key == 0)
+            {
+                msg_key = getNextPublishCounter();
+            }
 
-        if (connectionStatus == SOCKET_READY)
-        { // publish send ok
+            // if not connected, call sendPublishCb with error and return
+            if (connectionStatus != SOCKET_READY)
+            {
+                LOG(TRACE, "sendPublishCb ERROR");
+                if (sendPublishCb)
+                    (*sendPublishCb)(eventName, data, msg_key, false);
+
+                return false;
+            }
+
+            // if connected continue, create packet block
+            trackle_protocol_send_event_data d = {};
+            trackle::protocol::block_messages_data *block = trackle::protocol::trackle_get_free_block();
+            uint16_t currBlockLength = MAX_BLOCK_SIZE;
+
+            if (block == NULL) // no free block
+                return false;
+
+            // Block-wise, more than one packet
+            if (strlen(data) > MAX_BLOCK_SIZE)
+            {
+                // copy from 2nd block, send 1st block with trackle_protocol_send_event
+                memcpy(block->buffer, data + MAX_BLOCK_SIZE, strlen(data) - MAX_BLOCK_SIZE);
+                block->totBytesNumber = strlen(data) - MAX_BLOCK_SIZE;
+                block->totBlockNumber = ceil((double)strlen(data) / MAX_BLOCK_SIZE);
+            }
+            else // single packet
+            {
+                block->totBytesNumber = 0;
+                block->totBlockNumber = 1;
+                currBlockLength = strlen(data);
+            }
+
+            block->currBlockIndex = 0;
+            block->eventName = std::string(eventName);
+            block->token = getNextToken();
+            block->msg_key = msg_key;
+            block->transmissionRunning = true;
+            block->ttl = ttl;
+            block->flags = flags;
+            block->completionCb = completedPublishCb;
+
+            d.handler_callback = trackle::protocol::genericBlockCompletionCallback;
+            d.handler_data = (void *)msg_key;
+            d.handler_token = block->token;
+
+            // publish send ok
             LOG(TRACE, "sendPublishCb OK");
             if (sendPublishCb)
                 (*sendPublishCb)(eventName, data, msg_key, true);
-        }
-        else
-        { // publish send error
-            LOG(TRACE, "sendPublishCb ERROR");
-            if (sendPublishCb)
-                (*sendPublishCb)(eventName, data, msg_key, false);
-        }
-    }
 
-    LOG(TRACE, "sendPublish %s: %s ", eventName, data);
-    int res = 0;
-    if (connectionStatus == SOCKET_READY && strlen(data) <= MAX_BLOCK_SIZE * MAX_BLOCKS_NUMBER)
-    {
-        using namespace trackle::protocol;
-        
-        if (strlen(data) > MAX_BLOCK_SIZE)
-        {
-            if (Messages::blockTransmissionRunning)
-                return false;
+            LOG(TRACE, "sendPublish %s: %s ", eventName, data);
 
-            memcpy(Messages::blocksBuffer, data, strlen(data));
-            Messages::currBlockIndex = 0;
-            Messages::totBytesNumber = strlen(data);
-            Messages::currEventName = std::string(eventName);
-            Messages::currentToken = static_cast<uint16_t>(HAL_RNG_GetRandomNumber() & 0xFFFF);
-            Messages::blockTransmissionRunning = true;
-            Messages::ttl = ttl;
-            Messages::flags = flags;
-            Messages::completionCb = d.handler_callback; // only if function has flag WITH_ACK 
-            d.handler_callback = trackle::protocol::genericBlockCompletionCallback;
-            res = trackle_protocol_send_event_in_blocks(protocol, ttl, flags, &d);
+            res = trackle_protocol_send_event(protocol, block->token, block->eventName.c_str(), data, currBlockLength, ttl, block->currBlockIndex, block->totBlockNumber, flags, &d);
         }
-        else
+        else // without ACK
         {
-            res = trackle_protocol_send_event(protocol, eventName, data, ttl, flags, &d);
+            uint16_t totBytesNumber = strlen(data);
+            uint16_t totBlockNumber = ceil((double)strlen(data) / MAX_BLOCK_SIZE);
+            uint16_t currBlockLength = 0;
+            bool res = false;
+
+            for (int i = 0; i < totBlockNumber; i++)
+            {
+                currBlockLength = std::min(MAX_BLOCK_SIZE, totBytesNumber - i * MAX_BLOCK_SIZE);
+                res = trackle_protocol_send_event(protocol, 0, eventName, data, currBlockLength, ttl, i, totBlockNumber, flags, NULL);
+                if (!res)
+                    return false;
+            }
+
+            return true;
         }
     }
 
@@ -1579,11 +1637,11 @@ int completeCloudConnection()
 
         if (claim_code[0] != 0 && (uint8_t)claim_code[0] != 0xff)
         {
-            trackle_protocol_send_event(protocol, "trackle/device/claim/code", claim_code, DEFAULT_TTL, flags, NULL);
+            trackle_protocol_send_event(protocol, 0, "trackle/device/claim/code", claim_code, strlen(claim_code), DEFAULT_TTL, 0, 1, flags, NULL);
             LOG(TRACE, "Send trackle/device/claim/code event for code %s", claim_code);
         }
-        trackle_protocol_send_event(protocol, "trackle/device/updates/forced", (updates_forced ? "true" : "false"), DEFAULT_TTL, flags, NULL);
-        trackle_protocol_send_event(protocol, "trackle/device/updates/enabled", (updates_enabled ? "true" : "false"), DEFAULT_TTL, flags, NULL);
+        trackle_protocol_send_event(protocol, 0, "trackle/device/updates/forced", (updates_forced ? "true" : "false"), (updates_forced ? 4 : 5), DEFAULT_TTL, 0, 1, flags, NULL);
+        trackle_protocol_send_event(protocol, 0, "trackle/device/updates/enabled", (updates_enabled ? "true" : "false"), (updates_enabled ? 4 : 5), DEFAULT_TTL, 0, 1, flags, NULL);
         LOG(TRACE, "Send devices update status");
 
         trackle_protocol_send_subscriptions(protocol);
@@ -1662,10 +1720,10 @@ int Trackle::connect()
         LOG(TRACE, "Protocol already initialized");
         setConnectionStatus(SOCKET_CONNECTING);
         int res = -1;
-        
+
         string address = "device.trackle.io";
         address = string_device_id + ".udp." + address;
-        
+
         res = (*connectCb)(address.c_str(), 5684);
 
         // If it returns < 0, it's an immediate error

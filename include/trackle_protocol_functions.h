@@ -30,6 +30,7 @@
 #include "protocol_defs.h"
 #include "completion_handler.h"
 #include "hal_platform.h"
+#include "defines.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -173,14 +174,14 @@ extern "C"
 		size_t size;
 		completion_callback handler_callback;
 		void *handler_data;
-		bool is_last_chunk;
+		uint8_t handler_token;
 	} completion_handler_data;
 
 	typedef completion_handler_data trackle_protocol_send_event_data;
 
-	bool trackle_protocol_send_event(ProtocolFacade *protocol, const char *event_name, const char *data,
-									 int ttl, uint32_t flags, void *reserved);
-	bool trackle_protocol_send_event_in_blocks(ProtocolFacade *protocol, int ttl, uint32_t flags, void *reserved);
+	bool trackle_protocol_send_event(ProtocolFacade *protocol, uint8_t token, const char *event_name,
+									 const char *data, uint16_t length, int ttl, uint8_t block_id,
+									 uint8_t block_num, uint32_t flags, void *reserved);
 	bool trackle_protocol_send_subscription_device(ProtocolFacade *protocol, const char *event_name, const char *device_id, void *reserved = NULL);
 	bool trackle_protocol_send_subscription_scope(ProtocolFacade *protocol, const char *event_name, SubscriptionScope::Enum scope, void *reserved = NULL);
 	bool trackle_protocol_add_event_handler(ProtocolFacade *protocol, const char *event_name, EventHandler handler, SubscriptionScope::Enum scope, const char *id, void *handler_data = NULL);

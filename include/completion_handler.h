@@ -50,13 +50,13 @@ namespace trackle
     class CompletionHandler
     {
     public:
-        explicit CompletionHandler(completion_callback callback = nullptr, void *data = nullptr) : callback_(callback),
-                                                                                                   data_(data)
+        explicit CompletionHandler(completion_callback callback = nullptr, void *data = nullptr, uint8_t token = 0) : callback_(callback),
+                                                                                                   data_(data), token_(token)
         {
         }
 
         CompletionHandler(CompletionHandler &&handler) : callback_(handler.callback_),
-                                                         data_(handler.data_)
+                                                         data_(handler.data_), token_(handler.token_)
         {
             handler.callback_ = nullptr; // Reset source handler
         }
@@ -83,7 +83,7 @@ namespace trackle
         {
             if (callback_)
             {
-                callback_(error, msg, data_, nullptr);
+                callback_(error, msg, data_, &token_);
                 callback_ = nullptr;
             }
         }
@@ -93,6 +93,7 @@ namespace trackle
             setError(SYSTEM_ERROR_INTERNAL); // Invoke current callback
             callback_ = handler.callback_;
             data_ = handler.data_;
+            token_ = handler.token_;
             handler.callback_ = nullptr; // Reset source handler
             return *this;
         }
@@ -110,12 +111,13 @@ namespace trackle
     private:
         completion_callback callback_;
         void *data_;
+        uint8_t token_;
 
         void setResult(const void *result)
         {
             if (callback_)
             {
-                callback_(SYSTEM_ERROR_NONE, result, data_, nullptr);
+                callback_(SYSTEM_ERROR_NONE, result, data_, &token_);
                 callback_ = nullptr;
             }
         }

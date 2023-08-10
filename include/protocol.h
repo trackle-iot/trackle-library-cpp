@@ -436,34 +436,18 @@ namespace trackle
 			ProtocolError post_description(int desc_flags);
 
 			// Returns true on success, false on sending timeout or rate-limiting failure
-			bool send_event(const char *event_name, const char *data, int ttl,
-							EventType::Enum event_type, int flags, CompletionHandler handler)
+			bool send_event(uint8_t token, const char *event_name, const char *data, uint16_t length, 
+									  int ttl, uint8_t block_id, uint8_t block_num, EventType::Enum event_type, 
+									  int flags, CompletionHandler handler)
 			{
 				if (chunkedTransfer.is_updating())
 				{
 					handler.setError(SYSTEM_ERROR_BUSY);
 					return false;
 				}
-				const ProtocolError error = publisher.send_event(channel, event_name, data, ttl, event_type, flags,
-																 callbacks.millis(), std::move(handler));
-				if (error != NO_ERROR)
-				{
-					handler.setError(toSystemError(error));
-					return false;
-				}
-				return true;
-			}
 
-			// Returns true on success, false on sending timeout or rate-limiting failure
-			bool send_event_in_blocks(int ttl, EventType::Enum event_type, int flags, CompletionHandler handler)
-			{
-				if (chunkedTransfer.is_updating())
-				{
-					handler.setError(SYSTEM_ERROR_BUSY);
-					return false;
-				}
-				const ProtocolError error = publisher.send_event_in_blocks(channel, ttl, event_type, flags,
-																 callbacks.millis(), std::move(handler));
+				const ProtocolError error = publisher.send_event(channel, token, event_name, data, length, ttl, block_id,
+																		   block_num, event_type, flags, callbacks.millis(), std::move(handler));
 				if (error != NO_ERROR)
 				{
 					handler.setError(toSystemError(error));
@@ -589,7 +573,7 @@ namespace trackle
 			// int mesh_command(MeshCommand::Enum cmd, uint32_t data, void* extraData, completion_handler_data* completion);
 #endif // HAL_PLATFORM_MESH
 
-			void notify_message_complete(message_id_t msg_id, CoAPCode::Enum responseCode);
+			void notify_message_complete(message_id_t msg_id, CoAPCode::Enum responseCode, uint8_t token);
 		};
 
 	}

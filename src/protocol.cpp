@@ -39,18 +39,19 @@ namespace trackle
             message_id_t msg_id = CoAP::message_id(queue);
             CoAPCode::Enum code = CoAP::code(queue);
             CoAPType::Enum type = CoAP::type(queue);
+
             if (CoAPType::is_reply(type))
             {
                 LOG(TRACE, "Reply received: type=%d, code=%d", type, code);
-                //printf("Reply received: type=%d, code=%d\n", type, code);
-                // todo - this is a little too simple in the case of an empty ACK for a separate response
-                // the message should then be bound to the token. see CH19037
+                // printf("Reply received: type=%d, code=%d\n", type, code);
+                //  todo - this is a little too simple in the case of an empty ACK for a separate response
+                //  the message should then be bound to the token. see CH19037
                 if (type == CoAPType::RESET)
                 { // RST is sent with an empty code. It's like an unspecified error
                     LOG(TRACE, "Reset received, setting error code to internal server error.");
                     code = CoAPCode::INTERNAL_SERVER_ERROR;
                 }
-                notify_message_complete(msg_id, code);
+                notify_message_complete(msg_id, code, token);
             }
 
             ProtocolError error = NO_ERROR;
@@ -154,24 +155,30 @@ namespace trackle
             // So it was completed with an error or if last packet was sent.
             // In both case the completion callback must be called.
 
-            if ((error != SYSTEM_ERROR_NONE) || ((Messages::currBlockIndex + 1) * MAX_BLOCK_SIZE >= Messages::totBytesNumber) )
+            uint8_t *tokenPtr = static_cast<uint8_t *>(reserved);
+
+            block_messages_data *block = trackle_get_block_by_token(*tokenPtr);
+            if (block == NULL)
+                return;
+
+            // Remember: totBytesNumber starts from 2nd block
+            if ((error != SYSTEM_ERROR_NONE) || ((block->currBlockIndex) * MAX_BLOCK_SIZE >= block->totBytesNumber))
             {
                 // Reset trasmission running status
-                Messages::blockTransmissionRunning = false;
+                block->transmissionRunning = false;
 
-                if (Messages::completionCb == nullptr)
+                if (block->completionCb == nullptr)
                 {
                     LOG(WARN, "publish completed, but no completion callback specified!");
                     return;
                 }
-                Messages::completionCb(error, data, callbackData, reserved);
+                block->completionCb(error, data, callbackData, reserved);
             }
 
             // Otherwise, do nothing.
-
         }
 
-        void Protocol::notify_message_complete(message_id_t msg_id, CoAPCode::Enum responseCode)
+        void Protocol::notify_message_complete(message_id_t msg_id, CoAPCode::Enum responseCode, uint8_t token)
         {
             const auto codeClass = (int)responseCode >> 5;
             const auto codeDetail = (int)responseCode & 0x1f;
@@ -180,14 +187,26 @@ namespace trackle
             // Server received previous block, send the next.
             if (responseCode == CoAPCode::CONTINUE)
             {
-                //printf("RECEIVED CONTINUE\n");
+                // printf("RECEIVED CONTINUE\n");
                 ack_handlers.setResult(msg_id);
-                Messages::currBlockIndex++;
-                const uint32_t messageId = getNextPublishCounter();
+
+                block_messages_data *block = trackle_get_block_by_token(token);
+                if (block == NULL)
+                    return;
+
+                block->currBlockIndex++;
                 trackle_protocol_send_event_data eventHandler;
                 eventHandler.handler_callback = genericBlockCompletionCallback;
-                eventHandler.handler_data = reinterpret_cast<void *>(messageId);
-                trackle_protocol_send_event_in_blocks(this, Messages::ttl, Messages::flags, &eventHandler);
+                eventHandler.handler_data = reinterpret_cast<void *>(block->msg_key);
+                eventHandler.handler_token = token;
+
+                const char *data = reinterpret_cast<const char *>(block->buffer);
+
+                // remember: buffer starts from 2nd block
+                uint16_t currBlockLength = std::min(static_cast<size_t>(MAX_BLOCK_SIZE), block->totBytesNumber + MAX_BLOCK_SIZE - block->currBlockIndex * MAX_BLOCK_SIZE);
+                uint16_t currentOffset = block->currBlockIndex * MAX_BLOCK_SIZE - MAX_BLOCK_SIZE;
+
+                trackle_protocol_send_event(this, block->token, block->eventName.c_str(), data + currentOffset, currBlockLength, block->ttl, block->currBlockIndex, block->totBlockNumber, block->flags, &eventHandler);
             }
             else if (CoAPCode::is_success(responseCode))
             {
