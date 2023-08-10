@@ -173,7 +173,7 @@ void Callbacks_complete_publish(int error, const void *data, void *callbackData,
 {
     uint32_t *b = (uint32_t *)callbackData;
     const char *c = (const char *)data;
+    uint8_t *tokenPtr = (uint8_t *)reserved;
 
-    printf("callback_complete_publish (%d) result : %d...\n", b, error);
-    printf("message: %s...\n", c);
+    printf("callback_complete_publish (msg_key: %d, token: %02x) result : %d...\n", b, *tokenPtr, error);
 }
