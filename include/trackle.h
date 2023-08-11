@@ -455,6 +455,13 @@ public:
         void setClaimCode(const char *claimCode);
 
         /**
+         * @brief It copies the componentsList parameter into the components_list variable and send it to Trackle on description
+         *
+         * @param claimCode The components list of the project.
+         */
+        void setComponentsList(const char *componentsList);
+
+        /**
          * @brief This function sets the callback function that will be called when it's needed to save the current
          * DTLS session.
          *
