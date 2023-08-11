@@ -46,6 +46,7 @@ uint32_t connection_timeout = DEFAULT_CONNECTION_TIMEOUT;
 const uint32_t PUBLISH_EVENT_FLAG_PUBLIC = 0x0;
 const uint32_t PUBLISH_EVENT_FLAG_PRIVATE = 0x1;
 const int CLAIM_CODE_SIZE = 63;
+const int COMPONENTS_LIST_SIZE = 200;
 
 // DICHIARAZIONI  ------------------------------------------------------------
 
@@ -258,6 +259,7 @@ char device_id[DEVICE_ID_LENGTH];
 unsigned char server_public_key[PUBLIC_KEY_LENGTH] = {0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x02, 0x01, 0x06, 0x08, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00, 0x04, 0x2B, 0x19, 0x9D, 0xC9, 0xF2, 0xB0, 0x2D, 0xD1, 0xF1, 0x7D, 0xF0, 0x2B, 0xD1, 0xEC, 0xD1, 0x57, 0xD6, 0x74, 0x51, 0xD7, 0x9C, 0x09, 0xE1, 0x70, 0x43, 0x4A, 0x5B, 0xC2, 0x40, 0xC0, 0x49, 0x67, 0x34, 0xC8, 0xA4, 0xF8, 0xB4, 0xF7, 0xFB, 0xB4, 0xD0, 0x3F, 0xCC, 0xAF, 0x1F, 0xAA, 0x2E, 0x1D, 0x76, 0x82, 0xCF, 0x3A, 0x1A, 0x0B, 0x42, 0x38, 0x14, 0x6D, 0x54, 0x42, 0x05, 0xDC, 0x4D, 0x27};
 unsigned char client_private_key[PRIVATE_KEY_LENGTH];
 char claim_code[CLAIM_CODE_SIZE + 1];
+char components_list[COMPONENTS_LIST_SIZE + 1];
 
 // TRACKLE.VARIABLE ------------------------------------------------------------
 
@@ -1104,7 +1106,7 @@ bool appendSystemInfo(appender_fn appender, void *append, void *reserved)
     product_details_t details;
     details.size = sizeof(details);
 
-    string json = "\"i\":" + int_to_string(connectionPropType.ping_interval) + "." + int_to_string(connectionType) + ",\"o\":" + int_to_string(otaMethod) + ",\"p\":" + int_to_string(PLATFORM_ID) + ",\"s\":\"" + int_to_string(VERSION_MAYOR) + "." + int_to_string(VERSION_MINOR) + "." + int_to_string(VERSION_PATCH) + "\"";
+    string json = "\"i\":" + int_to_string(connectionPropType.ping_interval) + "." + int_to_string(connectionType) + ",\"o\":" + int_to_string(otaMethod) + ",\"p\":" + int_to_string(PLATFORM_ID) + ",\"s\":\"" + int_to_string(VERSION_MAYOR) + "." + int_to_string(VERSION_MINOR) + "." + int_to_string(VERSION_PATCH) + "\"" + components_list;
 
     LOG(ERROR, "%s", json.c_str());
     const char *result = json.c_str();
@@ -1486,6 +1488,12 @@ void Trackle::setClaimCode(const char *claimCode)
     memset(claim_code, 0, CLAIM_CODE_SIZE);
     memcpy(claim_code, claimCode, CLAIM_CODE_SIZE);
     claim_code[CLAIM_CODE_SIZE] = 0;
+}
+
+void Trackle::setComponentsList(const char *componentsList)
+{
+    memset(components_list, 0, COMPONENTS_LIST_SIZE);
+    sprintf(components_list, ",\"c\":\"%s\"", componentsList);
 }
 
 void Trackle::setSaveSessionCallback(saveSessionCallback *save)

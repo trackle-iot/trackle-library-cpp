@@ -196,6 +196,12 @@ void trackleSetClaimCode(Trackle *v, const char *claimCode)
     v->setClaimCode(claimCode);
 }
 
+void trackleSetComponentsList(Trackle *v, const char *componentsList)
+{
+    IF_NOT_INITIALIZED_WARNING();
+    v->setComponentsList(componentsList);
+}
+
 void trackleSetPingInterval(Trackle *v, uint32_t pingInterval)
 {
     IF_NOT_INITIALIZED_WARNING();

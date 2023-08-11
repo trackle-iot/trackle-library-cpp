@@ -227,6 +227,13 @@ extern "C"
     void trackleSetClaimCode(Trackle *v, const char *claimCode) DYNLIB;
 
     /*!
+     * @copybrief Trackle::setComponentsList()
+     * @trackle
+     * @copydetails Trackle::setComponentsList()
+     */
+    void trackleSetComponentsList(Trackle *v, const char *componentsList);
+
+    /*!
      * @copybrief Trackle::setSaveSessionCallback()
      * @trackle
      * @copydetails Trackle::setSaveSessionCallback()
