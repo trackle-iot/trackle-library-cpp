@@ -1,2 +1,8 @@
 /doc
 /license_header.txt
+example/**/bin/
+example/**/lib/
+**/__pycache__
+.vscode
+lib/tinydtls/dtls_config.h.gch
+setup_credentials.sh

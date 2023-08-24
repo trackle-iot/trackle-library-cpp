@@ -30,6 +30,13 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
+// For testing it is useful not to have this logs, since they take away attention from tests results.
+#ifdef DISABLE_EXAMPLES_LOGGING
+#define EXAMPLE_LOG(...)
+#else
+#define EXAMPLE_LOG(...) printf(__VA_ARGS__)
+#endif
+
 // Socket for connection to cloud
 static struct sockaddr_in cloud_addr;
 static int cloud_socket = -1;
@@ -64,7 +71,7 @@ void Callbacks_set_time_cb(time_t time, unsigned int param, void *reserved)
  */
 int Callbacks_connect_udp_cb(const char *address, int port)
 {
-    printf("Connecting socket\n");
+    EXAMPLE_LOG("Connecting socket\n");
     int addr_family;
     int ip_protocol;
     char addr_str[128];
@@ -72,10 +79,10 @@ int Callbacks_connect_udp_cb(const char *address, int port)
     struct hostent *res = gethostbyname(address);
 
     if (res)
-        printf("Dns address %s resolved\n", address);
+        EXAMPLE_LOG("Dns address %s resolved\n", address);
     else
     {
-        printf("error resolving gethostbyname %s\n", address);
+        EXAMPLE_LOG("error resolving gethostbyname %s\n", address);
         return -1;
     }
 
@@ -92,10 +99,10 @@ int Callbacks_connect_udp_cb(const char *address, int port)
     cloud_socket = socket(addr_family, SOCK_DGRAM, ip_protocol);
     if (cloud_socket < 0)
     {
-        printf("Unable to create socket: errno %d\n", errno);
+        EXAMPLE_LOG("Unable to create socket: errno %d\n", errno);
         return -3;
     }
-    printf("Socket created, sending to %s:%d\n", address, port);
+    EXAMPLE_LOG("Socket created, sending to %s:%d\n", address, port);
 
     // setto i timeout di lettura/scrittura del socket
     struct timeval socket_timeout;
@@ -133,7 +140,7 @@ int Callbacks_send_udp_cb(const unsigned char *buf, uint32_t buflen, void *tmp)
 {
     size_t sent = sendto(cloud_socket, (const char *)buf, buflen, 0, (struct sockaddr *)&cloud_addr, sizeof(cloud_addr));
     if ((int)sent > 0)
-        printf("send_cb_udp sent %d\n", sent);
+        EXAMPLE_LOG("send_cb_udp sent %d\n", sent);
 
     return (int)sent;
 }
@@ -150,7 +157,7 @@ int Callbacks_receive_udp_cb(unsigned char *buf, uint32_t buflen, void *tmp)
 {
     size_t res = recvfrom(cloud_socket, (char *)buf, buflen, 0, (struct sockaddr *)NULL, NULL);
     if ((int)res > 0)
-        printf("receive_cb_udp received %d\n", res);
+        EXAMPLE_LOG("receive_cb_udp received %d\n", res);
 
     // on timeout error, set bytes received to 0
     if ((int)res < 0 && errno == EAGAIN)
@@ -161,12 +168,12 @@ int Callbacks_receive_udp_cb(unsigned char *buf, uint32_t buflen, void *tmp)
 
 void Callbacks_log_cb(const char *msg, int level, const char *category, void *attribute, void *reserved)
 {
-    printf("%u - Log_cb(lvl=%d): (%s) -> %s\n", Callbacks_get_millis_cb(), level, (category ? category : ""), msg);
+    EXAMPLE_LOG("%u - Log_cb(lvl=%d): (%s) -> %s\n", Callbacks_get_millis_cb(), level, (category ? category : ""), msg);
 }
 
 void Callbacks_reboot_cb(const char *data)
 {
-    printf("Reboot request ignored\n");
+    EXAMPLE_LOG("Reboot request ignored\n");
 }
 
 void Callbacks_complete_publish(int error, const void *data, void *callbackData, void *reserved)
@@ -175,5 +182,5 @@ void Callbacks_complete_publish(int error, const void *data, void *callbackData,
     const char *c = (const char *)data;
     uint8_t *tokenPtr = (uint8_t *)reserved;
 
-    printf("callback_complete_publish (msg_key: %d, token: %02x) result : %d...\n", b, *tokenPtr, error);
+    EXAMPLE_LOG("callback_complete_publish (msg_key: %d, token: %02x) result : %d...\n", b, *tokenPtr, error);
 }

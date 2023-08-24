@@ -42,11 +42,11 @@
 #error "Did you put the Trackle credentials in 'trackle_hardcoded_credentials.h' ?"
 
 const uint8_t HARDCODED_DEVICE_ID[DEVICE_ID_LENGTH] = {
-	// Device ID goes here (12 bytes, e.g. 0x12, 0xF4, etc.)
+    // Device ID goes here (12 bytes, e.g. 0x12, 0xF4, etc.)
 };
 
 const uint8_t HARDCODED_PRIVATE_KEY[PRIVATE_KEY_LENGTH] = {
-	// Private key goes here (121 bytes, e.g. 0x0E, 0x4A, etc.)
+    // Private key goes here (121 bytes, e.g. 0x0E, 0x4A, etc.)
 };
 
 #endif
