@@ -6,3 +6,4 @@ example/**/lib/
 .vscode
 lib/tinydtls/dtls_config.h.gch
 setup_credentials.sh
+/local_test
