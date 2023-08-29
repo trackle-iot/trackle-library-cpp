@@ -81,7 +81,7 @@ namespace trackle
 					if (now - recent_event_ticks[evt_tick_idx] < 1000)
 					{
 						// exceeded allowable burst of 4 events per second
-						LOG(WARN, "rate limited, BANDWIDTH_EXCEEDED");
+						LOG(WARN, "NOT PUBLISHED: bandwidth exceeded");
 						return true;
 					}
 				}

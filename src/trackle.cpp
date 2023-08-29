@@ -562,8 +562,10 @@ inline uint32_t convert(uint32_t flags)
 
 bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Event_Type eventType, Event_Flags eventFlag, uint32_t msg_key)
 {
-    if (!cloudEnabled)
+    if (!cloudEnabled) {
+        LOG(WARN, "NOT PUBLISHED: cloud disabled");
         return false;
+    }
 
     uint32_t flags = eventType | eventFlag;
     flags = convert(flags);
@@ -590,6 +592,7 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
                 if (sendPublishCb)
                     (*sendPublishCb)(eventName, data, msg_key, false);
 
+                LOG(WARN, "NOT PUBLISHED: not connected to cloud");
                 return false;
             }
 
@@ -598,8 +601,10 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
             trackle::protocol::block_messages_data *block = trackle::protocol::trackle_get_free_block();
             uint16_t currBlockLength = MAX_BLOCK_SIZE;
 
-            if (block == NULL) // no free block
+            if (block == NULL) { // no free block
+                LOG(WARN, "NOT PUBLISHED: no free message block");
                 return false;
+            }
 
             // Block-wise, more than one packet
             if (strlen(data) > MAX_BLOCK_SIZE)
@@ -656,6 +661,8 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
 
             return true;
         }
+    } else {
+        LOG(WARN, "NOT PUBLISHED: packet size too big");
     }
 
     return res;
