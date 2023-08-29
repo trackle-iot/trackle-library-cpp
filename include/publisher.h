@@ -94,14 +94,10 @@ namespace trackle
 									 system_tick_t time, CompletionHandler handler)
 			{
 
-				block_messages_data *block = trackle_get_block_by_token(token);
-				if (block == NULL)
-					return INVALID_STATE;
-
 				bool is_system_event = is_system(event_name);
 
 				// Check rate limit only on first packet
-				if (block->currBlockIndex == 0)
+				if (block_id == 0)
 				{
 					bool rate_limited = is_rate_limited(is_system_event, time);
 					if (rate_limited)
@@ -114,12 +110,8 @@ namespace trackle
 				Message message;
 				channel.create(message);
 
-				bool confirmable = channel.is_unreliable();
-				if (flags & EventType::NO_ACK)
-				{
-					confirmable = false;
-				}
-				else if (flags & EventType::WITH_ACK)
+				bool confirmable = false;
+				if (flags & EventType::WITH_ACK)
 				{
 					confirmable = true;
 				}
