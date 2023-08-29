@@ -129,7 +129,7 @@ uint32_t getNextPublishCounter()
  *
  * @return The token.
  */
-uint32_t getNextToken()
+uint8_t getNextToken()
 {
     if (token == UINT8_MAX)
     {
@@ -643,12 +643,13 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
             uint16_t totBytesNumber = strlen(data);
             uint16_t totBlockNumber = ceil((double)strlen(data) / MAX_BLOCK_SIZE);
             uint16_t currBlockLength = 0;
+            uint8_t token = getNextToken();
             bool res = false;
 
             for (int i = 0; i < totBlockNumber; i++)
             {
                 currBlockLength = std::min(MAX_BLOCK_SIZE, totBytesNumber - i * MAX_BLOCK_SIZE);
-                res = trackle_protocol_send_event(protocol, 0, eventName, data, currBlockLength, ttl, i, totBlockNumber, flags, NULL);
+                res = trackle_protocol_send_event(protocol, token, eventName, data, currBlockLength, ttl, i, totBlockNumber, flags, NULL);
                 if (!res)
                     return false;
             }
