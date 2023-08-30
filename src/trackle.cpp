@@ -577,7 +577,8 @@ inline uint32_t convert(uint32_t flags)
 
 bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Event_Type eventType, Event_Flags eventFlag, uint32_t msg_key)
 {
-    if (!cloudEnabled) {
+    if (!cloudEnabled)
+    {
         LOG(WARN, "NOT PUBLISHED: cloud disabled");
         return false;
     }
@@ -616,7 +617,8 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
             trackle::protocol::block_messages_data *block = trackle::protocol::trackle_get_free_block();
             uint16_t currBlockLength = MAX_BLOCK_SIZE;
 
-            if (block == NULL) { // no free block
+            if (block == NULL)
+            { // no free block
                 LOG(WARN, "NOT PUBLISHED: no free message block");
                 return false;
             }
@@ -660,6 +662,13 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
         }
         else // without ACK
         {
+            // if not connected return
+            if (connectionStatus != SOCKET_READY)
+            {
+                LOG(WARN, "NOT PUBLISHED: not connected to cloud");
+                return false;
+            }
+
             uint16_t totBytesNumber = strlen(data);
             uint16_t totBlockNumber = ceil((double)strlen(data) / MAX_BLOCK_SIZE);
             uint16_t currBlockLength = 0;
@@ -676,7 +685,9 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
 
             return true;
         }
-    } else {
+    }
+    else
+    {
         LOG(WARN, "NOT PUBLISHED: packet size too big");
     }
 
@@ -1131,7 +1142,7 @@ bool appendSystemInfo(appender_fn appender, void *append, void *reserved)
 
     string json = "\"i\":" + int_to_string(connectionPropType.ping_interval) + "." + int_to_string(connectionType) + ",\"o\":" + int_to_string(otaMethod) + ",\"p\":" + int_to_string(PLATFORM_ID) + ",\"s\":\"" + int_to_string(VERSION_MAYOR) + "." + int_to_string(VERSION_MINOR) + "." + int_to_string(VERSION_PATCH) + "\"" + components_list;
 
-    LOG(ERROR, "%s", json.c_str());
+    LOG(TRACE, "%s", json.c_str());
     const char *result = json.c_str();
     ((Appender *)append)->append(result);
     return true;
@@ -1924,7 +1935,6 @@ void Trackle::setKeys(const uint8_t client[PRIVATE_KEY_LENGTH])
 char *file_content;
 uint64_t file_index = 0; // uint32_t is enough for correct use; use uint64_t for easier non-overflowing calculations
 
-// TODO updatesPending, enableupdate,
 
 /**
  * It's called to tell the application that a firmware update is about to start
