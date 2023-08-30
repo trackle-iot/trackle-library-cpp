@@ -808,34 +808,5 @@ namespace trackle
             data->current_size = appender.dataSize();
             return 0;
         }
-
-#if HAL_PLATFORM_MESH
-        int completion_result(int result, completion_handler_data *completion)
-        {
-            if (completion)
-            {
-                completion->handler_callback(result, nullptr, completion->handler_data, nullptr);
-            }
-            return result;
-        }
-
-        int Protocol::mesh_command(MeshCommand::Enum cmd, uint32_t data, void *extraData, completion_handler_data *completion)
-        {
-            LOG(INFO, "handling mesh command %d", cmd);
-            switch (cmd)
-            {
-            case MeshCommand::NETWORK_CREATED:
-                return mesh.network_update(*this, next_token(), channel, true, *(MeshCommand::NetworkInfo *)extraData, completion);
-            case MeshCommand::NETWORK_UPDATED:
-                return mesh.network_update(*this, next_token(), channel, false, *(MeshCommand::NetworkInfo *)extraData, completion);
-            case MeshCommand::DEVICE_MEMBERSHIP:
-                return mesh.device_joined(*this, next_token(), channel, data, *(MeshCommand::NetworkUpdate *)extraData, completion);
-            case MeshCommand::DEVICE_BORDER_ROUTER:
-                return mesh.device_gateway(*this, next_token(), channel, data, *(MeshCommand::NetworkUpdate *)extraData, completion);
-            default:
-                return completion_result(SYSTEM_ERROR_INVALID_ARGUMENT, completion);
-            }
-        }
-#endif // HAL_PLATFORM_MESH
     }
 }

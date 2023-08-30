@@ -141,10 +141,6 @@ namespace trackle
 			 */
 			TimeSyncManager timesync_;
 
-#if HAL_PLATFORM_MESH
-			// Mesh mesh;
-#endif
-
 			/**
 			 * Completion handlers for messages with confirmable delivery.
 			 */
@@ -568,10 +564,6 @@ namespace trackle
 			virtual int get_describe_data(trackle_protocol_describe_data *data, void *reserved);
 
 			virtual int get_status(protocol_status *status) const = 0;
-
-#if HAL_PLATFORM_MESH
-			// int mesh_command(MeshCommand::Enum cmd, uint32_t data, void* extraData, completion_handler_data* completion);
-#endif // HAL_PLATFORM_MESH
 
 			void notify_message_complete(message_id_t msg_id, CoAPCode::Enum responseCode, uint8_t token);
 		};
