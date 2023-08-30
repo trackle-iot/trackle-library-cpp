@@ -802,7 +802,7 @@ namespace trackle
 
         int Protocol::get_describe_data(trackle_protocol_describe_data *data, void *reserved)
         {
-            data->maximum_size = 768;             // a conservative guess based on dtls and lightssl encryption overhead and the CoAP data
+            data->maximum_size = 1024;             // a conservative guess based on dtls and lightssl encryption overhead and the CoAP data
             BufferAppender2 appender(nullptr, 0); // don't need to store the data, just count the size
             build_describe_message(appender, data->flags);
             data->current_size = appender.dataSize();

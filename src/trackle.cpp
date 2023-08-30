@@ -26,12 +26,21 @@
 #include "tinydtls_set_get_millis.h"
 #include "messages.h"
 
-#define USER_VAR_MAX_COUNT 10
-#define USER_VAR_KEY_LENGTH 64
+// describe length:
+// {"f":[...],"v":{...},"i":30.1,"o":0,"p":102,"s":"3.2.0"} // min len is 50
+// func key len = FUNC_KEY_LENGTH + 3 // "....",
+// var key len = USER_FUNC_KEY_LENGTH + 5 // "..":x,
+// remove 2 from total (2 are commas for last funct and var)
+// TOTAL LEN = 50 + 20 * (USER_VAR_KEY_LENGTH + 3) + 20 * (USER_FUNC_KEY_LENGTH + 5) + (COMPONENTS_LIST_LENGTH + 7) - 2 = 1015
 
-#define USER_FUNC_MAX_COUNT 4
-#define USER_FUNC_KEY_LENGTH 64
+#define USER_VAR_MAX_COUNT 20
+#define USER_VAR_KEY_LENGTH 16
+
+#define USER_FUNC_MAX_COUNT 20
+#define USER_FUNC_KEY_LENGTH 16
 #define USER_FUNC_ARG_LENGTH 622
+
+#define COMPONENTS_LIST_LENGTH 160
 
 #define DEFAULT_CONNECTION_TIMEOUT 1000
 #define RECONNECTION_TIMEOUT 3750
@@ -46,7 +55,7 @@ uint32_t connection_timeout = DEFAULT_CONNECTION_TIMEOUT;
 const uint32_t PUBLISH_EVENT_FLAG_PUBLIC = 0x0;
 const uint32_t PUBLISH_EVENT_FLAG_PRIVATE = 0x1;
 const int CLAIM_CODE_SIZE = 63;
-const int COMPONENTS_LIST_SIZE = 200;
+const int COMPONENTS_LIST_SIZE = COMPONENTS_LIST_LENGTH + 20;
 
 // DICHIARAZIONI  ------------------------------------------------------------
 
@@ -357,6 +366,11 @@ bool Trackle::addGet(const char *varKey, void *(*fn)(const char *), Data_TypeDef
         return false;
     }
 
+    if (vars.size() >= USER_VAR_MAX_COUNT) {
+        LOG(WARN, "Maximum allowed limit of %d gets reached", USER_VAR_MAX_COUNT);
+        return false;
+    }
+
     CloudVariableTypeBase *old_item = find_var_by_key(varKey);
 
     if (old_item)
@@ -364,8 +378,6 @@ bool Trackle::addGet(const char *varKey, void *(*fn)(const char *), Data_TypeDef
         LOG(WARN, "Tried to add already-existing var (\"%s\" exists)", old_item->userVarKey);
         return false;
     }
-
-    // TODO CHECK MAX VAR NUMBER
 
     if (userVarType == VAR_BOOLEAN)
     {
@@ -526,6 +538,11 @@ CloudFunctionTypeBase *find_func_by_key(const char *funcKey)
 
 bool Trackle::post(const char *funcKey, user_function_int_char_t *func, Function_PermissionDef permission)
 {
+    if (funcs.size() >= USER_FUNC_MAX_COUNT) {
+        LOG(WARN, "Maximum allowed limit of %d posts reached", USER_FUNC_MAX_COUNT);
+        return false;
+    }
+
     CloudFunctionTypeBase *old_item = find_func_by_key(funcKey);
 
     if (old_item)
@@ -533,8 +550,6 @@ bool Trackle::post(const char *funcKey, user_function_int_char_t *func, Function
         LOG(WARN, "Tried to add already-existing function \"%s\" (\"%s\" exists)", funcKey, old_item->userFuncKey);
         return false;
     }
-
-    // TODO CHECK MAX FUNCTION NUMBER
 
     CloudFunctionTypeBase item = CloudFunctionTypeBase(funcKey, func, permission);
     funcs.push_back(item);
@@ -1500,6 +1515,12 @@ void Trackle::setClaimCode(const char *claimCode)
 
 void Trackle::setComponentsList(const char *componentsList)
 {
+    if (strlen(componentsList) > COMPONENTS_LIST_LENGTH)
+    {
+        LOG(WARN, "componentsList too long (max %d char)", COMPONENTS_LIST_LENGTH);
+        return;
+    }
+
     memset(components_list, 0, COMPONENTS_LIST_SIZE);
     sprintf(components_list, ",\"c\":\"%s\"", componentsList);
 }
