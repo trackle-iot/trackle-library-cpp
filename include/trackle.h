@@ -49,7 +49,7 @@ private:
          * @param eventFlag event flags, with or without ack.
          * @param msg_key the message key, if you want to use it.
          *
-         * @return The return value is a boolean value.
+         * @return true if message is sent to cloud, false if any error occured
          */
         bool sendPublish(const char *eventName, const char *data, int ttl, Event_Type eventType, Event_Flags eventFlag, uint32_t msg_key);
 
@@ -61,7 +61,13 @@ private:
          * @param deviceId The device ID of the device you want to subscribe to. If you want to subscribe to
          * all devices, set this to NULL.
          *
-         * @return A boolean value.
+         * @return true if the subscription request was successfully sent, false otherwise.
+         */
+
+        /**
+         * @brief It sends a subscription request to the server
+         * @cond
+         * @endcond
          */
         bool registerEvent(const char *eventName, Subscription_Scope_Type eventScope, const char *deviceID);
 
@@ -77,7 +83,7 @@ private:
          * all devices, set this to NULL.
          * @param reserved reserved for future use, must be NULL
          *
-         * @return A boolean value.
+         * @return true if the subscription request was successfully sent, false otherwise.
          */
         bool addSubscription(const char *eventName, EventHandler handler, void *handlerData, Subscription_Scope_Type scope, const char *deviceID, void *reserved);
 
@@ -104,7 +110,7 @@ public:
         ~Trackle();
 
         /**
-         * @brief Sets the cloudEnabled variable to the value of the status variable
+         * @brief This enbales/disables Trackle cloud connection by setting the cloudEnabled variable
          *
          * @param status true or false
          */
@@ -252,7 +258,7 @@ public:
         bool publish(string eventName);
 
         /**
-         * @brief It sends a publish to the cloud
+         * @brief It sends a state update to the cloud
          *
          * @param data the data to be sent
          *
@@ -261,7 +267,7 @@ public:
         bool syncState(const char *data);
 
         /**
-         * @brief It sends a publish to the cloud
+         * @brief It sends a state update to the cloud
          *
          * @param data the data to be sent
          *
@@ -440,7 +446,7 @@ public:
         void setConnectionStatusCallback(connectionStatusCallback *connectionStatus);
 
         /**
-         * @brief It sets the updateStateCb to the updateStateCb.
+         * @brief It sets the updateStateCb to handle state update from cloud
          *
          * @param updateStateCb This is a callback function that will be called when the Trackle device has a
          * state to update.
@@ -455,7 +461,7 @@ public:
         void setClaimCode(const char *claimCode);
 
         /**
-         * @brief It copies the componentsList parameter into the components_list variable and send it to Trackle on description
+         * @brief It copies the componentsList parameter into the components_list variable and send it to Trackle on describe message
          *
          * @param claimCode The components list of the project.
          */
@@ -530,7 +536,7 @@ public:
         /**
          * @brief This function sets the connection type for the Trackle library
          *
-         * @param conn The connection type. This can be UNDEFINED, WIFI, ETHERNET, CELLULAR or NBIOT
+         * @param conn The connection type. This can be UNDEFINED, WIFI, ETHERNET, LET, NBIOT or CAT_M
          */
         void setConnectionType(Connection_Type conn);
 
@@ -583,7 +589,9 @@ public:
          * @brief It initializes the protocol, sets the connection status to connecting, and calls the connectCb
          * callback
          *
-         * @return The return value is the result of the connect() function.
+         * @retval -1 error creating socket or initializing connection
+         * @retval 0 cloud disabled or not connected to cloud
+         * @retval 1 connection successfull
          */
         int connect();
 
@@ -614,8 +622,9 @@ public:
         void disconnect();
 
         /**
-         * @brief It checks if the device is connected to the cloud, if it is, it checks if it's time to send a health
-         * check, if it's not, it checks if it's time to reconnect
+         * @brief This function checks for the incoming messages from Trackle, and processes any messages that have come in. 
+         * It also sends keep-alive pings to the Cloud, so if it's not called frequently, the connection to Trackle may be lost.
+         * It also handles health check messages communication and keep up and running the connection to Trackle by making reconnections.
          */
         void loop();
 
