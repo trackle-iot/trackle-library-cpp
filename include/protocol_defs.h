@@ -77,14 +77,17 @@ namespace trackle
         const size_t MINIMUM_CHUNK_INCREASE = 2u;
         const size_t MAX_EVENT_TTL_SECONDS = 16777215;
         const size_t MAX_OPTION_DELTA_LENGTH = 12;
-        const size_t MAX_USER_CALLER_ID_LEN = 64;
-        const size_t MAX_FUNCTION_KEY_LENGTH = 64;
-        const size_t MAX_VARIABLE_KEY_LENGTH = 64;
-        const size_t MAX_EVENT_NAME_LENGTH = 64;
+        const size_t MAX_USER_CALLER_ID_LEN = 32;
+        const size_t MAX_FUNCTION_KEY_LENGTH = 32;
+        const size_t MAX_VARIABLE_KEY_LENGTH = 32;
+        const size_t MAX_EVENT_NAME_LENGTH = 32;
         const size_t MAX_EVENT_DATA_LENGTH = 1024;
         const size_t MAX_FUNCTION_ARG_LENGTH = 1024;
         const size_t MAX_VARIABLE_ARG_LENGTH = 1024;
+        const size_t MAX_COMPONENTS_LIST_LENGTH = 160;
         const size_t MAX_VARIABLE_VALUE_LENGTH = 1024;
+        const size_t MAX_FUNCTION_COUNT = 20;
+        const size_t MAX_VARIABLE_COUNT= 20;
 
         // Timeout in milliseconds given to receive an acknowledgement for a published event
         const unsigned SEND_EVENT_ACK_TIMEOUT = 30000; // MAX_TRANSMIT_WAIT - max_rand (15*1000)

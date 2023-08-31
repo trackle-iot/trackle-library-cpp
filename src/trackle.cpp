@@ -26,21 +26,14 @@
 #include "tinydtls_set_get_millis.h"
 #include "messages.h"
 
+using namespace trackle::protocol;
+
 // describe length:
 // {"f":[...],"v":{...},"i":30.1,"o":0,"p":102,"s":"3.2.0"} // min len is 50
 // func key len = FUNC_KEY_LENGTH + 3 // "....",
-// var key len = USER_FUNC_KEY_LENGTH + 5 // "..":x,
+// var key len = MAX_FUNCTION_KEY_LENGTH + 5 // "..":x,
 // remove 2 from total (2 are commas for last funct and var)
-// TOTAL LEN = 50 + 20 * (USER_VAR_KEY_LENGTH + 3) + 20 * (USER_FUNC_KEY_LENGTH + 5) + (COMPONENTS_LIST_LENGTH + 7) - 2 = 1015
-
-#define USER_VAR_MAX_COUNT 20
-#define USER_VAR_KEY_LENGTH 16
-
-#define USER_FUNC_MAX_COUNT 20
-#define USER_FUNC_KEY_LENGTH 16
-#define USER_FUNC_ARG_LENGTH 622
-
-#define COMPONENTS_LIST_LENGTH 160
+// TOTAL LEN = 50 + 20 * (MAX_VARIABLE_KEY_LENGTH + 3) + 20 * (MAX_FUNCTION_KEY_LENGTH + 5) + (MAX_COMPONENTS_LIST_LENGTH + 7) - 2 = 1015
 
 #define DEFAULT_CONNECTION_TIMEOUT 1000
 #define RECONNECTION_TIMEOUT 3750
@@ -55,7 +48,7 @@ uint32_t connection_timeout = DEFAULT_CONNECTION_TIMEOUT;
 const uint32_t PUBLISH_EVENT_FLAG_PUBLIC = 0x0;
 const uint32_t PUBLISH_EVENT_FLAG_PRIVATE = 0x1;
 const int CLAIM_CODE_SIZE = 63;
-const int COMPONENTS_LIST_SIZE = COMPONENTS_LIST_LENGTH + 20;
+const int COMPONENTS_LIST_SIZE = MAX_COMPONENTS_LIST_LENGTH + 20;
 
 // DICHIARAZIONI  ------------------------------------------------------------
 
@@ -274,7 +267,7 @@ char components_list[COMPONENTS_LIST_SIZE + 1];
 
 struct CloudVariableTypeBase
 {
-    char userVarKey[USER_VAR_KEY_LENGTH + 1];
+    char userVarKey[MAX_VARIABLE_KEY_LENGTH + 1];
     Data_TypeDef userVarType;
     Data_TypeDef stringVarType;
     void *(*funct)(const char *);
@@ -301,7 +294,7 @@ CloudVariableTypeBase *find_var_by_key(const char *varKey)
 {
     for (int i = (int)vars.size(); i-- > 0;)
     {
-        if (0 == strncmp(vars[i].userVarKey, varKey, USER_VAR_KEY_LENGTH))
+        if (0 == strncmp(vars[i].userVarKey, varKey, MAX_VARIABLE_KEY_LENGTH))
         {
             return &vars[i];
         }
@@ -366,8 +359,8 @@ bool Trackle::addGet(const char *varKey, void *(*fn)(const char *), Data_TypeDef
         return false;
     }
 
-    if (vars.size() >= USER_VAR_MAX_COUNT) {
-        LOG(WARN, "Maximum allowed limit of %d gets reached", USER_VAR_MAX_COUNT);
+    if (vars.size() >= MAX_VARIABLE_COUNT) {
+        LOG(WARN, "Maximum allowed limit of %d gets reached", MAX_VARIABLE_COUNT);
         return false;
     }
 
@@ -476,7 +469,7 @@ struct CloudFunctionTypeBase
 {
     user_function_int_char_t *pUserFunc;
     Function_PermissionDef permission;
-    char userFuncKey[USER_FUNC_KEY_LENGTH + 1];
+    char userFuncKey[MAX_FUNCTION_KEY_LENGTH + 1];
     CloudFunctionTypeBase(const char *funcKey, user_function_int_char_t *userFunc, Function_PermissionDef perms)
     {
         strncpy(userFuncKey, funcKey, sizeof(userFuncKey));
@@ -528,7 +521,7 @@ CloudFunctionTypeBase *find_func_by_key(const char *funcKey)
     }
     for (int i = (int)funcs.size(); i-- > 0;)
     {
-        if (0 == strncmp(funcs[i].userFuncKey, funcKey, USER_FUNC_KEY_LENGTH))
+        if (0 == strncmp(funcs[i].userFuncKey, funcKey, MAX_FUNCTION_KEY_LENGTH))
         {
             return &funcs[i];
         }
@@ -538,8 +531,8 @@ CloudFunctionTypeBase *find_func_by_key(const char *funcKey)
 
 bool Trackle::post(const char *funcKey, user_function_int_char_t *func, Function_PermissionDef permission)
 {
-    if (funcs.size() >= USER_FUNC_MAX_COUNT) {
-        LOG(WARN, "Maximum allowed limit of %d posts reached", USER_FUNC_MAX_COUNT);
+    if (funcs.size() >= MAX_FUNCTION_COUNT) {
+        LOG(WARN, "Maximum allowed limit of %d posts reached", MAX_FUNCTION_COUNT);
         return false;
     }
 
@@ -1526,9 +1519,9 @@ void Trackle::setClaimCode(const char *claimCode)
 
 void Trackle::setComponentsList(const char *componentsList)
 {
-    if (strlen(componentsList) > COMPONENTS_LIST_LENGTH)
+    if (strlen(componentsList) > MAX_COMPONENTS_LIST_LENGTH)
     {
-        LOG(WARN, "componentsList too long (max %d char)", COMPONENTS_LIST_LENGTH);
+        LOG(WARN, "componentsList too long (max %d char)", MAX_COMPONENTS_LIST_LENGTH);
         return;
     }
 
