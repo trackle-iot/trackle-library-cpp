@@ -179,36 +179,14 @@ std::string hexStr(char *data, int len)
 Connection_Status_Type connectionStatus = SOCKET_NOT_CONNECTED;
 int cloudStatus = -1;
 
-trackle::protocol::Connection_Properties_Type connectionPropTypeList[6] = {
+trackle::protocol::Connection_Properties_Type connectionPropTypeList[5] = {
     {30, 10, 2},  // UNDEFINED
     {30, 10, 2},  // WIFI
     {30, 10, 2},  // ETHERNET
     {30, 10, 2},  // CELLULAR
-    {150, 20, 5}, // NBIOT
-    {150, 20, 5}, // CAT_M
+    {150, 20, 5}, // LPWA
 };                // in seconds
 
-hal_net_access_tech_t getTecnologyAccess(Connection_Type con)
-{
-    if (con == CONNECTION_TYPE_WIFI)
-    {
-        return NET_ACCESS_TECHNOLOGY_WIFI;
-    }
-    else if (con == CONNECTION_TYPE_LTE)
-    {
-        return NET_ACCESS_TECHNOLOGY_LTE;
-    }
-    else if (con == CONNECTION_TYPE_NBIOT)
-    {
-        return NET_ACCESS_TECHNOLOGY_LTE_CAT_NB1;
-    }
-    else if (con == CONNECTION_TYPE_CAT_M)
-    {
-        return NET_ACCESS_TECHNOLOGY_LTE_CAT_M1;
-    }
-
-    return NET_ACCESS_TECHNOLOGY_UNKNOWN;
-}
 
 /**
  * It increases the connection timeout by a factor of 2, and adds a random number between 0 and 0.512
@@ -1585,7 +1563,6 @@ const char *Trackle::getLogLevelName(int level)
 void Trackle::setConnectionType(Connection_Type conn)
 {
     connectionType = conn;
-    diagnostic::diagnosticNetwork(NETWORK_ACCESS_TECNHOLOGY, getTecnologyAccess(conn));
 }
 
 void Trackle::setPingInterval(uint32_t interval)

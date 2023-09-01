@@ -536,7 +536,7 @@ public:
         /**
          * @brief This function sets the connection type for the Trackle library
          *
-         * @param conn The connection type. This can be UNDEFINED, WIFI, ETHERNET, LET, NBIOT or CAT_M
+         * @param conn The connection type. This can be UNDEFINED, WIFI, ETHERNET, CELLULAR or LPWA
          */
         void setConnectionType(Connection_Type conn);
 
