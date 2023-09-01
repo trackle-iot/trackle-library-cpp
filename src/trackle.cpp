@@ -576,6 +576,12 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
         return false;
     }
 
+    // reject system events
+    if(is_system(eventName)) {
+        LOG(WARN, "NOT PUBLISHED: can't publish system event");
+        return false;
+    }
+
     uint32_t flags = eventType | eventFlag;
     flags = convert(flags);
 

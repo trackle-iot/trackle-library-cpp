@@ -42,11 +42,6 @@ namespace trackle
 			{
 			}
 
-			inline bool is_system(const char *event_name)
-			{
-				return !strncmp(event_name, "trackle", 5) || !strncmp(event_name, "trackle", 8);
-			}
-
 			bool is_rate_limited(bool is_system_event, system_tick_t millis)
 			{
 				if (is_system_event)

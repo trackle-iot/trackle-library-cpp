@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <functional>
+#include <cstring>
 
 #include "system_error.h"
 
@@ -69,6 +70,12 @@ namespace trackle
         // Converts protocol error to system error code
         system_error_t toSystemError(ProtocolError error);
 
+        // is system event if start with trackle but not equal to trackle/p
+        inline bool is_system(const char *event_name)
+        {
+            return !strncmp(event_name, "trackle", 7) && strcmp(event_name, "trackle/p");
+        }
+
         typedef uint16_t chunk_index_t;
 
         const chunk_index_t NO_CHUNKS_MISSING = 65535;
@@ -87,7 +94,7 @@ namespace trackle
         const size_t MAX_COMPONENTS_LIST_LENGTH = 160;
         const size_t MAX_VARIABLE_VALUE_LENGTH = 1024;
         const size_t MAX_FUNCTION_COUNT = 20;
-        const size_t MAX_VARIABLE_COUNT= 20;
+        const size_t MAX_VARIABLE_COUNT = 20;
 
         // Timeout in milliseconds given to receive an acknowledgement for a published event
         const unsigned SEND_EVENT_ACK_TIMEOUT = 30000; // MAX_TRANSMIT_WAIT - max_rand (15*1000)
