@@ -725,12 +725,12 @@ bool Trackle::publish(string eventName)
 
 bool Trackle::syncState(const char *data)
 {
-    return sendPublish("trackle/p", data, DEFAULT_TTL, PUBLIC, EMPTY_FLAGS, 0);
+    return sendPublish("trackle/p", data, DEFAULT_TTL, PUBLIC, WITH_ACK, 0);
 }
 
 bool Trackle::syncState(string data)
 {
-    return sendPublish("trackle/p", data.c_str(), DEFAULT_TTL, PUBLIC, EMPTY_FLAGS, 0);
+    return sendPublish("trackle/p", data.c_str(), DEFAULT_TTL, PUBLIC, WITH_ACK, 0);
 }
 
 bool Trackle::getTime()
