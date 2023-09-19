@@ -671,7 +671,7 @@ class TrackleLibraryTest(ut.TestCase):
 
     def test_publish_8(self):
         """
-        pubblicazione con ritrasmissione, con proxy, ok
+        pubblicazione blackwise con ritrasmissione, con proxy, ok
             - si spegne il proxy,
             - 1: return true,
             - 2: published true: si riattiva il proxy,
@@ -806,6 +806,51 @@ class TrackleLibraryTest(ut.TestCase):
             wait_event_name(self.from_device, "publish_completed")
         with self.assertRaises(TimeoutError):
             wait_sse_publish_event(self.sse_client, "testing/test_publish_10_5", 5)
+
+    def test_publish_11(self):
+        """
+        pubblicazione singola con ritrasmissione, con proxy, ok
+            - si spegne il proxy,
+            - 1: return true,
+            - 2: published true: si riattiva il proxy,
+            - 3: error 0
+        """
+        # Connection
+        params = device.DeviceStartupParams(
+            cred.TRACKLE_PRIVATE_KEY_LIST,
+            self.proxy_port
+        )
+        self.spawn_device(params)
+        res = wait_event_name(self.from_device, "connect_result")
+        self.assertTrue(res["return"])
+        wait_event_name(self.from_device, "connected")
+        # Switch off proxy
+        self.to_proxy.put({"name" : "proxy_off"})
+        wait_event_name(self.from_proxy, "proxy_switched_off")
+        # Publish event
+        self.to_device.put({"name" : "publish",
+                            "event" : "testing/test_publish_11",
+                            "data" : lorem.LOREM_IPSUM[:500],
+                            "ttl" : 30,
+                            "visibility" : trackle_enums.PublishVisibility.PUBLIC,
+                            "ack" : trackle_enums.PublishType.WITH_ACK,
+                            "key" : 2})
+        # Wait with proxy off
+        time.sleep(20)
+        # Switch on proxy
+        self.to_proxy.put({"name" : "proxy_on"})
+        wait_event_name(self.from_proxy, "proxy_switched_on")
+        # Check publish result
+        result = wait_event_name(self.from_device, "publish_result", self)
+        self.assertTrue(result["return"], "unexpected function return value")
+        result = wait_event_name(self.from_device, "publish_sent", self)
+        self.assertEqual(result["published"], 1, "published result in sent callback differs from 1")
+        self.assertEqual(result["idx"], 2, "msg key in sent callback differs from 2")
+        result = wait_sse_publish_event(self.sse_client, "testing/test_publish_11", 15, self)
+        self.assertEqual(result["data"], lorem.LOREM_IPSUM[:500], "cloud data doesn't match")
+        result = wait_event_name(self.from_device, "publish_completed", self)
+        self.assertEqual(result["error"], 0, "error code in completed callback differs from 0")
+        self.assertEqual(result["idx"], 2, "msg key in completed callback differs from 2")
 
     def test_signal_1(self):
         """
