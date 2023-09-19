@@ -73,7 +73,7 @@ namespace trackle
         // is system event if start with trackle but not equal to trackle/p
         inline bool is_system(const char *event_name)
         {
-            return !strncmp(event_name, "trackle", 7) && strcmp(event_name, "trackle/p");
+            return !strncmp(event_name, "iotready", 8) || (!strncmp(event_name, "trackle", 7) && strcmp(event_name, "trackle/p"));
         }
 
         typedef uint16_t chunk_index_t;
