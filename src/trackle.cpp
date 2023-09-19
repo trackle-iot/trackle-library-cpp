@@ -655,7 +655,7 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
             for (int i = 0; i < totBlockNumber; i++)
             {
                 currBlockLength = std::min(MAX_BLOCK_SIZE, totBytesNumber - i * MAX_BLOCK_SIZE);
-                res = trackle_protocol_send_event(protocol, token, eventName, data, currBlockLength, ttl, i, totBlockNumber, flags, NULL);
+                res = trackle_protocol_send_event(protocol, token, eventName, data + i * MAX_BLOCK_SIZE, currBlockLength, ttl, i, totBlockNumber, flags, NULL);
                 if (!res)
                     return false;
             }
