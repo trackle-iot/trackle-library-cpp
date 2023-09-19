@@ -30,6 +30,7 @@ extern "C"
 {
 #endif
 
+    void Callbacks_setConnectionOverride(bool override, char *address, int port);
     system_tick_t Callbacks_get_millis_cb();
     void Callbacks_sleep_ms_cb(uint32_t milliseconds);
     void Callbacks_set_time_cb(time_t time, unsigned int param, void *reserved);

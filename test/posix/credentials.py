@@ -1,0 +1,69 @@
+"""
+Python source that gets credentials from environment variables.
+
+Example of environment variables format:
+
+# Trackle ID the device will use to connect to the cloud
+TRACKLE_ID_LIB_TEST="0x11, 0xbe, 0x26, 0x92, 0x74, 0x0d, 0x83, 0x43, 0x02, 0xaa, 0xb7, 0xa4"
+
+# Private key
+TRACKLE_PRIVATE_KEY_LIB_TEST="
+0x30, 0x77, 0xc6, 0x01, 0x01, 0x04, 0x20, 0x74, 0xfb, 0x02, 0x49, 0x14,
+0x64, 0x28, 0x11, 0xcd, 0xcc, 0xbc, 0xab, 0xf0, 0x1c, 0xfe, 0xde, 0xac,
+0x3a, 0xf2, 0x5e, 0xdd, 0x4e, 0xa6, 0x95, 0xfd, 0xe0, 0x08, 0x9a, 0xa0,
+0xfd, 0x33, 0x0a, 0xa0, 0x0a, 0x06, 0x08, 0x9b, 0x86, 0x48, 0xce, 0x3d,
+0x03, 0x01, 0x07, 0xa1, 0x44, 0x03, 0x42, 0x00, 0x04, 0xc5, 0x5f, 0xe5,
+0xa8, 0xe0, 0x02, 0xb3, 0xc7, 0xe6, 0x6f, 0x34, 0x18, 0xd7, 0x18, 0xdc,
+0x2c, 0xd7, 0x6f, 0x43, 0xdc, 0x47, 0x96, 0x31, 0x4d, 0xb2, 0xd6, 0x4e,
+0xab, 0xa5, 0x80, 0x4a, 0xd1, 0xd6, 0x2a, 0x18, 0x25, 0x0c, 0x90, 0xc1,
+0x07, 0x6b, 0xfd, 0x92, 0x3a, 0x12, 0x85, 0x29, 0x8f, 0x87, 0x8e, 0x01,
+0x82, 0x4e, 0xe6, 0x5c, 0xd8, 0x0e, 0xdf, 0x54, 0x6d, 0xa5, 0xba, 0x76,
+0xd1
+"
+
+# OAuth authorization user
+TRACKLE_CLIENT_ID_LIB_TEST="lib_test_credential-1234"
+
+# OAuth authorization password
+TRACKLE_CLIENT_SECRET_LIB_TEST="21da6a79e96b2b6dab73872bcdd8b0ad"
+
+"""
+
+import ctypes
+import os
+
+# Check environment variables existence
+required_variables = {"TRACKLE_ID_LIB_TEST",
+                      "TRACKLE_PRIVATE_KEY_LIB_TEST",
+                      "TRACKLE_CLIENT_ID_LIB_TEST",
+                      "TRACKLE_CLIENT_SECRET_LIB_TEST"}
+missing_variables = required_variables - set(os.environ)
+if len(missing_variables) != 0:
+    raise ValueError(f"Required environment variables not found: {', '.join(missing_variables)}")
+
+def int_list_from_cpp_hex_array(string):
+    " Return integer list from string containing a hex array "
+    return [int(s.strip(), 16) for s in string.split(",")]
+
+# Library credentials
+
+TRACKLE_ID = (ctypes.c_uint8*12)(
+    *int_list_from_cpp_hex_array(os.environ["TRACKLE_ID_LIB_TEST"])
+)
+
+TRACKLE_ID_STRING = "".join([hex(i)[2:].rjust(2, "0") for i in TRACKLE_ID])
+
+TRACKLE_PRIVATE_KEY = (ctypes.c_uint8*121)(
+    *int_list_from_cpp_hex_array(os.environ["TRACKLE_PRIVATE_KEY_LIB_TEST"])
+)
+
+TRACKLE_PRIVATE_KEY_LIST = int_list_from_cpp_hex_array(os.environ["TRACKLE_PRIVATE_KEY_LIB_TEST"])
+
+def list_to_private_key(private_key: list):
+    """ Convert list of integers to private key as ctypes uint8 array """
+    return (ctypes.c_uint8*121)(*private_key)
+
+#  Test suite credentials
+
+TRACKLE_CLIENT_ID = os.environ["TRACKLE_CLIENT_ID_LIB_TEST"]
+TRACKLE_CLIENT_SECRET = os.environ["TRACKLE_CLIENT_SECRET_LIB_TEST"]

@@ -41,6 +41,25 @@
 static struct sockaddr_in cloud_addr;
 static int cloud_socket = -1;
 
+#define MAX_CONN_ADDRESS_LEN 64
+static char overriddenAddress[MAX_CONN_ADDRESS_LEN + 1] = {0};
+static int overriddenPort = 0;
+
+void Callbacks_setConnectionOverride(bool override, char *address, int port)
+{
+    if (override)
+    {
+        strncpy(overriddenAddress, address, MAX_CONN_ADDRESS_LEN + 1);
+        overriddenAddress[MAX_CONN_ADDRESS_LEN] = '\0';
+        overriddenPort = port;
+    }
+    else
+    {
+        overriddenAddress[0] = '\0';
+        overriddenPort = 0;
+    }
+}
+
 system_tick_t Callbacks_get_millis_cb()
 {
     struct timespec t;
@@ -76,7 +95,22 @@ int Callbacks_connect_udp_cb(const char *address, int port)
     int ip_protocol;
     char addr_str[128];
 
-    struct hostent *res = gethostbyname("192.168.1.124");
+    struct hostent *res;
+
+    // If address is overridden, it's an IP, don't resolve it with DNS
+    if (strcmp(overriddenAddress, "") != 0)
+    {
+        address = overriddenAddress;
+        port = overriddenPort;
+
+        struct in_addr addr = {.s_addr = inet_addr(address)};
+        res = gethostbyaddr(&addr, sizeof(struct in_addr), AF_INET);
+    }
+    // else it's a domain, resolve it with DNS.
+    else
+    {
+        res = gethostbyname(address);
+    }
 
     if (res)
         EXAMPLE_LOG("Dns address %s resolved\n", address);
