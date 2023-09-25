@@ -671,7 +671,7 @@ class TrackleLibraryTest(ut.TestCase):
 
     def test_publish_8(self):
         """
-        pubblicazione blackwise con ritrasmissione, con proxy, ok
+        pubblicazione blockwise con ritrasmissione, con proxy, ok
             - si spegne il proxy,
             - 1: return true,
             - 2: published true: si riattiva il proxy,
@@ -698,7 +698,7 @@ class TrackleLibraryTest(ut.TestCase):
                             "ack" : trackle_enums.PublishType.WITH_ACK,
                             "key" : 2})
         # Wait with proxy off
-        time.sleep(20)
+        time.sleep(10)
         # Switch on proxy
         self.to_proxy.put({"name" : "proxy_on"})
         wait_event_name(self.from_proxy, "proxy_switched_on")
@@ -836,7 +836,7 @@ class TrackleLibraryTest(ut.TestCase):
                             "ack" : trackle_enums.PublishType.WITH_ACK,
                             "key" : 2})
         # Wait with proxy off
-        time.sleep(20)
+        time.sleep(10)
         # Switch on proxy
         self.to_proxy.put({"name" : "proxy_on"})
         wait_event_name(self.from_proxy, "proxy_switched_on")
