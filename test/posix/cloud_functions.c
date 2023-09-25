@@ -1,33 +1,28 @@
 #include <inttypes.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
 // GET functions
 
-static bool boolVal = false;
-void *CloudFun_getEchoBool(const char *args)
+bool CloudFun_getEchoBool(const char *args)
 {
-    boolVal = atoi(args);
-    return &boolVal;
+    return atoi(args);
 }
 
-static int intVal = 0;
-void *CloudFun_getEchoInt(const char *args)
+int32_t CloudFun_getEchoInt(const char *args)
 {
-    intVal = atoi(args);
-    return &intVal;
+    return atoi(args);
 }
 
-static double doubleVal = 0;
-void *CloudFun_getEchoDouble(const char *args)
+double CloudFun_getEchoDouble(const char *args)
 {
-    doubleVal = atof(args);
-    return &doubleVal;
+    return atof(args);
 }
 
 static char stringVal[64];
-void *CloudFun_getEchoString(const char *args)
+char *CloudFun_getEchoString(const char *args)
 {
     strncpy(stringVal, args, 64);
     stringVal[63] = '\0';
@@ -35,7 +30,7 @@ void *CloudFun_getEchoString(const char *args)
 }
 
 static char jsonVal[64];
-void *CloudFun_getEchoJson(const char *args)
+char *CloudFun_getEchoJson(const char *args)
 {
     strncpy(jsonVal, args, 64);
     jsonVal[63] = '\0';

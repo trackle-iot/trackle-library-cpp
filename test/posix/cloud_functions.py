@@ -16,15 +16,15 @@ __lib = ctypes.cdll.LoadLibrary(f"lib/cloud_functions.{__DLL_EXTENSION}")
 
 get_echo_bool = __lib.CloudFun_getEchoBool
 get_echo_bool.argtypes = (ctypes.c_char_p,)
-get_echo_bool.restype = ctypes.c_char_p
+get_echo_bool.restype = ctypes.c_bool
 
 get_echo_int = __lib.CloudFun_getEchoInt
 get_echo_int.argtypes = (ctypes.c_char_p,)
-get_echo_int.restype = ctypes.c_char_p
+get_echo_int.restype = ctypes.c_int32
 
 get_echo_double = __lib.CloudFun_getEchoDouble
 get_echo_double.argtypes = (ctypes.c_char_p,)
-get_echo_double.restype = ctypes.c_char_p
+get_echo_double.restype = ctypes.c_double
 
 get_echo_string = __lib.CloudFun_getEchoString
 get_echo_string.argtypes = (ctypes.c_char_p,)

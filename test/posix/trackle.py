@@ -147,7 +147,7 @@ post.restype = ctypes.c_bool
 
 GET_CB = ctypes.CFUNCTYPE(ctypes.c_char_p, ctypes.c_char_p)
 get = __lib.trackleGet
-get.argtypes = [ctypes.c_void_p, ctypes.c_char_p, GET_CB, ctypes.c_int]
+get.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_void_p, ctypes.c_int]
 get.restype = ctypes.c_bool
 
 publish = __lib.tracklePublish
