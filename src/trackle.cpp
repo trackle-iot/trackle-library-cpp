@@ -412,7 +412,7 @@ bool Trackle::get(const char *varKey, user_variable_bool_cb_t fn)
 #pragma GCC diagnostic pop
 }
 
-bool Trackle::get(const char *varKey, user_variable_int_cb_t fn)
+bool Trackle::get(const char *varKey, user_variable_int32_cb_t fn)
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
