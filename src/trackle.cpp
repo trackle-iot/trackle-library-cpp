@@ -187,7 +187,6 @@ trackle::protocol::Connection_Properties_Type connectionPropTypeList[5] = {
     {150, 20, 5}, // LPWA
 };                // in seconds
 
-
 /**
  * It increases the connection timeout by a factor of 2, and adds a random number between 0 and 0.512
  */
@@ -248,7 +247,14 @@ struct CloudVariableTypeBase
     char userVarKey[MAX_VARIABLE_KEY_LENGTH + 1];
     Data_TypeDef userVarType;
     Data_TypeDef stringVarType;
+
+    // According to the following SO answer and comments, it's not safe to cast function pointers to void pointers (void*),
+    // but it's safe to cast a function pointer type to another function pointer type.
+    // For this reason, here we keep a reference to callback function using void *(*)(const char*).
+    // It's client's responsibility to cast such pointer to the correct type according to userVarType.
+    // URL to SO answer: https://stackoverflow.com/questions/36645660/why-cant-i-cast-a-function-pointer-to-void
     void *(*funct)(const char *);
+
     CloudVariableTypeBase(void *(*fn)(const char *), const char *varKey, Data_TypeDef type)
     {
         strncpy(userVarKey, varKey, sizeof(userVarKey) - 1);
@@ -337,7 +343,8 @@ bool Trackle::addGet(const char *varKey, void *(*fn)(const char *), Data_TypeDef
         return false;
     }
 
-    if (vars.size() >= MAX_VARIABLE_COUNT) {
+    if (vars.size() >= MAX_VARIABLE_COUNT)
+    {
         LOG(WARN, "Maximum allowed limit of %d gets reached", MAX_VARIABLE_COUNT);
         return false;
     }
@@ -412,7 +419,7 @@ bool Trackle::get(const char *varKey, user_variable_bool_cb_t fn)
 #pragma GCC diagnostic pop
 }
 
-bool Trackle::get(const char *varKey, user_variable_int_cb_t fn)
+bool Trackle::get(const char *varKey, user_variable_int32_cb_t fn)
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
@@ -509,7 +516,8 @@ CloudFunctionTypeBase *find_func_by_key(const char *funcKey)
 
 bool Trackle::post(const char *funcKey, user_function_int_char_t *func, Function_PermissionDef permission)
 {
-    if (funcs.size() >= MAX_FUNCTION_COUNT) {
+    if (funcs.size() >= MAX_FUNCTION_COUNT)
+    {
         LOG(WARN, "Maximum allowed limit of %d posts reached", MAX_FUNCTION_COUNT);
         return false;
     }
@@ -555,7 +563,8 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
     }
 
     // reject system events
-    if(is_system(eventName)) {
+    if (is_system(eventName))
+    {
         LOG(WARN, "NOT PUBLISHED: can't publish system event");
         return false;
     }
@@ -1910,7 +1919,6 @@ void Trackle::setKeys(const uint8_t client[PRIVATE_KEY_LENGTH])
  */
 char *file_content;
 uint64_t file_index = 0; // uint32_t is enough for correct use; use uint64_t for easier non-overflowing calculations
-
 
 /**
  * It's called to tell the application that a firmware update is about to start

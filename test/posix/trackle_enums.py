@@ -13,16 +13,6 @@ class PublishType(enum.IntEnum):
     NO_ACK = 0x2
     WITH_ACK = 0x8
 
-class TypeDef(enum.IntEnum):
-    """ Type of value returned by cloud GET function """
-    VAR_BOOLEAN = 1
-    VAR_INT = 2
-    VAR_STRING = 4
-    VAR_CHAR = 5
-    VAR_LONG = 6
-    VAR_JSON = 7
-    VAR_DOUBLE = 9
-
 class PermissionDef(enum.IntEnum):
     """ Access permission of a POST function """
     ALL_USERS = 1

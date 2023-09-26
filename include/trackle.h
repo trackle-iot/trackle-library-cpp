@@ -141,7 +141,7 @@ public:
          *
          * @return The return value is the result of the addGet function.
          */
-        bool get(const char *varKey, user_variable_int_cb_t fn);
+        bool get(const char *varKey, user_variable_int32_cb_t fn);
 
         /**
          * @brief Add a getter function for a variable of type double.
