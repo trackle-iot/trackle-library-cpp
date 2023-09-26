@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include <trackle_interface.h>
+
 // GET functions
 
 bool CloudFun_getEchoBool(const char *args)

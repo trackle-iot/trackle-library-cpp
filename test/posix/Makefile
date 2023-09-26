@@ -13,6 +13,7 @@ else
     endif
 endif
 
+TEST_AUX_FUN_SRCS = test_auxiliary_functions.c
 
 # Trackle library and its components compilation variables
 TRACKLE_LIB_SRCS = $(TRACKLE_LIB)/src/*.cpp
@@ -71,7 +72,10 @@ callbacks_fpic:
 cloud_functions_fpic:
 	$(CC) -w -c -fPIC $(CLOUD_FUNCTIONS_SRCS) $(SHARED_INCLUDES) $(TRACKLE_LIB_INCLUDES) $(UECC_INCLUDES) $(TINY_INCLUDES) $(DLL_FLAGS)
 
-dll_trackle: trackle_library_fpic uecc_fpic tinydtls_fpic
+test_aux_fun_fpic:
+	$(CC) -w -c -fPIC $(TEST_AUX_FUN_SRCS) $(SHARED_INCLUDES) $(TRACKLE_LIB_INCLUDES) $(UECC_INCLUDES) $(TINY_INCLUDES) $(DLL_FLAGS)
+
+dll_trackle: trackle_library_fpic uecc_fpic tinydtls_fpic test_aux_fun_fpic
 	mkdir -p lib
 	$(CC) -w -shared $(OBJS) -o lib/trackle_library.$(DLL_EXTENSION) -lstdc++ -lm
 	rm -f *.o

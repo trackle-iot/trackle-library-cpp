@@ -62,11 +62,11 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
     post_success_cb = trackle.POST_CB(cloud_functions.post_success)
     post_failing_cb = trackle.POST_CB(cloud_functions.post_failing)
     post_private_cb = trackle.POST_CB(cloud_functions.post_private)
-    get_echo_bool_cb = trackle.GET_CB(cloud_functions.get_echo_bool)
-    get_echo_int_cb = trackle.GET_CB(cloud_functions.get_echo_int)
-    get_echo_double_cb = trackle.GET_CB(cloud_functions.get_echo_double)
-    get_echo_string_cb = trackle.GET_CB(cloud_functions.get_echo_string)
-    get_echo_json_cb = trackle.GET_CB(cloud_functions.get_echo_json)
+    get_echo_bool_cb = trackle.GET_BOOL_CB(cloud_functions.get_echo_bool)
+    get_echo_int_cb = trackle.GET_INT32_CB(cloud_functions.get_echo_int)
+    get_echo_double_cb = trackle.GET_DOUBLE_CB(cloud_functions.get_echo_double)
+    get_echo_string_cb = trackle.GET_STRING_CB(cloud_functions.get_echo_string)
+    get_echo_json_cb = trackle.GET_JSON_CB(cloud_functions.get_echo_json)
 
     trackle_s = trackle.new()
     trackle.init(trackle_s)
@@ -103,11 +103,11 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
     trackle.post(trackle_s, b"postFailing", post_failing_cb, trackle.PermissionDef.ALL_USERS)
     trackle.post(trackle_s, b"postPrivate", post_private_cb, trackle.PermissionDef.OWNER_ONLY)
 
-    trackle.get(trackle_s, b"getEchoBool", get_echo_bool_cb, trackle.TypeDef.VAR_BOOLEAN)
-    trackle.get(trackle_s, b"getEchoInt", get_echo_int_cb, trackle.TypeDef.VAR_INT)
-    trackle.get(trackle_s, b"getEchoDouble", get_echo_double_cb, trackle.TypeDef.VAR_DOUBLE)
-    trackle.get(trackle_s, b"getEchoString", get_echo_string_cb, trackle.TypeDef.VAR_STRING)
-    trackle.get(trackle_s, b"getEchoJson", get_echo_json_cb, trackle.TypeDef.VAR_JSON)
+    trackle.register_get_bool(trackle_s, b"getEchoBool", get_echo_bool_cb)
+    trackle.register_get_int32(trackle_s, b"getEchoInt", get_echo_int_cb)
+    trackle.register_get_double(trackle_s, b"getEchoDouble", get_echo_double_cb)
+    trackle.register_get_string(trackle_s, b"getEchoString", get_echo_string_cb)
+    trackle.register_get_json(trackle_s, b"getEchoJson", get_echo_json_cb)
 
     callbacks.set_connection_override(True, b"127.0.0.1", startup_params.proxy_port)
 

@@ -145,10 +145,31 @@ post = __lib.tracklePost
 post.argtypes = [ctypes.c_void_p, ctypes.c_char_p, POST_CB, ctypes.c_int]
 post.restype = ctypes.c_bool
 
-GET_CB = ctypes.CFUNCTYPE(ctypes.c_char_p, ctypes.c_char_p)
-get = __lib.trackleGet
-get.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_void_p, ctypes.c_int]
-get.restype = ctypes.c_bool
+GET_BOOL_CB = ctypes.CFUNCTYPE(ctypes.c_bool, ctypes.c_char_p)
+register_get_bool = __lib.TestAuxFun_trackleGetBool
+register_get_bool.argtypes = (ctypes.c_void_p, ctypes.c_char_p, GET_BOOL_CB)
+register_get_bool.restype = ctypes.c_bool
+
+GET_INT32_CB = ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.c_char_p)
+register_get_int32 = __lib.TestAuxFun_trackleGetInt32
+register_get_int32.argtypes = (ctypes.c_void_p, ctypes.c_char_p, GET_INT32_CB)
+register_get_int32.restype = ctypes.c_bool
+
+GET_DOUBLE_CB = ctypes.CFUNCTYPE(ctypes.c_double, ctypes.c_char_p)
+register_get_double = __lib.TestAuxFun_trackleGetDouble
+register_get_double.argtypes = (ctypes.c_void_p, ctypes.c_char_p, GET_DOUBLE_CB)
+register_get_double.restype = ctypes.c_bool
+
+GET_STRING_CB = ctypes.CFUNCTYPE(ctypes.c_char_p, ctypes.c_char_p)
+register_get_string = __lib.TestAuxFun_trackleGetString
+register_get_string.argtypes = (ctypes.c_void_p, ctypes.c_char_p, GET_STRING_CB)
+register_get_string.restype = ctypes.c_bool
+
+GET_JSON_CB = ctypes.CFUNCTYPE(ctypes.c_char_p, ctypes.c_char_p)
+register_get_json = __lib.TestAuxFun_trackleGetJson
+register_get_json.argtypes = (ctypes.c_void_p, ctypes.c_char_p, GET_JSON_CB)
+register_get_json.restype = ctypes.c_bool
+
 
 publish = __lib.tracklePublish
 publish.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int,
