@@ -1834,7 +1834,7 @@ void Trackle::loop()
             // create socket
             if (Trackle::connect() > 0)
             { // socket creation ok
-                LOG(INFO, "Socket connection completed, starting handshake");
+                LOG(INFO, "Socket creation completed, starting handshake");
             }
             else // on socket creation error, reset timeout
             {
