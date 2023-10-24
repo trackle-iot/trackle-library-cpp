@@ -11,6 +11,7 @@ namespace trackle
 		uint32_t T_ACK_TIMEOUT;
 		uint32_t MAX_TRANSMIT_WAIT;
 		uint16_t CoAPMessage::message_count = 0;
+		system_tick_t last_ack_time = 0;
 
 		bool is_ack_or_reset(const uint8_t *buf, size_t len)
 		{
@@ -48,7 +49,16 @@ namespace trackle
 			{
 				LOG(WARN, "CLOUD_UNACKNOWLEDGED_MESSAGES");
 				diagnostic::diagnosticCloud(CLOUD_UNACKNOWLEDGED_MESSAGES, 1);
-				channel.command(MessageChannel::CLOSE);
+
+				// do not close channel if ack was received after packet send_time
+				if (msg.get_send_time() > last_ack_time)
+				{
+					channel.command(MessageChannel::CLOSE);
+				}
+				else
+				{
+					LOG(INFO, "Channel not closed because an ack was received recently");
+				}
 			}
 		}
 
@@ -124,6 +134,11 @@ namespace trackle
 				{
 					int32_t round_trip = (time - coap_msg->get_send_time());
 					diagnostic::diagnosticCloud(CLOUD_COAP_ROUND_TRIP, round_trip);
+				}
+
+				if (msgtype == CoAPType::ACK)
+				{
+					last_ack_time = time;
 				}
 
 				if (msgtype == CoAPType::RESET)

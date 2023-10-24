@@ -347,9 +347,6 @@ namespace trackle
                  * Reset channel state machine
                  */
                 channel.init_status();
-
-                LOG(INFO, "Socket connection completed, starting handshake");
-
                 this->status = CHANNEL_ESTABLISHED;
 
                 break;
