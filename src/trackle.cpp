@@ -1046,7 +1046,7 @@ bool appendSystemInfo(appender_fn appender, void *append, void *reserved)
     product_details_t details;
     details.size = sizeof(details);
 
-    string json = "\"i\":" + int_to_string(connectionPropType.ping_interval) + "." + int_to_string(connectionType) + ",\"o\":" + int_to_string(otaMethod) + ",\"p\":" + int_to_string(PLATFORM_ID) + ",\"s\":\"" + int_to_string(VERSION_MAYOR) + "." + int_to_string(VERSION_MINOR) + "." + int_to_string(VERSION_PATCH) + "\"";
+    string json = "\"i\":" + int_to_string(connectionPropType.ping_interval) + "." + int_to_string(connectionType) + ",\"o\":" + int_to_string(otaMethod) + ",\"p\":" + int_to_string(PLATFORM_ID) + ",\"s\":\"" + int_to_string(VERSION_MAYOR) + "." + int_to_string(VERSION_MINOR) + "." + int_to_string(VERSION_PATCH) + VERSION_DEV + "\"";
 
     LOG(ERROR, "%s", json.c_str());
     const char *result = json.c_str();
