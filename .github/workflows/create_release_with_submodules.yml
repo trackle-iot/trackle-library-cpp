@@ -48,7 +48,7 @@ jobs:
                      ## Assets description:
                      - ```${{ env.TARBALL_NAME }}.tar.gz```: contains the complete sources of the project, along with required submodules.
                      - ```Source code (zip)``` and ```Source code (tar.gz)```: archives generated automatically by GitHub, without submodules.
-                draft: false
+                draft: true
                 prerelease: false
             - name: Cleanup repo files
               run: rm -fr .git*
