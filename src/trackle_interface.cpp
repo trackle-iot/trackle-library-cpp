@@ -202,6 +202,18 @@ void trackleSetComponentsList(Trackle *v, const char *componentsList)
     v->setComponentsList(componentsList);
 }
 
+void trackleSetImei(Trackle *v, const char *imei)
+{
+    IF_NOT_INITIALIZED_WARNING();
+    v->setImei(imei);
+}
+
+void trackleSetIccid(Trackle *v, const char *iccid)
+{
+    IF_NOT_INITIALIZED_WARNING();
+    v->setIccid(iccid);
+}
+
 void trackleSetPingInterval(Trackle *v, uint32_t pingInterval)
 {
     IF_NOT_INITIALIZED_WARNING();

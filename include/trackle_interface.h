@@ -234,6 +234,20 @@ extern "C"
     void trackleSetComponentsList(Trackle *v, const char *componentsList);
 
     /*!
+     * @copybrief Trackle::setImei()
+     * @trackle
+     * @copydetails Trackle::setImei()
+     */
+    void trackleSetImei(Trackle *v, const char *imei);
+
+    /*!
+     * @copybrief Trackle::setIccid()
+     * @trackle
+     * @copydetails Trackle::setIccid()
+     */
+    void trackleSetIccid(Trackle *v, const char *iccid);
+
+    /*!
      * @copybrief Trackle::setSaveSessionCallback()
      * @trackle
      * @copydetails Trackle::setSaveSessionCallback()
