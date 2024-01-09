@@ -3,15 +3,16 @@ name: Update online Doxygen documentation
 on:
   push:
     branches:
-      - main
+      - v3
   workflow_dispatch:
 
 jobs:
   update_online_documentation:
     runs-on: ubuntu-latest
     steps:
-      - uses: DenverCoder1/doxygen-github-pages-action@v1
+      - uses: DenverCoder1/doxygen-github-pages-action@v1.3.0
         with:
           github_token: ${{ secrets.TOKEN }}
           branch: gh-pages
           folder: doc/html
+          target_folder: v3
