@@ -203,6 +203,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a1d173dc4ae4d40bd63c9bae307c7ef84"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8cpp.html#a1d173dc4ae4d40bd63c9bae307c7ef84">trackleSetComponentsList</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, const char *componentsList)</td></tr>
 <tr class="memdesc:a1d173dc4ae4d40bd63c9bae307c7ef84"><td class="mdescLeft">&#160;</td><td class="mdescRight">It copies the componentsList parameter into the components_list variable and send it to <a class="el" href="class_trackle.html">Trackle</a> on describe message.  <a href="trackle__interface_8cpp.html#a1d173dc4ae4d40bd63c9bae307c7ef84">More...</a><br /></td></tr>
 <tr class="separator:a1d173dc4ae4d40bd63c9bae307c7ef84"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afd47596631521373b2a47270978d88af"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8cpp.html#afd47596631521373b2a47270978d88af">trackleSetImei</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, const char *imei)</td></tr>
+<tr class="memdesc:afd47596631521373b2a47270978d88af"><td class="mdescLeft">&#160;</td><td class="mdescRight">It saves the imei value and send it to <a class="el" href="class_trackle.html">Trackle</a> on description.  <a href="trackle__interface_8cpp.html#afd47596631521373b2a47270978d88af">More...</a><br /></td></tr>
+<tr class="separator:afd47596631521373b2a47270978d88af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a97af6ae6ac18cf6b947e507b3bfc0b64"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8cpp.html#a97af6ae6ac18cf6b947e507b3bfc0b64">trackleSetIccid</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, const char *iccid)</td></tr>
+<tr class="memdesc:a97af6ae6ac18cf6b947e507b3bfc0b64"><td class="mdescLeft">&#160;</td><td class="mdescRight">It saves the iccid value and send it to <a class="el" href="class_trackle.html">Trackle</a> on description.  <a href="trackle__interface_8cpp.html#a97af6ae6ac18cf6b947e507b3bfc0b64">More...</a><br /></td></tr>
+<tr class="separator:a97af6ae6ac18cf6b947e507b3bfc0b64"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa59f3699b8fb6605366e89aa4ca451b2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8cpp.html#aa59f3699b8fb6605366e89aa4ca451b2">trackleSetPingInterval</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, uint32_t <a class="el" href="trackle_8cpp.html#a630b3f747793bb20686a528702ce4194">pingInterval</a>)</td></tr>
 <tr class="memdesc:aa59f3699b8fb6605366e89aa4ca451b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function sets the interval at which the <a class="el" href="class_trackle.html">Trackle</a> will send a ping to the server.  <a href="trackle__interface_8cpp.html#aa59f3699b8fb6605366e89aa4ca451b2">More...</a><br /></td></tr>
 <tr class="separator:aa59f3699b8fb6605366e89aa4ca451b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1461,6 +1467,80 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">v</td><td>The <a class="el" href="class_trackle.html">Trackle</a> struct. </td></tr>
     <tr><td class="paramname">firmwareversion</td><td>The firmware version of the product. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a97af6ae6ac18cf6b947e507b3bfc0b64"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a97af6ae6ac18cf6b947e507b3bfc0b64">&#9670;&nbsp;</a></span>trackleSetIccid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void trackleSetIccid </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_trackle.html">Trackle</a> *&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>iccid</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>It saves the iccid value and send it to <a class="el" href="class_trackle.html">Trackle</a> on description. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">v</td><td>The <a class="el" href="class_trackle.html">Trackle</a> struct. </td></tr>
+    <tr><td class="paramname">iccid</td><td>The iccid of the SIM. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="afd47596631521373b2a47270978d88af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afd47596631521373b2a47270978d88af">&#9670;&nbsp;</a></span>trackleSetImei()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void trackleSetImei </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_trackle.html">Trackle</a> *&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>imei</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>It saves the imei value and send it to <a class="el" href="class_trackle.html">Trackle</a> on description. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">v</td><td>The <a class="el" href="class_trackle.html">Trackle</a> struct. </td></tr>
+    <tr><td class="paramname">imei</td><td>The imei of the cellular module. </td></tr>
   </table>
   </dd>
 </dl>

@@ -36,6 +36,8 @@ var trackle__interface_8h =
     [ "trackleSetFinishFirmwareUpdateCallback", "trackle__interface_8h.html#a8faab60f417cbf28d8e4b2ee41531a5b", null ],
     [ "trackleSetFirmwareUrlUpdateCallback", "trackle__interface_8h.html#ab665cffc56a07296654b82baa90e1ad9", null ],
     [ "trackleSetFirmwareVersion", "trackle__interface_8h.html#ac503a345ce4e85de5709a376fc6fd7b1", null ],
+    [ "trackleSetIccid", "trackle__interface_8h.html#a97af6ae6ac18cf6b947e507b3bfc0b64", null ],
+    [ "trackleSetImei", "trackle__interface_8h.html#afd47596631521373b2a47270978d88af", null ],
     [ "trackleSetKeys", "trackle__interface_8h.html#a31a066a5c46f71b960c00a0980862d78", null ],
     [ "trackleSetLogCallback", "trackle__interface_8h.html#a5239b881771ed346fb4758c14edde876", null ],
     [ "trackleSetLogLevel", "trackle__interface_8h.html#a9ab33f0316244a0aa9ab630a869fd643", null ],

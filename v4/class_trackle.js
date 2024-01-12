@@ -45,6 +45,8 @@ var class_trackle =
     [ "setFinishFirmwareUpdateCallback", "class_trackle.html#ae3daca8731a38bdc3877f8b20b0cd661", null ],
     [ "setFirmwareUrlUpdateCallback", "class_trackle.html#aef95e932b85dc8607ed062a057ca48bc", null ],
     [ "setFirmwareVersion", "class_trackle.html#a1763a5ef4ec4a7ba55fcde732d8636c6", null ],
+    [ "setIccid", "class_trackle.html#ae82399739d89fe183b9da648c6282d21", null ],
+    [ "setImei", "class_trackle.html#a90f0e97b5c982a0cf23250d439c57244", null ],
     [ "setKeys", "class_trackle.html#aeb88451c243449d642f92e9b7383d517", null ],
     [ "setLogCallback", "class_trackle.html#a5722b42f84feecc84075029d147d7e0a", null ],
     [ "setLogLevel", "class_trackle.html#af2b0ceead1697c0febb57a10d046c53a", null ],

@@ -269,6 +269,8 @@ Variables</h2></td></tr>
 <tr class="separator:ae642c71b4f85f934302a1c2ae0fbd7a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a561d931c5de5c40e8a211dd63746e7bb"><td class="memItemLeft" align="right" valign="top">const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a561d931c5de5c40e8a211dd63746e7bb">COMPONENTS_LIST_SIZE</a> = MAX_COMPONENTS_LIST_LENGTH + 20</td></tr>
 <tr class="separator:a561d931c5de5c40e8a211dd63746e7bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad48c0bdbc836df1cd789b61d3d29d8d7"><td class="memItemLeft" align="right" valign="top">const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#ad48c0bdbc836df1cd789b61d3d29d8d7">DESCRIBE_ATTR_SIZE</a> = 35</td></tr>
+<tr class="separator:ad48c0bdbc836df1cd789b61d3d29d8d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab4c32b6985960cdc5f8a52dc7a272357"><td class="memItemLeft" align="right" valign="top">trackle::protocol::DTLSProtocol&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#ab4c32b6985960cdc5f8a52dc7a272357">protocol_instance</a></td></tr>
 <tr class="separator:ab4c32b6985960cdc5f8a52dc7a272357"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9660a413af9a946dedd44eaccdde53c0"><td class="memItemLeft" align="right" valign="top">ProtocolFacade *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a9660a413af9a946dedd44eaccdde53c0">protocol</a> = &amp;<a class="el" href="trackle_8cpp.html#ab4c32b6985960cdc5f8a52dc7a272357">protocol_instance</a></td></tr>
@@ -363,6 +365,10 @@ Variables</h2></td></tr>
 <tr class="separator:a55394e29c76fd9d6d31f86518d9e4c00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5de020fc2383e7ea147fece732d432c8"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a5de020fc2383e7ea147fece732d432c8">components_list</a> [<a class="el" href="trackle_8cpp.html#a561d931c5de5c40e8a211dd63746e7bb">COMPONENTS_LIST_SIZE</a>+1]</td></tr>
 <tr class="separator:a5de020fc2383e7ea147fece732d432c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a41c819f37613235c174751ea4fc65976"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a41c819f37613235c174751ea4fc65976">describe_imei</a> [<a class="el" href="trackle_8cpp.html#ad48c0bdbc836df1cd789b61d3d29d8d7">DESCRIBE_ATTR_SIZE</a>+1]</td></tr>
+<tr class="separator:a41c819f37613235c174751ea4fc65976"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0656b375d5020d5fd1aa1ac794b8ff7b"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a0656b375d5020d5fd1aa1ac794b8ff7b">describe_iccid</a> [<a class="el" href="trackle_8cpp.html#ad48c0bdbc836df1cd789b61d3d29d8d7">DESCRIBE_ATTR_SIZE</a>+1]</td></tr>
+<tr class="separator:a0656b375d5020d5fd1aa1ac794b8ff7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2e22aedfe2dcb8c8e7f2042dc0fef876"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="struct_cloud_variable_type_base.html">CloudVariableTypeBase</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a2e22aedfe2dcb8c8e7f2042dc0fef876">vars</a></td></tr>
 <tr class="separator:a2e22aedfe2dcb8c8e7f2042dc0fef876"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3ec629319e81f0a5a840c68da7582feb"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="struct_cloud_function_type_base.html">CloudFunctionTypeBase</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a3ec629319e81f0a5a840c68da7582feb">funcs</a></td></tr>
@@ -2149,6 +2155,48 @@ Variables</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">uint32_t counter = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad48c0bdbc836df1cd789b61d3d29d8d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad48c0bdbc836df1cd789b61d3d29d8d7">&#9670;&nbsp;</a></span>DESCRIBE_ATTR_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const int DESCRIBE_ATTR_SIZE = 35</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0656b375d5020d5fd1aa1ac794b8ff7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0656b375d5020d5fd1aa1ac794b8ff7b">&#9670;&nbsp;</a></span>describe_iccid</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char describe_iccid[<a class="el" href="trackle_8cpp.html#ad48c0bdbc836df1cd789b61d3d29d8d7">DESCRIBE_ATTR_SIZE</a>+1]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a41c819f37613235c174751ea4fc65976"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a41c819f37613235c174751ea4fc65976">&#9670;&nbsp;</a></span>describe_imei</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char describe_imei[<a class="el" href="trackle_8cpp.html#ad48c0bdbc836df1cd789b61d3d29d8d7">DESCRIBE_ATTR_SIZE</a>+1]</td>
         </tr>
       </table>
 </div><div class="memdoc">

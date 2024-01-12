@@ -232,6 +232,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:acfca91867f4bc5b7b2d70b8956f96d99"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#acfca91867f4bc5b7b2d70b8956f96d99">setComponentsList</a> (const char *componentsList)</td></tr>
 <tr class="memdesc:acfca91867f4bc5b7b2d70b8956f96d99"><td class="mdescLeft">&#160;</td><td class="mdescRight">It copies the componentsList parameter into the components_list variable and send it to <a class="el" href="class_trackle.html">Trackle</a> on describe message.  <a href="class_trackle.html#acfca91867f4bc5b7b2d70b8956f96d99">More...</a><br /></td></tr>
 <tr class="separator:acfca91867f4bc5b7b2d70b8956f96d99"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90f0e97b5c982a0cf23250d439c57244"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#a90f0e97b5c982a0cf23250d439c57244">setImei</a> (const char *imei)</td></tr>
+<tr class="memdesc:a90f0e97b5c982a0cf23250d439c57244"><td class="mdescLeft">&#160;</td><td class="mdescRight">It saves the imei value and send it to <a class="el" href="class_trackle.html">Trackle</a> on description.  <a href="class_trackle.html#a90f0e97b5c982a0cf23250d439c57244">More...</a><br /></td></tr>
+<tr class="separator:a90f0e97b5c982a0cf23250d439c57244"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae82399739d89fe183b9da648c6282d21"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#ae82399739d89fe183b9da648c6282d21">setIccid</a> (const char *iccid)</td></tr>
+<tr class="memdesc:ae82399739d89fe183b9da648c6282d21"><td class="mdescLeft">&#160;</td><td class="mdescRight">It saves the iccid value and send it to <a class="el" href="class_trackle.html">Trackle</a> on description.  <a href="class_trackle.html#ae82399739d89fe183b9da648c6282d21">More...</a><br /></td></tr>
+<tr class="separator:ae82399739d89fe183b9da648c6282d21"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a45db9022cf3c3380768e9c982b737dd1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#a45db9022cf3c3380768e9c982b737dd1">setSaveSessionCallback</a> (saveSessionCallback *save)</td></tr>
 <tr class="memdesc:a45db9022cf3c3380768e9c982b737dd1"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function sets the callback function that will be called when it's needed to save the current DTLS session.  <a href="class_trackle.html#a45db9022cf3c3380768e9c982b737dd1">More...</a><br /></td></tr>
 <tr class="separator:a45db9022cf3c3380768e9c982b737dd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1848,6 +1854,58 @@ Private Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">firmwareversion</td><td>The firmware version of the product. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ae82399739d89fe183b9da648c6282d21"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae82399739d89fe183b9da648c6282d21">&#9670;&nbsp;</a></span>setIccid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void setIccid </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>iccid</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>It saves the iccid value and send it to <a class="el" href="class_trackle.html">Trackle</a> on description. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iccid</td><td>The iccid of the SIM. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a90f0e97b5c982a0cf23250d439c57244"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a90f0e97b5c982a0cf23250d439c57244">&#9670;&nbsp;</a></span>setImei()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void setImei </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>imei</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>It saves the imei value and send it to <a class="el" href="class_trackle.html">Trackle</a> on description. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">imei</td><td>The imei of the cellular module. </td></tr>
   </table>
   </dd>
 </dl>
