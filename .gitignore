@@ -8,3 +8,4 @@ lib/tinydtls/dtls_config.h.gch
 setup_credentials.sh
 *.o
 /local_test
+/test/posix/env.sh
