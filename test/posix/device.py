@@ -18,6 +18,8 @@ class DeviceStartupParams:
     proxy_port: int
     claim_code: str = ""
     components_list: str = ""
+    imei: str = ""
+    iccid: str = ""
 
 class ConnectionStatus:
 
@@ -86,6 +88,10 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
         trackle.setClaimCode(trackle_s, startup_params.claim_code.encode("utf-8"))
     if startup_params.components_list:
         trackle.setComponentsList(trackle_s, startup_params.components_list.encode("utf-8"))
+    if startup_params.imei:
+        trackle.setImei(trackle_s, startup_params.imei.encode("utf-8"))
+    if startup_params.iccid:
+        trackle.setIccid(trackle_s, startup_params.iccid.encode("utf-8"))
 
     trackle.setMillis(trackle_s, millis_cb)
     trackle.setSendCallback(trackle_s, send_udp_cb)

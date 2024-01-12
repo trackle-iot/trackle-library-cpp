@@ -468,6 +468,20 @@ public:
         void setComponentsList(const char *componentsList);
 
         /**
+         * @brief It saves the imei value and send it to Trackle on description
+         *
+         * @param imei The imei of the cellular module.
+         */
+        void setImei(const char *imei);
+
+        /**
+         * @brief It saves the iccid value and send it to Trackle on description
+         *
+         * @param iccid The iccid of the SIM.
+         */
+        void setIccid(const char *iccid);
+
+        /**
          * @brief This function sets the callback function that will be called when it's needed to save the current
          * DTLS session.
          *

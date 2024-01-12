@@ -53,6 +53,7 @@ const uint32_t PUBLISH_EVENT_FLAG_PUBLIC = 0x0;
 const uint32_t PUBLISH_EVENT_FLAG_PRIVATE = 0x1;
 const int CLAIM_CODE_SIZE = 63;
 const int COMPONENTS_LIST_SIZE = MAX_COMPONENTS_LIST_LENGTH + 20;
+const int DESCRIBE_ATTR_SIZE = 35;
 
 // DICHIARAZIONI  ------------------------------------------------------------
 
@@ -243,6 +244,8 @@ unsigned char server_public_key[PUBLIC_KEY_LENGTH] = {0x30, 0x59, 0x30, 0x13, 0x
 unsigned char client_private_key[PRIVATE_KEY_LENGTH];
 char claim_code[CLAIM_CODE_SIZE + 1];
 char components_list[COMPONENTS_LIST_SIZE + 1];
+char describe_imei[DESCRIBE_ATTR_SIZE + 1];
+char describe_iccid[DESCRIBE_ATTR_SIZE + 1];
 
 // TRACKLE.VARIABLE ------------------------------------------------------------
 
@@ -1130,8 +1133,9 @@ bool appendSystemInfo(appender_fn appender, void *append, void *reserved)
     product_details_t details;
     details.size = sizeof(details);
 
-    string json = "\"i\":" + int_to_string(connectionPropType.ping_interval) + "." + int_to_string(connectionType) + ",\"o\":" + int_to_string(otaMethod) + ",\"p\":" + int_to_string(PLATFORM_ID) + ",\"s\":\"" + int_to_string(VERSION_MAJOR) + "." + int_to_string(VERSION_MINOR) + "." + int_to_string(VERSION_PATCH) + VERSION_DEV + "\"" + components_list;
-    LOG(TRACE, "%s", json.c_str());
+    string json = "\"i\":" + int_to_string(connectionPropType.ping_interval) + "." + int_to_string(connectionType) + ",\"o\":" + int_to_string(otaMethod) + ",\"p\":" + int_to_string(PLATFORM_ID) + ",\"s\":\"" + int_to_string(VERSION_MAJOR) + "." + int_to_string(VERSION_MINOR) + "." + int_to_string(VERSION_PATCH) + VERSION_DEV + "\"" + components_list + describe_iccid + describe_imei;
+
+    LOG(INFO, "%s", json.c_str());
     const char *result = json.c_str();
     ((Appender *)append)->append(result);
     return true;
@@ -1523,6 +1527,18 @@ void Trackle::setComponentsList(const char *componentsList)
 
     memset(components_list, 0, COMPONENTS_LIST_SIZE);
     sprintf(components_list, ",\"c\":\"%s\"", componentsList);
+}
+
+void Trackle::setImei(const char *imei)
+{
+    memset(describe_imei, 0, DESCRIBE_ATTR_SIZE);
+    sprintf(describe_imei, ",\"imei\":\"%s\"", imei);
+}
+
+void Trackle::setIccid(const char *iccid)
+{
+    memset(describe_iccid, 0, DESCRIBE_ATTR_SIZE);
+    sprintf(describe_iccid, ",\"iccid\":\"%s\"", iccid);
 }
 
 void Trackle::setSaveSessionCallback(saveSessionCallback *save)

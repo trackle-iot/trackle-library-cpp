@@ -106,6 +106,14 @@ setComponentsList = __lib.trackleSetComponentsList
 setComponentsList.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
 setComponentsList.restype = None
 
+setImei = __lib.trackleSetImei
+setImei.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+setImei.restype = None
+
+setIccid = __lib.trackleSetIccid
+setIccid.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+setIccid.restype = None
+
 setPublishHealthCheckInterval = __lib.trackleSetPublishHealthCheckInterval
 setPublishHealthCheckInterval.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
 setPublishHealthCheckInterval.restype = None

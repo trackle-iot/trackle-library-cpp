@@ -972,6 +972,31 @@ class TrackleLibraryTest(ut.TestCase):
         resp = req.get(url, headers=self.headers, timeout=15)
         self.assertEqual(resp.json().get("firmware_components_list"), components_list, "wrong list")
 
+    def test_imei_iccid_1(self):
+        """
+        imei and iccid list - si imposta l'imei con trackle.setImei e l'iccid con trackle.setIccid 
+        prima della connect, si controllo dopo la connessione avvenuta con una chiamata all'api device 
+        che gli attributi siano uguali alle stringhe inviate
+        """
+        # Connection
+        imei = "123456789012345"
+        iccid = "123456789012345678"
+        params = device.DeviceStartupParams(
+            cred.TRACKLE_PRIVATE_KEY_LIST,
+            self.proxy_port,
+            imei=imei,
+            iccid=iccid
+        )
+        self.spawn_device(params)
+        res = wait_event_name(self.from_device, "connect_result")
+        self.assertTrue(res["return"])
+        wait_event_name(self.from_device, "connected")
+        # Send GET for device information
+        url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
+        resp = req.get(url, headers=self.headers, timeout=15)
+        self.assertEqual(resp.json().get("imei"), imei, "wrong imei")
+        self.assertEqual(resp.json().get("iccid"), iccid, "wrong iccid")
+
 def proxy_code(from_tester : mp.Queue, to_tester : mp.Queue, local_port : int):
     """
     Code for process that implements UDP proxy.
