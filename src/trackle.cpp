@@ -42,11 +42,20 @@ bool first_connection_completed = false;
 uint16_t connection_retry = 0;
 uint32_t connection_timeout = DEFAULT_CONNECTION_TIMEOUT;
 
+// OTA
+static const char *OTA_EVENT_NAME = "trackle/device/update/status";
+
+struct _ota_data
+{
+    bool running;
+    char ota_job_id[64];
+} ota_data;
+
 #define MAX_COUNTER 9999999
 #define MAX_PING_INTERVAL 1000
 
 #ifndef VERSION_DEV
-    #define VERSION_DEV ""
+#define VERSION_DEV ""
 #endif
 
 const uint32_t PUBLISH_EVENT_FLAG_PUBLIC = 0x0;
@@ -78,7 +87,7 @@ firmwareChunkCallback *firmwareChunkCb = NULL;
 finishFirmwareUpdateCallback *finishUpdateCb = NULL;
 randomNumberCallback *getRandomCb = NULL;
 rebootCallback *systemRebootCb = NULL;
-firmwareUrlUpdateCallback *firmwareUrlCb = NULL;
+otaUpdateCallback *otaUpdateCb = NULL;
 pincodeCallback *pincodeCb = NULL;
 connectionStatusCallback *connectionStatusCb = NULL;
 updateStateCallback *updateStateCb = NULL;
@@ -897,13 +906,89 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
     }
     else if (strcmp(event_name, "trackle/device/update") == 0)
     {
-        if (firmwareUrlCb)
+        if (otaUpdateCb)
         {
-            (*firmwareUrlCb)(data);
+            if (ota_data.running)
+            {
+                LOG(ERROR, "Ota already in progress...");
+                char ota_cloud_message[256];
+                sprintf(ota_cloud_message, "busy");
+            }
+            else
+            {
+
+                LOG(INFO, "otaUpdateCb %s", data);
+                memset(ota_data.ota_job_id, 0, 64);
+
+                char *copy = strdup(data);
+                char *url = strtok_r(copy, ",", &copy);
+                uint32_t crc = 0;
+                uint32_t ota_type = 0; // 0 undefined, 1 product, 2 developer
+
+                if (url != NULL)
+                {
+                    char *crc32 = strtok_r(copy, ",", &copy);
+                    char *job_id = strtok_r(copy, ",", &copy);
+
+                    if (crc32 != NULL && job_id != NULL)
+                    {
+                        // product firmware update
+                        sscanf(crc32, "%" PRIx32 "", &crc);
+                        strcpy(ota_data.ota_job_id, job_id);
+                        ota_type = 1;
+                    }
+                    else
+                    {
+                        // developer firmware update
+                        crc = 0;
+                        ota_type = 2;
+                    }
+                }
+                else
+                {
+                    LOG(ERROR, "not valid url");
+                    ota_type = 0;
+                }
+
+                free(copy);
+
+                if (ota_type > 0)
+                {
+                    int ota_error = (*otaUpdateCb)(url, crc);
+
+                    if (ota_type == 1) // ota product
+                    {
+                        char ota_cloud_message[256];
+
+                        if (ota_error == NO_ERROR) // ota ok
+                        {
+                            ota_data.running = true;
+                            sprintf(ota_cloud_message, "started,%s", ota_data.ota_job_id);
+                            ((Trackle *)handler)->publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
+                            LOG(INFO, "otaUpdateCb OTA start successfully, job_id %s", ota_data.ota_job_id);
+                        }
+                        else // error
+                        {
+                            sprintf(ota_cloud_message, "failed,%s,%d", ota_data.ota_job_id, ota_error);
+                            ((Trackle *)handler)->publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
+                            LOG(INFO, "otaUpdateCb OTA start error, job_id %s", ota_data.ota_job_id);
+                        }
+                    }
+                    else if (ota_error == NO_ERROR) // ota ok, developer
+                    {
+                        ota_data.running = true;
+                        LOG(INFO, "otaUpdateCb OTA start successfully");
+                    }
+                    else // ota error,
+                    {
+                        LOG(ERROR, "otaUpdateCb OTA start error: %" PRIu32, ota_error);
+                    }
+                }
+            }
         }
         else
         {
-            LOG(INFO, "firmwareUrlCb not implemented...");
+            LOG(INFO, "otaUpdateCb not implemented...");
         }
     }
     else if (strcmp(event_name, "trackle/device/pin_code") == 0)
@@ -1485,9 +1570,34 @@ void Trackle::setFinishFirmwareUpdateCallback(finishFirmwareUpdateCallback *fini
     finishUpdateCb = finish;
 }
 
-void Trackle::setFirmwareUrlUpdateCallback(firmwareUrlUpdateCallback *firmwareUrl)
+void Trackle::setOtaUpdateCallback(otaUpdateCallback *updateCb)
 {
-    firmwareUrlCb = firmwareUrl;
+    otaUpdateCb = updateCb;
+}
+
+void Trackle::setOtaUpdateDone(int error_code)
+{
+    char ota_cloud_message[256];
+
+    if (ota_data.running)
+    {
+        if (error_code == NO_ERROR)
+        {
+            sprintf(ota_cloud_message, "success,%s", ota_data.ota_job_id);
+        }
+        else
+        {
+            sprintf(ota_cloud_message, "failed,%s,%d", ota_data.ota_job_id, error_code);
+        }
+
+        publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
+    }
+    else
+    {
+        LOG(ERROR, "Ota not running!");
+    }
+
+    ota_data.running = false;
 }
 
 void Trackle::setPincodeCallback(pincodeCallback *pincode)

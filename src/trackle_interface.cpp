@@ -161,9 +161,14 @@ void trackleSetFinishFirmwareUpdateCallback(Trackle *v, finishFirmwareUpdateCall
     v->setFinishFirmwareUpdateCallback(finish);
 }
 
-void trackleSetFirmwareUrlUpdateCallback(Trackle *v, firmwareUrlUpdateCallback *firmwareUrl)
+void trackleSetOtaUpdateCallback(Trackle *v, otaUpdateCallback *updateCb)
 {
-    v->setFirmwareUrlUpdateCallback(firmwareUrl);
+    v->setOtaUpdateCallback(updateCb);
+}
+
+void trackleSetOtaUpdateDone(Trackle *v, int error_code)
+{
+    v->setOtaUpdateDone(error_code);
 }
 
 void trackleSetPincodeCallback(Trackle *v, pincodeCallback *pincode)

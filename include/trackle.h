@@ -416,11 +416,18 @@ public:
         void setFinishFirmwareUpdateCallback(finishFirmwareUpdateCallback *finish);
 
         /**
-         * @brief It sets the firmwareUrlCb to the firmwareUrl passed in.
+         * @brief It sets the otaUpdateCallback to the firmwareUrl passed in.
          *
          * @param firmwareUrl The URL of the firmware file.
          */
-        void setFirmwareUrlUpdateCallback(firmwareUrlUpdateCallback *firmwareUrl);
+        void setOtaUpdateCallback(otaUpdateCallback *updateCb);
+
+        /**
+         * @brief Set update done status with result code.
+         *
+         * @param error_code 0: ota done successfull, != 0 is and error code.
+         */
+        void setOtaUpdateDone(int error_code);
 
         /**
          * @brief It sets the pincode callback function.
@@ -636,7 +643,7 @@ public:
         void disconnect();
 
         /**
-         * @brief This function checks for the incoming messages from Trackle, and processes any messages that have come in. 
+         * @brief This function checks for the incoming messages from Trackle, and processes any messages that have come in.
          * It also sends keep-alive pings to the Cloud, so if it's not called frequently, the connection to Trackle may be lost.
          * It also handles health check messages communication and keep up and running the connection to Trackle by making reconnections.
          */

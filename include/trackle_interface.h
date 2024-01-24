@@ -185,11 +185,18 @@ extern "C"
     void trackleSetFinishFirmwareUpdateCallback(Trackle *v, finishFirmwareUpdateCallback *finish) DYNLIB;
 
     /*!
-     * @copybrief Trackle::setFirmwareUrlUpdateCallback()
+     * @copybrief Trackle::setOtaUpdateCallback()
      * @trackle
-     * @copydetails Trackle::setFirmwareUrlUpdateCallback()
+     * @copydetails Trackle::setOtaUpdateCallback()
      */
-    void trackleSetFirmwareUrlUpdateCallback(Trackle *v, firmwareUrlUpdateCallback *update) DYNLIB;
+    void trackleSetOtaUpdateCallback(Trackle *v, otaUpdateCallback *updateCb) DYNLIB;
+
+    /*!
+     * @copybrief Trackle::setOtaUpdateDone()
+     * @trackle
+     * @copydetails Trackle::setOtaUpdateDone()
+     */
+    void trackleSetOtaUpdateDone(Trackle *v, int error_code) DYNLIB;
 
     /*!
      * @copybrief Trackle::setPincodeCallback()
