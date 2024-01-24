@@ -1,6 +1,8 @@
 var searchData=
 [
-  ['if_5fnot_5finitialized_5fwarning_87',['IF_NOT_INITIALIZED_WARNING',['../trackle__interface_8cpp.html#a93395b8a39c51a878ec51aecdb76f046',1,'trackle_interface.cpp']]],
-  ['increase_5fconnection_5ftimeout_88',['increase_connection_timeout',['../trackle_8cpp.html#a619931bfdd95ed3fee3c0febe3e8f8ae',1,'trackle.cpp']]],
-  ['isenabled_89',['isEnabled',['../class_trackle.html#a56722b6f1c22da04885bc9853148bb71',1,'Trackle']]]
+  ['hal_5fota_5fflashed_5fresetstatus_82',['HAL_OTA_Flashed_ResetStatus',['../trackle_8cpp.html#a4e1aab47caad92177775cc677b4bea88',1,'trackle.cpp']]],
+  ['hal_5frng_5fgetrandomnumber_83',['HAL_RNG_GetRandomNumber',['../trackle_8h.html#abd7eeb850453afdae1e6ac00ecdae295',1,'HAL_RNG_GetRandomNumber(void):&#160;trackle.cpp'],['../trackle_8cpp.html#abd7eeb850453afdae1e6ac00ecdae295',1,'HAL_RNG_GetRandomNumber(void):&#160;trackle.cpp']]],
+  ['health_5fcheck_5finterval_84',['health_check_interval',['../trackle_8cpp.html#a569d1b53f9ae006bf8f47be8a1955994',1,'trackle.cpp']]],
+  ['hexmap_85',['hexmap',['../trackle_8cpp.html#a08cfbd4924069817d1fa4939901aa0df',1,'trackle.cpp']]],
+  ['hexstr_86',['hexStr',['../trackle_8cpp.html#a3e073ce29aafbb5a27ea6b7f2abc60f5',1,'trackle.cpp']]]
 ];

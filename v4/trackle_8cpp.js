@@ -1,5 +1,6 @@
 var trackle_8cpp =
 [
+    [ "_ota_data", "struct__ota__data.html", "struct__ota__data" ],
     [ "CloudVariableTypeBase", "struct_cloud_variable_type_base.html", "struct_cloud_variable_type_base" ],
     [ "CloudFunctionTypeBase", "struct_cloud_function_type_base.html", "struct_cloud_function_type_base" ],
     [ "BITS_IN_RAND", "trackle_8cpp.html#a236693566044c3b30f585bf72a086a94", null ],
@@ -83,7 +84,6 @@ var trackle_8cpp =
     [ "file_index", "trackle_8cpp.html#a23b32ed5ab98421cf678bbc35c0fc45d", null ],
     [ "finishUpdateCb", "trackle_8cpp.html#a909ce05e2d979fbd7560ac1260cd3822", null ],
     [ "firmwareChunkCb", "trackle_8cpp.html#a6e60ac29fdab8b5df355ced13325d1b1", null ],
-    [ "firmwareUrlCb", "trackle_8cpp.html#a9e75925e9f24f8d9bd1903692ea7448c", null ],
     [ "first_connection_completed", "trackle_8cpp.html#aea86972f4f24610259bdb36bfc20bdff", null ],
     [ "funcs", "trackle_8cpp.html#a3ec629319e81f0a5a840c68da7582feb", null ],
     [ "getRandomCb", "trackle_8cpp.html#ab9c9c3f54df7cbbaaab60cc031f16ab5", null ],
@@ -94,7 +94,9 @@ var trackle_8cpp =
     [ "millis_last_sent_health_check", "trackle_8cpp.html#ad50415da9e1ec4b0f42ba4eb289d9a66", null ],
     [ "millis_last_sent_received_time", "trackle_8cpp.html#a36674b34513a1aea8cb4c21148c9d90f", null ],
     [ "millis_started_at", "trackle_8cpp.html#a5f6f68242d19f39da0825ba9b2289f6f", null ],
+    [ "ota_data", "trackle_8cpp.html#a0ec3e8b18ca29897c3fd74d831dc6711", null ],
     [ "otaMethod", "trackle_8cpp.html#a2d838c3e89267abfaf57269e70248916", null ],
+    [ "otaUpdateCb", "trackle_8cpp.html#a86e28ce7fa6a1c769e8dc9cfe5c8683f", null ],
     [ "owners", "trackle_8cpp.html#acfae85b075e92385eaed14bc7cf17e26", null ],
     [ "pincodeCb", "trackle_8cpp.html#a73c4830908138bf5ec37b0a991811ac7", null ],
     [ "pingInterval", "trackle_8cpp.html#a630b3f747793bb20686a528702ce4194", null ],

@@ -138,6 +138,8 @@ Include dependency graph for trackle.cpp:</div>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Data Structures</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__ota__data.html">_ota_data</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_cloud_variable_type_base.html">CloudVariableTypeBase</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_cloud_function_type_base.html">CloudFunctionTypeBase</a></td></tr>
@@ -261,6 +263,8 @@ Variables</h2></td></tr>
 <tr class="separator:a393c457fef3fc122d92d67999b2ae121"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa1b93a2bca49e1f34af849501d96340b"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#aa1b93a2bca49e1f34af849501d96340b">connection_timeout</a> = <a class="el" href="trackle_8cpp.html#ad1d35b0a1fafc882e1fe0eaf622a2a81">DEFAULT_CONNECTION_TIMEOUT</a></td></tr>
 <tr class="separator:aa1b93a2bca49e1f34af849501d96340b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ec3e8b18ca29897c3fd74d831dc6711"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="struct__ota__data.html">_ota_data</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a0ec3e8b18ca29897c3fd74d831dc6711">ota_data</a></td></tr>
+<tr class="separator:a0ec3e8b18ca29897c3fd74d831dc6711"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a230538b38280dfd412835cbd3e41714c"><td class="memItemLeft" align="right" valign="top">const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a230538b38280dfd412835cbd3e41714c">PUBLISH_EVENT_FLAG_PUBLIC</a> = 0x0</td></tr>
 <tr class="separator:a230538b38280dfd412835cbd3e41714c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aed4e1c9117d3ce0885ffc43f7cb82c6f"><td class="memItemLeft" align="right" valign="top">const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#aed4e1c9117d3ce0885ffc43f7cb82c6f">PUBLISH_EVENT_FLAG_PRIVATE</a> = 0x1</td></tr>
@@ -303,8 +307,8 @@ Variables</h2></td></tr>
 <tr class="separator:ab9c9c3f54df7cbbaaab60cc031f16ab5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a7df48d9f52cfee46e2265973df1c0c"><td class="memItemLeft" align="right" valign="top">rebootCallback *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a1a7df48d9f52cfee46e2265973df1c0c">systemRebootCb</a> = NULL</td></tr>
 <tr class="separator:a1a7df48d9f52cfee46e2265973df1c0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9e75925e9f24f8d9bd1903692ea7448c"><td class="memItemLeft" align="right" valign="top">firmwareUrlUpdateCallback *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a9e75925e9f24f8d9bd1903692ea7448c">firmwareUrlCb</a> = NULL</td></tr>
-<tr class="separator:a9e75925e9f24f8d9bd1903692ea7448c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86e28ce7fa6a1c769e8dc9cfe5c8683f"><td class="memItemLeft" align="right" valign="top">otaUpdateCallback *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a86e28ce7fa6a1c769e8dc9cfe5c8683f">otaUpdateCb</a> = NULL</td></tr>
+<tr class="separator:a86e28ce7fa6a1c769e8dc9cfe5c8683f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a73c4830908138bf5ec37b0a991811ac7"><td class="memItemLeft" align="right" valign="top">pincodeCallback *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a73c4830908138bf5ec37b0a991811ac7">pincodeCb</a> = NULL</td></tr>
 <tr class="separator:a73c4830908138bf5ec37b0a991811ac7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2af2be170fe810f15a7370ce0dd8c4b8"><td class="memItemLeft" align="right" valign="top">connectionStatusCallback *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a2af2be170fe810f15a7370ce0dd8c4b8">connectionStatusCb</a> = NULL</td></tr>
@@ -2307,20 +2311,6 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a9e75925e9f24f8d9bd1903692ea7448c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9e75925e9f24f8d9bd1903692ea7448c">&#9670;&nbsp;</a></span>firmwareUrlCb</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">firmwareUrlUpdateCallback* firmwareUrlCb = NULL</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="aea86972f4f24610259bdb36bfc20bdff"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aea86972f4f24610259bdb36bfc20bdff">&#9670;&nbsp;</a></span>first_connection_completed</h2>
 
@@ -2471,6 +2461,20 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="a0ec3e8b18ca29897c3fd74d831dc6711"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ec3e8b18ca29897c3fd74d831dc6711">&#9670;&nbsp;</a></span>ota_data</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct <a class="el" href="struct__ota__data.html">_ota_data</a> ota_data</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a2d838c3e89267abfaf57269e70248916"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2d838c3e89267abfaf57269e70248916">&#9670;&nbsp;</a></span>otaMethod</h2>
 
@@ -2479,6 +2483,20 @@ Variables</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">Ota_Method otaMethod = NO_OTA</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a86e28ce7fa6a1c769e8dc9cfe5c8683f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86e28ce7fa6a1c769e8dc9cfe5c8683f">&#9670;&nbsp;</a></span>otaUpdateCb</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">otaUpdateCallback* otaUpdateCb = NULL</td>
         </tr>
       </table>
 </div><div class="memdoc">

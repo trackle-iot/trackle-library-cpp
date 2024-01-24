@@ -211,9 +211,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ae3daca8731a38bdc3877f8b20b0cd661"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#ae3daca8731a38bdc3877f8b20b0cd661">setFinishFirmwareUpdateCallback</a> (finishFirmwareUpdateCallback *finish)</td></tr>
 <tr class="memdesc:ae3daca8731a38bdc3877f8b20b0cd661"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function sets the callback function that will be called when a firmware update is completed.  <a href="class_trackle.html#ae3daca8731a38bdc3877f8b20b0cd661">More...</a><br /></td></tr>
 <tr class="separator:ae3daca8731a38bdc3877f8b20b0cd661"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aef95e932b85dc8607ed062a057ca48bc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#aef95e932b85dc8607ed062a057ca48bc">setFirmwareUrlUpdateCallback</a> (firmwareUrlUpdateCallback *firmwareUrl)</td></tr>
-<tr class="memdesc:aef95e932b85dc8607ed062a057ca48bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">It sets the firmwareUrlCb to the firmwareUrl passed in.  <a href="class_trackle.html#aef95e932b85dc8607ed062a057ca48bc">More...</a><br /></td></tr>
-<tr class="separator:aef95e932b85dc8607ed062a057ca48bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf2b79aa3d58737fa6a6ab7095e9524f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#adf2b79aa3d58737fa6a6ab7095e9524f">setOtaUpdateCallback</a> (otaUpdateCallback *updateCb)</td></tr>
+<tr class="memdesc:adf2b79aa3d58737fa6a6ab7095e9524f"><td class="mdescLeft">&#160;</td><td class="mdescRight">It sets the otaUpdateCallback to the firmwareUrl passed in.  <a href="class_trackle.html#adf2b79aa3d58737fa6a6ab7095e9524f">More...</a><br /></td></tr>
+<tr class="separator:adf2b79aa3d58737fa6a6ab7095e9524f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6af5cd84b3659f8af8224ccf77bc7c65"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#a6af5cd84b3659f8af8224ccf77bc7c65">setOtaUpdateDone</a> (int error_code)</td></tr>
+<tr class="memdesc:a6af5cd84b3659f8af8224ccf77bc7c65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set update done status with result code.  <a href="class_trackle.html#a6af5cd84b3659f8af8224ccf77bc7c65">More...</a><br /></td></tr>
+<tr class="separator:a6af5cd84b3659f8af8224ccf77bc7c65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9d5c75733d1125183c007980d4c869ac"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#a9d5c75733d1125183c007980d4c869ac">setPincodeCallback</a> (pincodeCallback *pincode)</td></tr>
 <tr class="memdesc:a9d5c75733d1125183c007980d4c869ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">It sets the pincode callback function.  <a href="class_trackle.html#a9d5c75733d1125183c007980d4c869ac">More...</a><br /></td></tr>
 <tr class="separator:a9d5c75733d1125183c007980d4c869ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1808,32 +1811,6 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="aef95e932b85dc8607ed062a057ca48bc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aef95e932b85dc8607ed062a057ca48bc">&#9670;&nbsp;</a></span>setFirmwareUrlUpdateCallback()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void setFirmwareUrlUpdateCallback </td>
-          <td>(</td>
-          <td class="paramtype">firmwareUrlUpdateCallback *&#160;</td>
-          <td class="paramname"><em>firmwareUrl</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>It sets the firmwareUrlCb to the firmwareUrl passed in. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">firmwareUrl</td><td>The URL of the firmware file. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="a1763a5ef4ec4a7ba55fcde732d8636c6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1763a5ef4ec4a7ba55fcde732d8636c6">&#9670;&nbsp;</a></span>setFirmwareVersion()</h2>
 
@@ -2036,6 +2013,58 @@ Private Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">method</td><td>The method to use for OTA updates. Can be PUSH or SEND_URL </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="adf2b79aa3d58737fa6a6ab7095e9524f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf2b79aa3d58737fa6a6ab7095e9524f">&#9670;&nbsp;</a></span>setOtaUpdateCallback()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void setOtaUpdateCallback </td>
+          <td>(</td>
+          <td class="paramtype">otaUpdateCallback *&#160;</td>
+          <td class="paramname"><em>updateCb</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>It sets the otaUpdateCallback to the firmwareUrl passed in. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">firmwareUrl</td><td>The URL of the firmware file. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a6af5cd84b3659f8af8224ccf77bc7c65"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6af5cd84b3659f8af8224ccf77bc7c65">&#9670;&nbsp;</a></span>setOtaUpdateDone()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void setOtaUpdateDone </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>error_code</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set update done status with result code. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">error_code</td><td>0: ota done successfull, != 0 is and error code. </td></tr>
   </table>
   </dd>
 </dl>

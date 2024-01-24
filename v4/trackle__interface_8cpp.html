@@ -182,9 +182,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a283922c6f3b6ca77838855cbbeeab4f5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8cpp.html#a283922c6f3b6ca77838855cbbeeab4f5">trackleSetFinishFirmwareUpdateCallback</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, finishFirmwareUpdateCallback *finish)</td></tr>
 <tr class="memdesc:a283922c6f3b6ca77838855cbbeeab4f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function sets the callback function that will be called when a firmware update is completed.  <a href="trackle__interface_8cpp.html#a283922c6f3b6ca77838855cbbeeab4f5">More...</a><br /></td></tr>
 <tr class="separator:a283922c6f3b6ca77838855cbbeeab4f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae6c86d1dd7702e52de7e3be5cfb05fab"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8cpp.html#ae6c86d1dd7702e52de7e3be5cfb05fab">trackleSetFirmwareUrlUpdateCallback</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, firmwareUrlUpdateCallback *firmwareUrl)</td></tr>
-<tr class="memdesc:ae6c86d1dd7702e52de7e3be5cfb05fab"><td class="mdescLeft">&#160;</td><td class="mdescRight">It sets the firmwareUrlCb to the firmwareUrl passed in.  <a href="trackle__interface_8cpp.html#ae6c86d1dd7702e52de7e3be5cfb05fab">More...</a><br /></td></tr>
-<tr class="separator:ae6c86d1dd7702e52de7e3be5cfb05fab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afffe99ab3e22afd92b976a5e22f15bd3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8cpp.html#afffe99ab3e22afd92b976a5e22f15bd3">trackleSetOtaUpdateCallback</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, otaUpdateCallback *updateCb)</td></tr>
+<tr class="memdesc:afffe99ab3e22afd92b976a5e22f15bd3"><td class="mdescLeft">&#160;</td><td class="mdescRight">It sets the otaUpdateCallback to the firmwareUrl passed in.  <a href="trackle__interface_8cpp.html#afffe99ab3e22afd92b976a5e22f15bd3">More...</a><br /></td></tr>
+<tr class="separator:afffe99ab3e22afd92b976a5e22f15bd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf4b3e4315d7e2bce0ff54806dfc24cb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8cpp.html#adf4b3e4315d7e2bce0ff54806dfc24cb">trackleSetOtaUpdateDone</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, int error_code)</td></tr>
+<tr class="memdesc:adf4b3e4315d7e2bce0ff54806dfc24cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set update done status with result code.  <a href="trackle__interface_8cpp.html#adf4b3e4315d7e2bce0ff54806dfc24cb">More...</a><br /></td></tr>
+<tr class="separator:adf4b3e4315d7e2bce0ff54806dfc24cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a79b6bc76329599beb798e36ac397edf4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8cpp.html#a79b6bc76329599beb798e36ac397edf4">trackleSetPincodeCallback</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, pincodeCallback *pincode)</td></tr>
 <tr class="memdesc:a79b6bc76329599beb798e36ac397edf4"><td class="mdescLeft">&#160;</td><td class="mdescRight">It sets the pincode callback function.  <a href="trackle__interface_8cpp.html#a79b6bc76329599beb798e36ac397edf4">More...</a><br /></td></tr>
 <tr class="separator:a79b6bc76329599beb798e36ac397edf4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1399,43 +1402,6 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ae6c86d1dd7702e52de7e3be5cfb05fab"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae6c86d1dd7702e52de7e3be5cfb05fab">&#9670;&nbsp;</a></span>trackleSetFirmwareUrlUpdateCallback()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void trackleSetFirmwareUrlUpdateCallback </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="class_trackle.html">Trackle</a> *&#160;</td>
-          <td class="paramname"><em>v</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">firmwareUrlUpdateCallback *&#160;</td>
-          <td class="paramname"><em>update</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>It sets the firmwareUrlCb to the firmwareUrl passed in. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">v</td><td>The <a class="el" href="class_trackle.html">Trackle</a> struct. </td></tr>
-    <tr><td class="paramname">firmwareUrl</td><td>The URL of the firmware file. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="a0d83ce906352e317fe169cbbe6d7f595"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0d83ce906352e317fe169cbbe6d7f595">&#9670;&nbsp;</a></span>trackleSetFirmwareVersion()</h2>
 
@@ -1726,6 +1692,80 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">v</td><td>The <a class="el" href="class_trackle.html">Trackle</a> struct. </td></tr>
     <tr><td class="paramname">method</td><td>The method to use for OTA updates. Can be PUSH or SEND_URL </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="afffe99ab3e22afd92b976a5e22f15bd3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afffe99ab3e22afd92b976a5e22f15bd3">&#9670;&nbsp;</a></span>trackleSetOtaUpdateCallback()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void trackleSetOtaUpdateCallback </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_trackle.html">Trackle</a> *&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">otaUpdateCallback *&#160;</td>
+          <td class="paramname"><em>updateCb</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>It sets the otaUpdateCallback to the firmwareUrl passed in. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">v</td><td>The <a class="el" href="class_trackle.html">Trackle</a> struct. </td></tr>
+    <tr><td class="paramname">firmwareUrl</td><td>The URL of the firmware file. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="adf4b3e4315d7e2bce0ff54806dfc24cb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf4b3e4315d7e2bce0ff54806dfc24cb">&#9670;&nbsp;</a></span>trackleSetOtaUpdateDone()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void trackleSetOtaUpdateDone </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_trackle.html">Trackle</a> *&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>error_code</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set update done status with result code. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">v</td><td>The <a class="el" href="class_trackle.html">Trackle</a> struct. </td></tr>
+    <tr><td class="paramname">error_code</td><td>0: ota done successfull, != 0 is and error code. </td></tr>
   </table>
   </dd>
 </dl>
