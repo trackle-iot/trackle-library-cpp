@@ -1393,6 +1393,10 @@ void connectionError(int error_type, bool force = false)
     {
         diagnostic::diagnosticCloud(CLOUD_DISCONNECTS, 1);
         diagnostic::diagnosticCloud(CLOUD_DISCONNECTION_REASON, error_type);
+
+        // reset connections attemps and unacked packets for new cloud session
+        diagnostic::diagnosticCloud(CLOUD_CONNECTION_ATTEMPTS, 0);
+        diagnostic::diagnosticCloud(CLOUD_UNACKNOWLEDGED_MESSAGES, 0);
     }
 
     // if connected or trying to connect

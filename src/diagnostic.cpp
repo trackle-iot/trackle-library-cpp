@@ -51,8 +51,15 @@ namespace diagnostic
 		int32_t right_value = (int32_t)value;
 		if (key == CLOUD_DISCONNECTS || key == CLOUD_CONNECTION_ATTEMPTS || key == CLOUD_UNACKNOWLEDGED_MESSAGES)
 		{
-			// must increase current value
-			right_value = getDiagnostic(key) + value;
+			// if valua > 0must increase current value, else reset
+			if (value == 0)
+			{
+				right_value = 0;
+			}
+			else
+			{
+				right_value = getDiagnostic(key) + value;
+			}
 		}
 		addDiagnostic(key, (int32_t)right_value);
 	}
@@ -85,8 +92,15 @@ namespace diagnostic
 		}
 		else if (key == NETWORK_DISCONNECTS || key == NETWORK_CONNECTION_ATTEMPTS)
 		{
-			// must increase current value
-			right_value = getDiagnostic(key) + value;
+			// if valua > 0must increase current value, else reset
+			if (value == 0)
+			{
+				right_value = 0;
+			}
+			else
+			{
+				right_value = getDiagnostic(key) + value;
+			}
 		}
 		addDiagnostic(key, right_value);
 	}
