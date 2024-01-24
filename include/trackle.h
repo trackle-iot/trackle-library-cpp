@@ -423,6 +423,13 @@ public:
         void setOtaUpdateCallback(otaUpdateCallback *updateCb);
 
         /**
+         * @brief Set progress percentage of update.
+         *
+         * @param percentage The percentage of update status.
+         */
+        void setOtaUpdateProgress(int percentage);
+
+        /**
          * @brief Set update done status with result code.
          *
          * @param error_code 0: ota done successfull, != 0 is and error code.

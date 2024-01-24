@@ -1579,6 +1579,20 @@ void Trackle::setOtaUpdateCallback(otaUpdateCallback *updateCb)
     otaUpdateCb = updateCb;
 }
 
+void Trackle::setOtaUpdateProgress(int percentage)
+{
+    if (ota_data.running)
+    {
+        char ota_cloud_message[256];
+        sprintf(ota_cloud_message, "percentage,%d", percentage);
+        publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
+    }
+    else
+    {
+        LOG(ERROR, "Ota not running!");
+    }
+}
+
 void Trackle::setOtaUpdateDone(int error_code)
 {
     char ota_cloud_message[256];

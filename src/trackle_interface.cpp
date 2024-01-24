@@ -166,6 +166,11 @@ void trackleSetOtaUpdateCallback(Trackle *v, otaUpdateCallback *updateCb)
     v->setOtaUpdateCallback(updateCb);
 }
 
+void trackleSetOtaUpdateProgress(Trackle *v, int percentage)
+{
+    v->setOtaUpdateProgress(percentage);
+}
+
 void trackleSetOtaUpdateDone(Trackle *v, int error_code)
 {
     v->setOtaUpdateDone(error_code);

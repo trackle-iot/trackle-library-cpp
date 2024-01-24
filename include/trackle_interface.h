@@ -192,6 +192,13 @@ extern "C"
     void trackleSetOtaUpdateCallback(Trackle *v, otaUpdateCallback *updateCb) DYNLIB;
 
     /*!
+     * @copybrief Trackle::setOtaUpdateProgress()
+     * @trackle
+     * @copydetails Trackle::setOtaUpdateProgress()
+     */
+    void trackleSetOtaUpdateProgress(Trackle *v, int percentage) DYNLIB;
+
+    /*!
      * @copybrief Trackle::setOtaUpdateDone()
      * @trackle
      * @copydetails Trackle::setOtaUpdateDone()
