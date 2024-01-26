@@ -913,12 +913,15 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
                 LOG(ERROR, "Ota already in progress...");
                 char ota_cloud_message[256];
                 sprintf(ota_cloud_message, "busy");
+                ((Trackle *)handler)->publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
             }
             else
             {
-
                 LOG(INFO, "otaUpdateCb %s", data);
                 memset(ota_data.ota_job_id, 0, 64);
+
+                // set dafault value to 0 number
+                ota_data.ota_job_id[0] = '0';
 
                 char *copy = strdup(data);
                 char *url = strtok_r(copy, ",", &copy);
@@ -955,33 +958,20 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
                 if (ota_type > 0)
                 {
                     int ota_error = (*otaUpdateCb)(url, crc);
+                    char ota_cloud_message[256];
 
-                    if (ota_type == 1) // ota product
-                    {
-                        char ota_cloud_message[256];
-
-                        if (ota_error == NO_ERROR) // ota ok
-                        {
-                            ota_data.running = true;
-                            sprintf(ota_cloud_message, "started,%s", ota_data.ota_job_id);
-                            ((Trackle *)handler)->publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
-                            LOG(INFO, "otaUpdateCb OTA start successfully, job_id %s", ota_data.ota_job_id);
-                        }
-                        else // error
-                        {
-                            sprintf(ota_cloud_message, "failed,%s,%d", ota_data.ota_job_id, ota_error);
-                            ((Trackle *)handler)->publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
-                            LOG(INFO, "otaUpdateCb OTA start error, job_id %s", ota_data.ota_job_id);
-                        }
-                    }
-                    else if (ota_error == NO_ERROR) // ota ok, developer
+                    if (ota_error == NO_ERROR) // ota ok
                     {
                         ota_data.running = true;
-                        LOG(INFO, "otaUpdateCb OTA start successfully");
+                        sprintf(ota_cloud_message, "started,%s", ota_data.ota_job_id);
+                        ((Trackle *)handler)->publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
+                        LOG(INFO, "otaUpdateCb OTA start successfully, job_id %s", ota_data.ota_job_id);
                     }
-                    else // ota error,
+                    else // error
                     {
-                        LOG(ERROR, "otaUpdateCb OTA start error: %" PRIu32, ota_error);
+                        sprintf(ota_cloud_message, "failed,%s,%d", ota_data.ota_job_id, ota_error);
+                        ((Trackle *)handler)->publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
+                        LOG(INFO, "otaUpdateCb OTA start error, job_id %s", ota_data.ota_job_id);
                     }
                 }
             }
