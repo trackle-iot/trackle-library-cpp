@@ -48,6 +48,9 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
 
     trackle = importlib.import_module("trackle", "")
     callbacks = importlib.import_module("callbacks", "")
+    callbacks.trackle_module = trackle
+    callbacks.to_tester_queue = to_tester
+    
     cloud_functions = importlib.import_module("cloud_functions", "")
 
     log_cb = trackle.LOG_CB(callbacks.log)
@@ -71,6 +74,8 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
     get_echo_json_cb = trackle.GET_JSON_CB(cloud_functions.get_echo_json)
 
     trackle_s = trackle.new()
+    callbacks.trackle_instance = trackle_s
+
     trackle.init(trackle_s)
 
     trackle.setDeviceId(trackle_s, credentials.TRACKLE_ID)
@@ -82,7 +87,8 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
 
     trackle.setKeys(trackle_s, credentials.list_to_private_key(startup_params.private_key))
     trackle.setFirmwareVersion(trackle_s, 1)
-    trackle.setOtaMethod(trackle_s, trackle.OTAMethod.NO_OTA)
+    trackle.setOtaMethod(trackle_s, trackle.OTAMethod.SEND_URL)
+    trackle.setOtaUpdateCallback(trackle_s, callbacks.ota_callback)
     trackle.setConnectionType(trackle_s, trackle.ConnectionType.UNDEFINED)
     if startup_params.claim_code:
         trackle.setClaimCode(trackle_s, startup_params.claim_code.encode("utf-8"))

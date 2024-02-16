@@ -94,6 +94,15 @@ setOtaMethod = __lib.trackleSetOtaMethod
 setOtaMethod.argtypes = [ctypes.c_int]
 setOtaMethod.restype = None
 
+OTA_UPDATE_CB = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p, ctypes.c_uint32)
+setOtaUpdateCallback = __lib.trackleSetOtaUpdateCallback
+setOtaUpdateCallback.argtypes = [ctypes.c_void_p, OTA_UPDATE_CB]
+setOtaUpdateCallback.restype = None
+
+setOtaUpdateDone = __lib.trackleSetOtaUpdateDone
+setOtaUpdateDone.argtypes = [ctypes.c_void_p, ctypes.c_int]
+setOtaUpdateDone.restype = None
+
 setConnectionType = __lib.trackleSetConnectionType
 setConnectionType.argtypes = [ctypes.c_int]
 setConnectionType.restype = None
