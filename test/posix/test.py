@@ -93,9 +93,23 @@ class TrackleLibraryTest(ut.TestCase):
         resp = req.put(url, headers=cls.headers, json=json_body, timeout=15)
         if resp.json().get("development") != mode:
             raise Exception("Failed putting in development mode. Can't continue test case.")
+        
+    @classmethod
+    def force_release(cls, version: int | None, intelligent: bool):
+        """ Force a particular release on device """
+        url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
+        json_body = {"desired_firmware_version": str(version) if version else None, "flash":intelligent}
+        resp = req.put(url, headers=cls.headers, json=json_body, timeout=15)
+        if resp.status_code != 200:
+            raise Exception(f"Failed publishing version: {resp.status_code} {resp.content}")
 
     @classmethod
     def setUpClass(cls):
+
+        # These will be references to queues that communicate with device.
+        # Created by spawn_device.
+        cls.to_device = None
+        cls.from_device = None
 
         cls.to_proxy = mp.Queue()
         cls.from_proxy = mp.Queue()
@@ -123,8 +137,6 @@ class TrackleLibraryTest(ut.TestCase):
         log.info("oauth authentication done")
         # building metadata for every single request
         cls.headers = {"Authorization": f"Bearer {temp_token}"}
-        # switching ON development mode to prevent undesired OTA during test
-        cls.switch_development_mode(True)
         # opening sse events stream
         sse_url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/events"
         cls.sse_client = scnw.SSEClientNoWait(sse_url, headers=cls.headers)
@@ -144,10 +156,18 @@ class TrackleLibraryTest(ut.TestCase):
         time.sleep(2)
         # Ignore events from previous test case
         self.sse_client.clear_pending_events()
+        # switching ON development mode to prevent undesired OTA during test
+        # and unlock version in release mode
+        self.switch_development_mode(False)
+        self.force_release(None, False)
+        self.switch_development_mode(True)
+        
 
     def tearDown(self):
-        self.to_device.put({"name":"kill_device"})
-        wait_event_name(self.from_device, "killing")
+        if self.to_device is not None:
+            self.to_device.put({"name":"kill_device"})
+        if self.from_device is not None:
+            wait_event_name(self.from_device, "killing")
 
     def test_connect_1(self):
         """
@@ -1025,32 +1045,58 @@ class TrackleLibraryTest(ut.TestCase):
         wait_event_name(self.from_device, "connected")
         # Send PUT with OTA url
         url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
-        json_body = {"firmware_url": "https://iotready.fra1.cdn.digitaloceanspaces.com/Iotready/firmware_test_suite.bin"}
+        json_body = {"firmware_url": "https://iotready.fra1.cdn.digitaloceanspaces.com/Iotready/firmware_test_suite_22.bin"}
         resp = req.put(url, headers=self.headers, json=json_body, timeout=15)
+        self.assertEqual(resp.status_code, 200, "request failed")
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
         self.assertEqual(resp.json().get("status"), "Update sent", "unexpected method name")
         wait_event_name(self.from_device, "ota_url_received", self)
         wait_event_name(self.from_device, "crc32_not_checked", self, 20) # Higher timeout in case of bad connection
-    
+
     def test_ota_2(self):
         """
         Test OTA firmware update when NOT in development mode (CRC check enabled)
         """
         # Send PUT to put in release mode
         self.switch_development_mode(False)
+        # Force release at connection
+        self.force_release(version=22, intelligent=False)
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            self.proxy_port,
+            fw_version = 21
         )
         self.spawn_device(params)
         res = wait_event_name(self.from_device, "connect_result")
         self.assertTrue(res["return"])
         wait_event_name(self.from_device, "connected")
-        # Send PUT with OTA url
+        # Wait OTA events
         wait_event_name(self.from_device, "ota_url_received", self, 15)
         wait_event_name(self.from_device, "crc32_correct", self, 20) # Higher timeout in case of bad connection
-
+    
+    def test_ota_3(self):
+        """
+        Test OTA firmware while already connected
+        """
+        # Send PUT to put in release mode
+        self.switch_development_mode(False)
+        # Connection
+        params = device.DeviceStartupParams(
+            cred.TRACKLE_PRIVATE_KEY_LIST,
+            self.proxy_port,
+            fw_version = 21
+        )
+        self.spawn_device(params)
+        res = wait_event_name(self.from_device, "connect_result")
+        self.assertTrue(res["return"])
+        wait_event_name(self.from_device, "connected")
+        with self.assertRaises(TimeoutError):
+            wait_event_name(self.from_device, "ota_url_received", None, 5)
+        self.force_release(version=22, intelligent=True)
+        # Wait for OTA on device
+        wait_event_name(self.from_device, "ota_url_received", self, 15)
+        wait_event_name(self.from_device, "crc32_correct", self, 20) # Higher timeout in case of bad connection
 
 def proxy_code(from_tester : mp.Queue, to_tester : mp.Queue, local_port : int):
     """

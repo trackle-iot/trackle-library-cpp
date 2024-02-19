@@ -77,7 +77,7 @@ def ota_task_code(url, expected_crc32):
         """ Calculate CRC32 with bytes in little-endian """
         crc32_bytes = zlib.crc32(b).to_bytes(4, 'little')
         crc32_int = struct.unpack(">I", crc32_bytes)
-        return crc32_int
+        return crc32_int[0]
 
     def set_done(value):
         """ Call trackleSetOtaUpdateDone on Trackle instance """
@@ -85,7 +85,8 @@ def ota_task_code(url, expected_crc32):
 
     result = req.get(url, timeout=30)
     if result.status_code == 200:
-        if crc32_le(result.content) == expected_crc32:
+        calculated_crc32 = crc32_le(result.content)
+        if calculated_crc32 == expected_crc32:
             to_tester_queue.put({"name":"crc32_correct"})
             logging.info("correct crc32")
             set_done(OtaError.OTA_ERR_OK)
@@ -95,7 +96,7 @@ def ota_task_code(url, expected_crc32):
             set_done(OtaError.OTA_ERR_OK)
         else:
             to_tester_queue.put({"name":"crc32_mismatch"})
-            logging.error(f"crc32 don't match")
+            logging.error(f"crc32 don't match (got '{calculated_crc32}, expected '{expected_crc32}'')")
             set_done(OtaError.OTA_ERR_VALIDATE_FAILED)
     else:
         to_tester_queue.put({"name":"invalid_ota_url"})

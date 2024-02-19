@@ -20,6 +20,7 @@ class DeviceStartupParams:
     components_list: str = ""
     imei: str = ""
     iccid: str = ""
+    fw_version: int = 1
 
 class ConnectionStatus:
 
@@ -86,7 +87,7 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
     trackle.setEnabled(trackle_s, True)
 
     trackle.setKeys(trackle_s, credentials.list_to_private_key(startup_params.private_key))
-    trackle.setFirmwareVersion(trackle_s, 1)
+    trackle.setFirmwareVersion(trackle_s, startup_params.fw_version)
     trackle.setOtaMethod(trackle_s, trackle.OTAMethod.SEND_URL)
     trackle.setOtaUpdateCallback(trackle_s, callbacks.ota_callback)
     trackle.setConnectionType(trackle_s, trackle.ConnectionType.UNDEFINED)
