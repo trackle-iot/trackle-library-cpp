@@ -1,5 +1,7 @@
 """ Messages used in the test suite """
 
+from trackle_enums import OtaError
+
 class QueueMessage:
 
     """ Message to be sent down a queue used by the test suite """
@@ -43,6 +45,8 @@ GET_TIME_CALLED = QueueMessage("get_time_called", "Couldn't receive get_time cal
 OTA_URL_RECEIVED = QueueMessage("ota_url_received", "Couldn't receive confirmation that device simulation process received OTA URL from cloud within %d seconds.")
 CRC32_NOT_CHECKED = QueueMessage("crc32_not_checked", "Couldn't receive confirmation that device simulation process finished OTA process without checking CRC32 within %d seconds.")
 CRC32_CORRECT = QueueMessage("crc32_correct", "Couldn't receive confirmation that device simulation process finished OTA process with correct CRC32 within %d seconds.")
+CRC32_MISMATCH = QueueMessage("crc32_mismatch", "Couldn't receive confirmation that device simulation process finished OTA process with CRC32 mismatch within %d seconds.")
+DOWNLOAD_INTERRUPTED = QueueMessage("download_interrupted", "Couldn't receive confirmation that device simulation process finished OTA process with a download interrupted error within %d seconds.")
 
 TESTS_COMPLETED = QueueMessage("tests_completed")
 PROXY_ON = QueueMessage("proxy_on")
@@ -54,3 +58,12 @@ PUBLISH = QueueMessage("publish")
 MULTIPUBLISH = QueueMessage("multipublish")
 MULTIPUBLISH_LONG = QueueMessage("multipublish_long")
 GET_TIME = QueueMessage("get_time")
+
+OTA_ERR_OK = QueueMessage(str(OtaError.OTA_ERR_OK))
+OTA_ERR_ALREADY_RUNNING = QueueMessage(str(OtaError.OTA_ERR_ALREADY_RUNNING))
+OTA_ERR_PARTITION = QueueMessage(str(OtaError.OTA_ERR_PARTITION))
+OTA_ERR_MEMORY = QueueMessage(str(OtaError.OTA_ERR_MEMORY))
+OTA_ERR_VALIDATE_FAILED = QueueMessage(str(OtaError.OTA_ERR_VALIDATE_FAILED))
+OTA_ERR_INCOMPLETE = QueueMessage(str(OtaError.OTA_ERR_INCOMPLETE))
+OTA_ERR_COMPLETING = QueueMessage(str(OtaError.OTA_ERR_COMPLETING))
+OTA_ERR_GENERIC = QueueMessage(str(OtaError.OTA_ERR_GENERIC))

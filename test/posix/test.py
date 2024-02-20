@@ -1038,9 +1038,9 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertEqual(resp.json().get("imei"), imei, "wrong imei")
         self.assertEqual(resp.json().get("iccid"), iccid, "wrong iccid")
 
-    def test_ota_1(self):
+    def test_ota_1_1(self):
         """
-        Test OTA firmware update when in development mode (no CRC check)
+        Test OTA firmware update when in development mode (no CRC check). Succeeding.
         """
         # Send PUT to put in development mode
         self.switch_development_mode(True)
@@ -1062,10 +1062,46 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertEqual(resp.json().get("status"), "Update sent", "unexpected method name")
         wait_queue_message(self.from_device, msgs.OTA_URL_RECEIVED, self)
         wait_queue_message(self.from_device, msgs.CRC32_NOT_CHECKED, self, 20) # Higher timeout in case of bad connection
+        # Check that success arrives on cloud
+        result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
+        self.assertEqual(result["data"], "started", "couldn't receive \"started\" event for OTA from cloud via SSE")
+        result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
+        self.assertEqual(result["data"], "success", "couldn't receive \"success\" event for OTA from cloud via SSE")
 
-    def test_ota_2(self):
+    def test_ota_1_2(self):
         """
-        Test OTA firmware update when NOT in development mode (CRC check enabled)
+        Test OTA firmware update when in development mode (no CRC check). Failing.
+        """
+        # Send PUT to put in development mode
+        self.switch_development_mode(True)
+        # Connection
+        params = device.DeviceStartupParams(
+            cred.TRACKLE_PRIVATE_KEY_LIST,
+            self.proxy_port,
+            reason_for_ota_failure = trackle_enums.OtaError.OTA_ERR_INCOMPLETE
+        )
+        self.spawn_device(params)
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
+        self.assertTrue(res["return"])
+        wait_queue_message(self.from_device, msgs.CONNECTED)
+        # Send PUT with OTA url
+        url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
+        json_body = {"firmware_url": "https://iotready.fra1.cdn.digitaloceanspaces.com/Iotready/firmware_test_suite_22.bin"}
+        resp = req.put(url, headers=self.headers, json=json_body, timeout=15)
+        self.assertEqual(resp.status_code, 200, "request failed")
+        self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
+        self.assertEqual(resp.json().get("status"), "Update sent", "unexpected method name")
+        wait_queue_message(self.from_device, msgs.OTA_URL_RECEIVED, self)
+        wait_queue_message(self.from_device, msgs.OTA_ERR_INCOMPLETE, self, 20) # Higher timeout in case of bad connection
+        # Check that failure arrives on cloud
+        result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
+        self.assertEqual(result["data"], "started", "couldn't receive \"started\" event for OTA from cloud via SSE")
+        result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
+        self.assertEqual(result["data"], f"failed,{trackle_enums.OtaError.OTA_ERR_INCOMPLETE.value}", "couldn't receive \"failed\" event for OTA from cloud via SSE")
+
+    def test_ota_2_1(self):
+        """
+        Test OTA firmware update when NOT in development mode (CRC check enabled). Succeeding.
         """
         # Send PUT to put in release mode
         self.switch_development_mode(False)
@@ -1084,10 +1120,43 @@ class TrackleLibraryTest(ut.TestCase):
         # Wait OTA events
         wait_queue_message(self.from_device, msgs.OTA_URL_RECEIVED, self, 15)
         wait_queue_message(self.from_device, msgs.CRC32_CORRECT, self, 20) # Higher timeout in case of bad connection
-    
-    def test_ota_3(self):
+        # Check that success arrives on cloud
+        result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
+        self.assertEqual(result["data"], "started", "couldn't receive \"started\" event for OTA from cloud via SSE")
+        result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
+        self.assertEqual(result["data"], "success", "couldn't receive \"success\" event for OTA from cloud via SSE")
+
+    def test_ota_2_2(self):
         """
-        Test OTA firmware while already connected
+        Test OTA firmware update when NOT in development mode (CRC check enabled). Failing.
+        """
+        # Send PUT to put in release mode
+        self.switch_development_mode(False)
+        # Force release at connection
+        self.force_release(version=22, intelligent=False)
+        # Connection
+        params = device.DeviceStartupParams(
+            cred.TRACKLE_PRIVATE_KEY_LIST,
+            self.proxy_port,
+            fw_version = 21,
+            reason_for_ota_failure=trackle_enums.OtaError.OTA_ERR_VALIDATE_FAILED
+        )
+        self.spawn_device(params)
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
+        self.assertTrue(res["return"])
+        wait_queue_message(self.from_device, msgs.CONNECTED)
+        # Wait OTA events
+        wait_queue_message(self.from_device, msgs.OTA_URL_RECEIVED, self, 15)
+        wait_queue_message(self.from_device, msgs.OTA_ERR_VALIDATE_FAILED, self, 20) # Higher timeout in case of bad connection
+        # Check that failure arrives on cloud
+        result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
+        self.assertEqual(result["data"], "started", "couldn't receive \"started\" event for OTA from cloud via SSE")
+        result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
+        self.assertEqual(result["data"], f"failed,{trackle_enums.OtaError.OTA_ERR_VALIDATE_FAILED.value}", "couldn't receive \"failed\" event for OTA from cloud via SSE")
+    
+    def test_ota_3_1(self):
+        """
+        Test OTA firmware while already connected. Succeeding.
         """
         # Send PUT to put in release mode
         self.switch_development_mode(False)
@@ -1107,6 +1176,41 @@ class TrackleLibraryTest(ut.TestCase):
         # Wait for OTA on device
         wait_queue_message(self.from_device, msgs.OTA_URL_RECEIVED, self, 15)
         wait_queue_message(self.from_device, msgs.CRC32_CORRECT, self, 20) # Higher timeout in case of bad connection
+        # Check that success arrives on cloud
+        result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
+        self.assertEqual(result["data"], "started", "couldn't receive \"started\" event for OTA from cloud via SSE")
+        result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
+        self.assertEqual(result["data"], "success", "couldn't receive \"success\" event for OTA from cloud via SSE")
+
+    def test_ota_3_2(self):
+        """
+        Test OTA firmware while already connected. Failing.
+        """
+        # Send PUT to put in release mode
+        self.switch_development_mode(False)
+        # Connection
+        params = device.DeviceStartupParams(
+            cred.TRACKLE_PRIVATE_KEY_LIST,
+            self.proxy_port,
+            fw_version = 21,
+            reason_for_ota_failure=trackle_enums.OtaError.OTA_ERR_MEMORY
+        )
+        self.spawn_device(params)
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
+        self.assertTrue(res["return"])
+        wait_queue_message(self.from_device, msgs.CONNECTED)
+        with self.assertRaises(TimeoutError):
+            wait_queue_message(self.from_device, msgs.OTA_URL_RECEIVED, None, 5)
+        self.force_release(version=22, intelligent=True)
+        # Wait for OTA on device
+        wait_queue_message(self.from_device, msgs.OTA_URL_RECEIVED, self, 15)
+        wait_queue_message(self.from_device, msgs.OTA_ERR_MEMORY, self, 20) # Higher timeout in case of bad connection
+        # Check that failure arrives on cloud
+        result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
+        self.assertEqual(result["data"], "started", "couldn't receive \"started\" event for OTA from cloud via SSE")
+        result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
+        self.assertEqual(result["data"], f"failed,{trackle_enums.OtaError.OTA_ERR_MEMORY.value}", "couldn't receive \"failed\" event for OTA from cloud via SSE")
+
 
 def proxy_code(from_tester : mp.Queue, to_tester : mp.Queue, local_port : int):
     """

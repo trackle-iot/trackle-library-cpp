@@ -4,6 +4,8 @@ import zlib
 import struct
 import threading
 import logging
+import multiprocessing as mp
+import types
 
 import requests as req
 
@@ -67,57 +69,71 @@ set_connection_override = __lib.Callbacks_setConnectionOverride
 set_connection_override.argtypes = (ctypes.c_bool, ctypes.c_char_p, ctypes.c_int)
 set_connection_override.restype = None
 
-trackle_module = None     # To be set from importing module!
-trackle_instance = None   # To be set from importing module!
-to_tester_queue = None    # To be set from importing module!
 
-def ota_task_code(url, expected_crc32):
-    """ OTA task function code """
+def make_ota_callback(trackle_module: types.ModuleType, trackle_instance: ctypes.c_void_p,
+                      to_tester_queue: mp.Queue, reason_for_failure: OtaError | None,
+                      trackle_lock: threading.Lock):
 
-    def crc32_le(b):
-        """ Calculate CRC32 with bytes in little-endian """
-        crc32_bytes = zlib.crc32(b).to_bytes(4, 'little')
-        crc32_int = struct.unpack(">I", crc32_bytes)
-        return crc32_int[0]
+    """ Return OTA callback to be registered in Trackle Library. This is a closure. """
 
-    def set_done(value):
-        """ Call trackleSetOtaUpdateDone on Trackle instance """
-        trackle_module.setOtaUpdateDone(trackle_instance, value)
+    def ota_thread_code(url, expected_crc32):
+        """ OTA thread function code """
 
-    result = req.get(url, timeout=30)
-    if result.status_code == 200:
-        calculated_crc32 = crc32_le(result.content)
-        if calculated_crc32 == expected_crc32:
-            to_tester_queue.put({"msg":msgs.CRC32_CORRECT})
-            logging.info("correct crc32")
-            set_done(OtaError.OTA_ERR_OK)
-        elif expected_crc32 == 0:
-            to_tester_queue.put({"msg":msgs.CRC32_NOT_CHECKED})
-            logging.info("not checking crc32")
-            set_done(OtaError.OTA_ERR_OK)
+        def crc32_le(b):
+            """ Calculate CRC32 with bytes in little-endian """
+            crc32_bytes = zlib.crc32(b).to_bytes(4, 'little')
+            crc32_int = struct.unpack(">I", crc32_bytes)
+            return crc32_int[0]
+
+        def set_done(value):
+            """ Call trackleSetOtaUpdateDone on Trackle instance """
+            with trackle_lock:
+                trackle_module.setOtaUpdateDone(trackle_instance, value)
+
+        # If this device is configured to have OTA failing for test purpose, fail
+        if reason_for_failure is not None:
+            to_tester_queue.put({"msg":str(reason_for_failure)})
+            logging.error(reason_for_failure)
+            set_done(reason_for_failure)
+            return
+        
+        # Else download firmware and behave as a normal device during OTA
+        result = req.get(url, timeout=30)
+        if result.status_code == 200:
+            calculated_crc32 = crc32_le(result.content)
+            if calculated_crc32 == expected_crc32:
+                to_tester_queue.put({"msg":msgs.CRC32_CORRECT})
+                logging.info("correct crc32")
+                set_done(OtaError.OTA_ERR_OK)
+            elif expected_crc32 == 0:
+                to_tester_queue.put({"msg":msgs.CRC32_NOT_CHECKED})
+                logging.info("not checking crc32")
+                set_done(OtaError.OTA_ERR_OK)
+            else:
+                to_tester_queue.put({"msg":msgs.CRC32_MISMATCH})
+                logging.error(f"crc32 don't match (got '{calculated_crc32}, expected '{expected_crc32}'')")
+                set_done(OtaError.OTA_ERR_VALIDATE_FAILED)
         else:
-            to_tester_queue.put({"msg":"crc32_mismatch"})
-            logging.error(f"crc32 don't match (got '{calculated_crc32}, expected '{expected_crc32}'')")
-            set_done(OtaError.OTA_ERR_VALIDATE_FAILED)
-    else:
-        to_tester_queue.put({"msg":"invalid_ota_url"})
-        logging.error("invalid ota url")
-        set_done(OtaError.OTA_ERR_INCOMPLETE)
+            to_tester_queue.put({"msg":msgs.DOWNLOAD_INTERRUPTED})
+            logging.error("download interrupted")
+            set_done(OtaError.OTA_ERR_GENERIC)
 
-@ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p, ctypes.c_uint32)
-def ota_callback(url, crc32):
-    """ Callback when OTA is started """
+    @ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p, ctypes.c_uint32)
+    def ota_callback(url, crc32):
+        """ Callback when OTA is started """
 
-    if trackle_module is None:
-        raise RuntimeError("trackle_module must be set!")
-    if trackle_instance is None:
-        raise RuntimeError("trackle_instance must be set!")
-    if to_tester_queue is None:
-        raise RuntimeError("to_tester_queue must be set!")
+        if trackle_module is None:
+            raise RuntimeError("trackle_module must be set!")
+        if trackle_instance is None:
+            raise RuntimeError("trackle_instance must be set!")
+        if to_tester_queue is None:
+            raise RuntimeError("to_tester_queue must be set!")
 
-    thread = threading.Thread(target=ota_task_code, args=(url, crc32))
-    thread.start()
+        thread = threading.Thread(target=ota_thread_code, args=(url, crc32))
+        thread.start()
 
-    to_tester_queue.put({"msg":msgs.OTA_URL_RECEIVED})
-    logging.info("OTA URL received")
-    return OtaError.OTA_ERR_OK
+        to_tester_queue.put({"msg":msgs.OTA_URL_RECEIVED})
+        logging.info("OTA URL received")
+        return OtaError.OTA_ERR_OK
+
+    return ota_callback

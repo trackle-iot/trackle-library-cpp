@@ -8,9 +8,11 @@ import ctypes
 import time
 import importlib
 import warnings
+import threading
 
 import credentials
 import messages as msgs
+from trackle_enums import OtaError
 
 @dataclass
 class DeviceStartupParams:
@@ -22,6 +24,7 @@ class DeviceStartupParams:
     imei: str = ""
     iccid: str = ""
     fw_version: int = 1
+    reason_for_ota_failure: OtaError | None = None
 
 class ConnectionStatus:
 
@@ -50,8 +53,6 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
 
     trackle = importlib.import_module("trackle", "")
     callbacks = importlib.import_module("callbacks", "")
-    callbacks.trackle_module = trackle
-    callbacks.to_tester_queue = to_tester
     
     cloud_functions = importlib.import_module("cloud_functions", "")
 
@@ -76,7 +77,6 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
     get_echo_json_cb = trackle.GET_JSON_CB(cloud_functions.get_echo_json)
 
     trackle_s = trackle.new()
-    callbacks.trackle_instance = trackle_s
 
     trackle.init(trackle_s)
 
@@ -90,7 +90,11 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
     trackle.setKeys(trackle_s, credentials.list_to_private_key(startup_params.private_key))
     trackle.setFirmwareVersion(trackle_s, startup_params.fw_version)
     trackle.setOtaMethod(trackle_s, trackle.OTAMethod.SEND_URL)
-    trackle.setOtaUpdateCallback(trackle_s, callbacks.ota_callback)
+
+    trackle_lock = threading.Lock()
+    ota_callback = callbacks.make_ota_callback(trackle, trackle_s, to_tester, startup_params.reason_for_ota_failure, trackle_lock)
+    trackle.setOtaUpdateCallback(trackle_s, ota_callback)
+    
     trackle.setConnectionType(trackle_s, trackle.ConnectionType.UNDEFINED)
     if startup_params.claim_code:
         trackle.setClaimCode(trackle_s, startup_params.claim_code.encode("utf-8"))
@@ -140,7 +144,8 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
         
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            trackle.loop(trackle_s)
+            with trackle_lock:
+                trackle.loop(trackle_s)
 
         # --------- Test runner commands interpretation ---------
 
