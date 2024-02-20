@@ -12,7 +12,7 @@ match platform.system():
     case "Linux":
         __DLL_EXTENSION = "so"
     case _:
-        raise OSError("Operating system not supported")
+        raise NotImplementedError("Operating system not supported")
 
 __lib = ctypes.cdll.LoadLibrary(f"lib/trackle_library.{__DLL_EXTENSION}")
 

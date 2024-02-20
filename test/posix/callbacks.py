@@ -8,6 +8,7 @@ import logging
 import requests as req
 
 from trackle_enums import OtaError
+import messages as msgs
 
 LOG_LEVEL = 100 # 100 means all logs disabled, otherwise, choose the level you desire
 logging.basicConfig(level=LOG_LEVEL, format="[%(levelname)s] %(processName)s : %(msg)s")
@@ -18,7 +19,7 @@ match platform.system():
     case "Linux":
         __DLL_EXTENSION = "so"
     case _:
-        raise Exception("invalid os")
+        raise NotImplementedError("Operating system not supported")
 
 __lib = ctypes.cdll.LoadLibrary(f"lib/callbacks.{__DLL_EXTENSION}")
 
@@ -87,19 +88,19 @@ def ota_task_code(url, expected_crc32):
     if result.status_code == 200:
         calculated_crc32 = crc32_le(result.content)
         if calculated_crc32 == expected_crc32:
-            to_tester_queue.put({"name":"crc32_correct"})
+            to_tester_queue.put({"msg":msgs.CRC32_CORRECT})
             logging.info("correct crc32")
             set_done(OtaError.OTA_ERR_OK)
         elif expected_crc32 == 0:
-            to_tester_queue.put({"name":"crc32_not_checked"})
+            to_tester_queue.put({"msg":msgs.CRC32_NOT_CHECKED})
             logging.info("not checking crc32")
             set_done(OtaError.OTA_ERR_OK)
         else:
-            to_tester_queue.put({"name":"crc32_mismatch"})
+            to_tester_queue.put({"msg":"crc32_mismatch"})
             logging.error(f"crc32 don't match (got '{calculated_crc32}, expected '{expected_crc32}'')")
             set_done(OtaError.OTA_ERR_VALIDATE_FAILED)
     else:
-        to_tester_queue.put({"name":"invalid_ota_url"})
+        to_tester_queue.put({"msg":"invalid_ota_url"})
         logging.error("invalid ota url")
         set_done(OtaError.OTA_ERR_INCOMPLETE)
 
@@ -117,6 +118,6 @@ def ota_callback(url, crc32):
     thread = threading.Thread(target=ota_task_code, args=(url, crc32))
     thread.start()
 
-    to_tester_queue.put({"name":"ota_url_received"})
+    to_tester_queue.put({"msg":msgs.OTA_URL_RECEIVED})
     logging.info("OTA URL received")
     return OtaError.OTA_ERR_OK

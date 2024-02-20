@@ -24,32 +24,34 @@ import lorem_ipsum as lorem
 import sseclient_nowait as scnw
 import device
 import trackle_enums
+import messages as msgs
 
 # Settings behaviours based on command line arguments
 LOG_LEVEL = 100 # 100 means all logs disabled, otherwise, choose the level you desire
 log.basicConfig(level=LOG_LEVEL, format="[%(levelname)s] %(processName)s : %(msg)s")
 
-def wait_event_name(evt_queue: mp.Queue, event_name: str, test_class: ut.TestCase = None, timeout: int = 5) -> dict:
+def wait_queue_message(evt_queue: mp.Queue, expect_msg: msgs.QueueMessage,
+                       test_class: ut.TestCase = None, timeout: int = 5) -> dict:
     """
     Wait queue event with given name.
     Events with other names found before that are put back to the queue.
     """
     period_s = 0.1
     periods_elapsed = 0
-    msg = evt_queue.get_nowait() if not evt_queue.empty() else None
-    while not isinstance(msg, dict) or msg["name"] != event_name:
-        evt_queue.put(msg)
+    got_msg_dict = evt_queue.get_nowait() if not evt_queue.empty() else None
+    while not isinstance(got_msg_dict, dict) or got_msg_dict["msg"] != expect_msg:
+        evt_queue.put(got_msg_dict)
         time.sleep(period_s)
-        msg = evt_queue.get_nowait() if not evt_queue.empty() else None
+        got_msg_dict = evt_queue.get_nowait() if not evt_queue.empty() else None
         periods_elapsed += 1
         if periods_elapsed * period_s > timeout:
             if test_class is None:
-                raise TimeoutError(f"couldn't receive expected queue event within {timeout} seconds")
+                raise TimeoutError(expect_msg.not_recvd_err_msg(timeout))
             else:
-                test_class.fail(f"couldn't receive expected queue event within {timeout} seconds")
-    return msg
+                test_class.fail(expect_msg.not_recvd_err_msg(timeout))
+    return got_msg_dict
 
-def wait_sse_publish_event(sse_client: scnw.SSEClientNoWait, event_name: str | set,
+def wait_sse_event(sse_client: scnw.SSEClientNoWait, event_name: str | set,
                            timeout_seconds: int, test_class: ut.TestCase = None) -> dict:
     """
     Wait SSE event with given name.
@@ -65,10 +67,19 @@ def wait_sse_publish_event(sse_client: scnw.SSEClientNoWait, event_name: str | s
         except queue.Empty:
             pass
         time.sleep(0.05)
-    if test_class is None:
-        raise TimeoutError(f"couldn't receive expected SSE event within {timeout_seconds} seconds")
+    # Make error string
+    if isinstance(event_name, str):
+        error_str = f"Couldn't receive SSE event \"{event_name}\" within {timeout_seconds} seconds."
+    elif isinstance(event_name, set):
+        error_str = f"Couldn't receive one of the following SSE events within {timeout_seconds} seconds: "
+        error_str += ", ".join(event_name)
     else:
-        test_class.fail(f"couldn't receive expected SSE event within {timeout_seconds} seconds")
+        raise RuntimeError("Unexpected type for event_name: " + type(event_name))
+    # Fail or raise error ("is this a failure of the test case or an error while preparing for the test case?")
+    if test_class is None:
+        raise TimeoutError(error_str)
+    else:
+        test_class.fail(error_str)
 
 class TrackleLibraryTest(ut.TestCase):
 
@@ -143,15 +154,15 @@ class TrackleLibraryTest(ut.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.to_proxy.put({"name": "tests_completed"})
+        cls.to_proxy.put({"msg": msgs.TESTS_COMPLETED})
         cls.proxy_proc.join()
 
     def setUp(self):
         # Switching on proxy and reset
-        self.to_proxy.put({"name" : "proxy_on"})
-        self.to_proxy.put({"name": "reset_server_conn"})
-        wait_event_name(self.from_proxy, "proxy_switched_on")
-        wait_event_name(self.from_proxy, "server_conn_was_reset")
+        self.to_proxy.put({"msg" : msgs.PROXY_ON})
+        self.to_proxy.put({"msg": msgs.RESET_SERVER_CONN})
+        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_ON)
+        wait_queue_message(self.from_proxy, msgs.SERVER_CONN_WAS_RESET)
         # Wait a moment
         time.sleep(2)
         # Ignore events from previous test case
@@ -165,9 +176,9 @@ class TrackleLibraryTest(ut.TestCase):
 
     def tearDown(self):
         if self.to_device is not None:
-            self.to_device.put({"name":"kill_device"})
+            self.to_device.put({"msg":msgs.KILL_DEVICE})
         if self.from_device is not None:
-            wait_event_name(self.from_device, "killing")
+            wait_queue_message(self.from_device, msgs.KILLING)
 
     def test_connect_1(self):
         """
@@ -180,11 +191,11 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result", self)
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT, self)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected", self)
+        wait_queue_message(self.from_device, msgs.CONNECTED, self)
         # Check for connection on cloud
-        result = wait_sse_publish_event(self.sse_client, "trackle/status", 5, self)
+        result = wait_sse_event(self.sse_client, "trackle/status", 5, self)
         self.assertIn(result["data"], {"online", "ip-changed"}, "not online from cloud")
 
     def test_connect_2(self):
@@ -193,28 +204,28 @@ class TrackleLibraryTest(ut.TestCase):
         pausa 20s, connect ritorna true, in cloud arriva l'online dopo aver riattivato il proxy
         """
         # Switching off proxy
-        self.to_proxy.put({"name" : "proxy_off"})
-        wait_event_name(self.from_proxy, "proxy_switched_off")
+        self.to_proxy.put({"msg" : msgs.PROXY_OFF})
+        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_OFF)
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result", self)
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT, self)
         self.assertTrue(res["return"])
         # Wait
         for _ in range(4):
             with self.assertRaises(TimeoutError):
-                wait_sse_publish_event(self.sse_client, "trackle/status", 5)
+                wait_sse_event(self.sse_client, "trackle/status", 5)
         # Switching on proxy
-        self.to_proxy.put({"name" : "proxy_on"})
-        wait_event_name(self.from_proxy, "proxy_switched_on")
+        self.to_proxy.put({"msg" : msgs.PROXY_ON})
+        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_ON)
         # Check for connection on cloud
         log.info("waiting online")
-        result = wait_sse_publish_event(self.sse_client, "trackle/status", 15, self)
+        result = wait_sse_event(self.sse_client, "trackle/status", 15, self)
         self.assertIn(result["data"], {"online", "ip-changed"}, "not online from cloud")
-        wait_event_name(self.from_device, "connected", self)
+        wait_queue_message(self.from_device, msgs.CONNECTED, self)
 
     def test_connect_3(self):
         """
@@ -222,19 +233,19 @@ class TrackleLibraryTest(ut.TestCase):
         connect ritorna true, i log stampano handshake error, in cloud non arriva l'online
         """
         # Switching off proxy
-        self.to_proxy.put({"name" : "proxy_off"})
-        wait_event_name(self.from_proxy, "proxy_switched_off")
+        self.to_proxy.put({"msg" : msgs.PROXY_OFF})
+        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_OFF)
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result", self)
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT, self)
         self.assertTrue(res["return"])
         # Wait
         with self.assertRaises(TimeoutError):
-            wait_sse_publish_event(self.sse_client, "trackle/status", 15)
+            wait_sse_event(self.sse_client, "trackle/status", 15)
 
     def test_connect_4(self):
         """
@@ -250,11 +261,11 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result", self)
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT, self)
         self.assertTrue(res["return"])
         # Wait
         with self.assertRaises(TimeoutError):
-            wait_sse_publish_event(self.sse_client, "trackle/status", 5)
+            wait_sse_event(self.sse_client, "trackle/status", 5)
 
     def test_get_1_1(self):
         """
@@ -268,9 +279,9 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send GET True
         method = "getEchoBool"
         url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
@@ -293,9 +304,9 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send GET False
         method = "getEchoBool"
         url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
@@ -317,9 +328,9 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send GET
         method = "getEchoInt"
         url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
@@ -341,9 +352,9 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send GET
         method = "getEchoDouble"
         url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
@@ -366,9 +377,9 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send GET
         method = "getEchoString"
         url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
@@ -392,9 +403,9 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send GET
         method = "getEchoJson"
         url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
@@ -416,9 +427,9 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send POST
         method = "postSuccess"
         url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
@@ -439,9 +450,9 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send POST
         method = "postFailing"
         url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
@@ -462,16 +473,16 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send POST
         method = "postPrivate"
         url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
         json_body = {"args": ""}
         resp = req.post(url, headers=self.headers, data=json_body, timeout=15)
-        self.to_device.put({"name":"was_private_post_executed"})
-        res = wait_event_name(self.from_device, "private_post_exec_status", self)
+        self.to_device.put({"msg":msgs.WAS_PRIVATE_POST_EXECUTED})
+        res = wait_queue_message(self.from_device, msgs.PRIVATE_POST_EXEC_STATUS, self)
         self.assertFalse(res["executed"])
         self.assertEqual(resp.status_code, 403)
 
@@ -488,25 +499,25 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Publish event
-        self.to_device.put({"name" : "publish",
+        self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "testing/test_publish_1",
                             "data" : lorem.LOREM_IPSUM[:500],
                             "ttl" : 30,
                             "visibility" : trackle_enums.PublishVisibility.PUBLIC,
                             "ack" : trackle_enums.PublishType.WITH_ACK,
                             "key" : 3})
-        result = wait_event_name(self.from_device, "publish_result", self)
+        result = wait_queue_message(self.from_device, msgs.PUBLISH_RESULT, self)
         self.assertTrue(result["return"], "unexpected function return value")
-        result = wait_event_name(self.from_device, "publish_sent", self)
+        result = wait_queue_message(self.from_device, msgs.PUBLISH_SENT, self)
         self.assertEqual(result["published"], 1, "published result in sent callback differs from 1")
         self.assertEqual(result["idx"], 3, "msg key in sent callback differs from 3")
-        result = wait_sse_publish_event(self.sse_client, "testing/test_publish_1", 5, self)
+        result = wait_sse_event(self.sse_client, "testing/test_publish_1", 5, self)
         self.assertEqual(result["data"], lorem.LOREM_IPSUM[:500], "cloud data doesn't match")
-        result = wait_event_name(self.from_device, "publish_completed", self)
+        result = wait_queue_message(self.from_device, msgs.PUBLISH_COMPLETED, self)
         self.assertEqual(result["error"], 0, "error code in completed callback differs from 0")
         self.assertEqual(result["idx"], 3, "msg key in completed callback differs from 3")
 
@@ -521,25 +532,25 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Publish event
-        self.to_device.put({"name" : "publish",
+        self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "testing/test_publish_2",
                             "data" : lorem.LOREM_IPSUM[:500],
                             "ttl" : 30,
                             "visibility" : trackle_enums.PublishVisibility.PUBLIC,
                             "ack" : trackle_enums.PublishType.NO_ACK,
                             "key" : 7})
-        result = wait_event_name(self.from_device, "publish_result", self)
+        result = wait_queue_message(self.from_device, msgs.PUBLISH_RESULT, self)
         self.assertTrue(result["return"], "unexpected function return value")
         with self.assertRaises(TimeoutError):
-            wait_event_name(self.from_device, "publish_sent")
-        result = wait_sse_publish_event(self.sse_client, "testing/test_publish_2", 5, self)
+            wait_queue_message(self.from_device, msgs.PUBLISH_SENT)
+        result = wait_sse_event(self.sse_client, "testing/test_publish_2", 5, self)
         self.assertEqual(result["data"], lorem.LOREM_IPSUM[:500], "cloud data doesn't match")
         with self.assertRaises(TimeoutError):
-            wait_event_name(self.from_device, "publish_completed")
+            wait_queue_message(self.from_device, msgs.PUBLISH_COMPLETED)
 
     def test_publish_3(self):
         """
@@ -554,25 +565,25 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Publish event
-        self.to_device.put({"name" : "publish",
+        self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "testing/test_publish_3",
                             "data" : lorem.LOREM_IPSUM[:3800],
                             "ttl" : 30,
                             "visibility" : trackle_enums.PublishVisibility.PUBLIC,
                             "ack" : trackle_enums.PublishType.WITH_ACK,
                             "key" : 4})
-        result = wait_event_name(self.from_device, "publish_result", self)
+        result = wait_queue_message(self.from_device, msgs.PUBLISH_RESULT, self)
         self.assertTrue(result["return"], "unexpected function return value")
-        result = wait_event_name(self.from_device, "publish_sent", self)
+        result = wait_queue_message(self.from_device, msgs.PUBLISH_SENT, self)
         self.assertEqual(result["published"], 1, "published result in sent callback differs from 1")
         self.assertEqual(result["idx"], 4, "msg key in sent callback differs from 4")
-        result = wait_sse_publish_event(self.sse_client, "testing/test_publish_3", 15, self)
+        result = wait_sse_event(self.sse_client, "testing/test_publish_3", 15, self)
         self.assertEqual(result["data"], lorem.LOREM_IPSUM[:3800], "cloud data doesn't match")
-        result = wait_event_name(self.from_device, "publish_completed", self)
+        result = wait_queue_message(self.from_device, msgs.PUBLISH_COMPLETED, self)
         self.assertEqual(result["error"], 0, "error code in completed callback differs from 0")
         self.assertEqual(result["idx"], 4, "msg key in completed callback differs from 4")
 
@@ -587,25 +598,25 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Publish event
-        self.to_device.put({"name" : "publish",
+        self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "testing/test_publish_4",
                             "data" : lorem.LOREM_IPSUM[:3700],
                             "ttl" : 30,
                             "visibility" : trackle_enums.PublishVisibility.PUBLIC,
                             "ack" : trackle_enums.PublishType.NO_ACK,
                             "key" : 6})
-        result = wait_event_name(self.from_device, "publish_result", self)
+        result = wait_queue_message(self.from_device, msgs.PUBLISH_RESULT, self)
         self.assertTrue(result["return"], "unexpected function return value")
         with self.assertRaises(TimeoutError):
-            wait_event_name(self.from_device, "publish_sent")
-        result = wait_sse_publish_event(self.sse_client, "testing/test_publish_4", 15, self)
+            wait_queue_message(self.from_device, msgs.PUBLISH_SENT)
+        result = wait_sse_event(self.sse_client, "testing/test_publish_4", 15, self)
         self.assertEqual(result["data"], lorem.LOREM_IPSUM[:3700], "cloud data doesn't match")
         with self.assertRaises(TimeoutError):
-            wait_event_name(self.from_device, "publish_completed")
+            wait_queue_message(self.from_device, msgs.PUBLISH_COMPLETED)
 
     def test_publish_5(self):
         """
@@ -619,24 +630,24 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Publish event
-        self.to_device.put({"name" : "multipublish",
+        self.to_device.put({"msg" : msgs.MULTIPUBLISH,
                             "event" : "testing/test_publish_5",
                             "data" : lorem.LOREM_IPSUM[:500],
                             "ttl" : 30,
                             "visibility" : trackle_enums.PublishVisibility.PUBLIC,
                             "key" : 0,
                             "times" : 5})
-        result = wait_event_name(self.from_device, "multipublish_result", self)
+        result = wait_queue_message(self.from_device, msgs.MULTIPUBLISH_RESULT, self)
         self.assertListEqual(result["return"], [True, True, True, True, False], "unexpected result")
         for _ in range(4):
-            result = wait_sse_publish_event(self.sse_client, "testing/test_publish_5", 5, self)
+            result = wait_sse_event(self.sse_client, "testing/test_publish_5", 5, self)
             self.assertEqual(result["data"], lorem.LOREM_IPSUM[:500], "cloud data doesn't match")
         with self.assertRaises(TimeoutError):
-            wait_sse_publish_event(self.sse_client, "testing/test_publish_5", 5)
+            wait_sse_event(self.sse_client, "testing/test_publish_5", 5)
 
     def test_publish_6(self):
         """
@@ -649,25 +660,25 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Publish event
-        self.to_device.put({"name" : "publish",
+        self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "trackle/test_publish_6",
                             "data" : lorem.LOREM_IPSUM[:500],
                             "ttl" : 30,
                             "visibility" : trackle_enums.PublishVisibility.PUBLIC,
                             "ack" : trackle_enums.PublishType.WITH_ACK,
                             "key" : 0})
-        result = wait_event_name(self.from_device, "publish_result", self)
+        result = wait_queue_message(self.from_device, msgs.PUBLISH_RESULT, self)
         self.assertFalse(result["return"], "unexpected function return value")
         with self.assertRaises(TimeoutError):
-            wait_event_name(self.from_device, "publish_sent")
+            wait_queue_message(self.from_device, msgs.PUBLISH_SENT)
         with self.assertRaises(TimeoutError):
-            wait_sse_publish_event(self.sse_client, "trackle/test_publish_6", 5)
+            wait_sse_event(self.sse_client, "trackle/test_publish_6", 5)
         with self.assertRaises(TimeoutError):
-            wait_event_name(self.from_device, "publish_completed")
+            wait_queue_message(self.from_device, msgs.PUBLISH_COMPLETED)
 
     def test_publish_7(self):
         """
@@ -680,25 +691,25 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Publish event
-        self.to_device.put({"name" : "publish",
+        self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "iotready/test_publish_7",
                             "data" : lorem.LOREM_IPSUM[:500],
                             "ttl" : 30,
                             "visibility" : trackle_enums.PublishVisibility.PUBLIC,
                             "ack" : trackle_enums.PublishType.WITH_ACK,
                             "key" : 0})
-        result = wait_event_name(self.from_device, "publish_result", self)
+        result = wait_queue_message(self.from_device, msgs.PUBLISH_RESULT, self)
         self.assertFalse(result["return"], "unexpected function return value")
         with self.assertRaises(TimeoutError):
-            wait_event_name(self.from_device, "publish_sent")
+            wait_queue_message(self.from_device, msgs.PUBLISH_SENT)
         with self.assertRaises(TimeoutError):
-            wait_sse_publish_event(self.sse_client, "trackle/test_publish_7", 5)
+            wait_sse_event(self.sse_client, "trackle/test_publish_7", 5)
         with self.assertRaises(TimeoutError):
-            wait_event_name(self.from_device, "publish_completed")
+            wait_queue_message(self.from_device, msgs.PUBLISH_COMPLETED)
 
     def test_publish_8(self):
         """
@@ -714,14 +725,14 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Switch off proxy
-        self.to_proxy.put({"name" : "proxy_off"})
-        wait_event_name(self.from_proxy, "proxy_switched_off")
+        self.to_proxy.put({"msg" : msgs.PROXY_OFF})
+        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_OFF)
         # Publish event
-        self.to_device.put({"name" : "publish",
+        self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "testing/test_publish_8",
                             "data" : lorem.LOREM_IPSUM[:3900],
                             "ttl" : 30,
@@ -731,17 +742,17 @@ class TrackleLibraryTest(ut.TestCase):
         # Wait with proxy off
         time.sleep(10)
         # Switch on proxy
-        self.to_proxy.put({"name" : "proxy_on"})
-        wait_event_name(self.from_proxy, "proxy_switched_on")
+        self.to_proxy.put({"msg" : msgs.PROXY_ON})
+        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_ON)
         # Check publish result
-        result = wait_event_name(self.from_device, "publish_result", self)
+        result = wait_queue_message(self.from_device, msgs.PUBLISH_RESULT, self)
         self.assertTrue(result["return"], "unexpected function return value")
-        result = wait_event_name(self.from_device, "publish_sent", self)
+        result = wait_queue_message(self.from_device, msgs.PUBLISH_SENT, self)
         self.assertEqual(result["published"], 1, "published result in sent callback differs from 1")
         self.assertEqual(result["idx"], 2, "msg key in sent callback differs from 2")
-        result = wait_sse_publish_event(self.sse_client, "testing/test_publish_8", 15, self)
+        result = wait_sse_event(self.sse_client, "testing/test_publish_8", 15, self)
         self.assertEqual(result["data"], lorem.LOREM_IPSUM[:3900], "cloud data doesn't match")
-        result = wait_event_name(self.from_device, "publish_completed", self)
+        result = wait_queue_message(self.from_device, msgs.PUBLISH_COMPLETED, self)
         self.assertEqual(result["error"], 0, "error code in completed callback differs from 0")
         self.assertEqual(result["idx"], 2, "msg key in completed callback differs from 2")
 
@@ -759,14 +770,14 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Switch off proxy
-        self.to_proxy.put({"name" : "proxy_off"})
-        wait_event_name(self.from_proxy, "proxy_switched_off")
+        self.to_proxy.put({"msg" : msgs.PROXY_OFF})
+        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_OFF)
         # Publish event
-        self.to_device.put({"name" : "publish",
+        self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "testing/test_publish_8",
                             "data" : lorem.LOREM_IPSUM[:3900],
                             "ttl" : 30,
@@ -774,13 +785,13 @@ class TrackleLibraryTest(ut.TestCase):
                             "ack" : trackle_enums.PublishType.WITH_ACK,
                             "key" : 0})
         # Check publish result
-        result = wait_event_name(self.from_device, "publish_result", self)
+        result = wait_queue_message(self.from_device, msgs.PUBLISH_RESULT, self)
         self.assertTrue(result["return"])
-        result = wait_event_name(self.from_device, "publish_sent", self)
+        result = wait_queue_message(self.from_device, msgs.PUBLISH_SENT, self)
         self.assertEqual(result["published"], 1)
         for _ in range(7):
             try:
-                result = wait_event_name(self.from_device, "publish_completed")
+                result = wait_queue_message(self.from_device, msgs.PUBLISH_COMPLETED)
             except TimeoutError:
                 pass
             else:
@@ -801,42 +812,42 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Publish event
-        self.to_device.put({"name" : "multipublish_long",
+        self.to_device.put({"msg" : msgs.MULTIPUBLISH_LONG,
                             "event" : ["testing/test_publish_10_" + str(i) for i in range(1,6)],
                             "data" : lorem.LOREM_IPSUM[:2400],
                             "ttl" : 30,
                             "visibility" : trackle_enums.PublishVisibility.PUBLIC,
                             "ack" : trackle_enums.PublishType.WITH_ACK})
-        result = wait_event_name(self.from_device, "multipublish_long_result", self)
+        result = wait_queue_message(self.from_device, msgs.MULTIPUBLISH_LONG_RESULT, self)
         self.assertListEqual(result["return"], [True, True, True, True, False], "unexpected result")
         to_send_msg_keys = {1,2,3,4}
         for _ in range(4):
-            result = wait_event_name(self.from_device, "publish_sent", self)
+            result = wait_queue_message(self.from_device, msgs.PUBLISH_SENT, self)
             self.assertEqual(result["published"], 1, "published result in sent callback is not 1")
             self.assertIn(result["idx"], to_send_msg_keys, "this msg key should have been sent")
             self.assertNotEqual(result["idx"], 5, "this shouldn't have been sent")
             to_send_msg_keys.remove(result["idx"])
         to_complete_msg_keys = {1,2,3,4}
         for _ in range(4):
-            result = wait_event_name(self.from_device, "publish_completed", self)
+            result = wait_queue_message(self.from_device, msgs.PUBLISH_COMPLETED, self)
             self.assertEqual(result["error"], 0, "error code in completed callback differs from 0")
             self.assertIn(result["idx"], to_complete_msg_keys, "msg shouldn't have been completed")
             self.assertNotEqual(result["idx"], 5, "this shouldn't have been completed")
             to_complete_msg_keys.remove(result["idx"])
         to_sse_events = set("testing/test_publish_10_"+str(s) for s in range(1,5))
         for _ in range(4):
-            result = wait_sse_publish_event(self.sse_client, to_sse_events, 15, self)
+            result = wait_sse_event(self.sse_client, to_sse_events, 15, self)
         # Check that no other things are arriving on device or through SSE
         with self.assertRaises(TimeoutError):
-            wait_event_name(self.from_device, "publish_sent")
+            wait_queue_message(self.from_device, msgs.PUBLISH_SENT)
         with self.assertRaises(TimeoutError):
-            wait_event_name(self.from_device, "publish_completed")
+            wait_queue_message(self.from_device, msgs.PUBLISH_COMPLETED)
         with self.assertRaises(TimeoutError):
-            wait_sse_publish_event(self.sse_client, "testing/test_publish_10_5", 5)
+            wait_sse_event(self.sse_client, "testing/test_publish_10_5", 5)
 
     def test_publish_11(self):
         """
@@ -852,14 +863,14 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Switch off proxy
-        self.to_proxy.put({"name" : "proxy_off"})
-        wait_event_name(self.from_proxy, "proxy_switched_off")
+        self.to_proxy.put({"msg" : msgs.PROXY_OFF})
+        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_OFF)
         # Publish event
-        self.to_device.put({"name" : "publish",
+        self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "testing/test_publish_11",
                             "data" : lorem.LOREM_IPSUM[:500],
                             "ttl" : 30,
@@ -869,17 +880,17 @@ class TrackleLibraryTest(ut.TestCase):
         # Wait with proxy off
         time.sleep(10)
         # Switch on proxy
-        self.to_proxy.put({"name" : "proxy_on"})
-        wait_event_name(self.from_proxy, "proxy_switched_on")
+        self.to_proxy.put({"msg" : msgs.PROXY_ON})
+        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_ON)
         # Check publish result
-        result = wait_event_name(self.from_device, "publish_result", self)
+        result = wait_queue_message(self.from_device, msgs.PUBLISH_RESULT, self)
         self.assertTrue(result["return"], "unexpected function return value")
-        result = wait_event_name(self.from_device, "publish_sent", self)
+        result = wait_queue_message(self.from_device, msgs.PUBLISH_SENT, self)
         self.assertEqual(result["published"], 1, "published result in sent callback differs from 1")
         self.assertEqual(result["idx"], 2, "msg key in sent callback differs from 2")
-        result = wait_sse_publish_event(self.sse_client, "testing/test_publish_11", 15, self)
+        result = wait_sse_event(self.sse_client, "testing/test_publish_11", 15, self)
         self.assertEqual(result["data"], lorem.LOREM_IPSUM[:500], "cloud data doesn't match")
-        result = wait_event_name(self.from_device, "publish_completed", self)
+        result = wait_queue_message(self.from_device, msgs.PUBLISH_COMPLETED, self)
         self.assertEqual(result["error"], 0, "error code in completed callback differs from 0")
         self.assertEqual(result["idx"], 2, "msg key in completed callback differs from 2")
 
@@ -893,9 +904,9 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send PUT with signal
         url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         json_body = {"signal": "1"}
@@ -903,7 +914,7 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
         self.assertTrue(resp.json().get("ok"), "unexpected method name")
         self.assertTrue(resp.json().get("signaling"), "unexpected return value")
-        wait_event_name(self.from_device, "signal_called", self)
+        wait_queue_message(self.from_device, msgs.SIGNAL_CALLED, self)
 
     def test_ping_1(self):
         """
@@ -915,9 +926,9 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send PUT with ping
         url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/ping"
         json_body = {}
@@ -934,15 +945,15 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send PUT with reset
         url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         json_body = {"reset": "reboot"}
         resp = req.put(url, headers=self.headers, data=json_body, timeout=15)
         self.assertTrue(resp.json().get("ok"), "unexpected method name")
-        wait_event_name(self.from_device, "reboot_called", self)
+        wait_queue_message(self.from_device, msgs.REBOOT_CALLED, self)
 
     def test_claim_code_1(self):
         """
@@ -956,17 +967,16 @@ class TrackleLibraryTest(ut.TestCase):
             claim_code
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Check for claim code
-        result = wait_sse_publish_event(self.sse_client, "trackle/device/claim/code", 5, self)
+        result = wait_sse_event(self.sse_client, "trackle/device/claim/code", 5, self)
         self.assertEqual(result["data"], claim_code, "wrong claim code")
 
     def test_get_time_1(self):
         """
-        claim code - si setta un claimcode prima della connect,
-        si controlla dopo la connessione che arrivi il publish su sse e che sia quello settato
+        get_time - si chiama trackleGetTime
         """
         # Connection
         params = device.DeviceStartupParams(
@@ -974,12 +984,12 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Call get time and wait
-        self.to_device.put({"name" : "get_time"})
-        wait_event_name(self.from_device, "get_time_called", self)
+        self.to_device.put({"msg" : msgs.GET_TIME})
+        wait_queue_message(self.from_device, msgs.GET_TIME_CALLED, self)
 
     def test_component_list_1(self):
         """
@@ -995,9 +1005,9 @@ class TrackleLibraryTest(ut.TestCase):
             components_list=components_list
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send GET for device information
         url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         resp = req.get(url, headers=self.headers, timeout=15)
@@ -1019,9 +1029,9 @@ class TrackleLibraryTest(ut.TestCase):
             iccid=iccid
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send GET for device information
         url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         resp = req.get(url, headers=self.headers, timeout=15)
@@ -1040,9 +1050,9 @@ class TrackleLibraryTest(ut.TestCase):
             self.proxy_port
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send PUT with OTA url
         url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         json_body = {"firmware_url": "https://iotready.fra1.cdn.digitaloceanspaces.com/Iotready/firmware_test_suite_22.bin"}
@@ -1050,8 +1060,8 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertEqual(resp.status_code, 200, "request failed")
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
         self.assertEqual(resp.json().get("status"), "Update sent", "unexpected method name")
-        wait_event_name(self.from_device, "ota_url_received", self)
-        wait_event_name(self.from_device, "crc32_not_checked", self, 20) # Higher timeout in case of bad connection
+        wait_queue_message(self.from_device, msgs.OTA_URL_RECEIVED, self)
+        wait_queue_message(self.from_device, msgs.CRC32_NOT_CHECKED, self, 20) # Higher timeout in case of bad connection
 
     def test_ota_2(self):
         """
@@ -1068,12 +1078,12 @@ class TrackleLibraryTest(ut.TestCase):
             fw_version = 21
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         # Wait OTA events
-        wait_event_name(self.from_device, "ota_url_received", self, 15)
-        wait_event_name(self.from_device, "crc32_correct", self, 20) # Higher timeout in case of bad connection
+        wait_queue_message(self.from_device, msgs.OTA_URL_RECEIVED, self, 15)
+        wait_queue_message(self.from_device, msgs.CRC32_CORRECT, self, 20) # Higher timeout in case of bad connection
     
     def test_ota_3(self):
         """
@@ -1088,15 +1098,15 @@ class TrackleLibraryTest(ut.TestCase):
             fw_version = 21
         )
         self.spawn_device(params)
-        res = wait_event_name(self.from_device, "connect_result")
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
-        wait_event_name(self.from_device, "connected")
+        wait_queue_message(self.from_device, msgs.CONNECTED)
         with self.assertRaises(TimeoutError):
-            wait_event_name(self.from_device, "ota_url_received", None, 5)
+            wait_queue_message(self.from_device, msgs.OTA_URL_RECEIVED, None, 5)
         self.force_release(version=22, intelligent=True)
         # Wait for OTA on device
-        wait_event_name(self.from_device, "ota_url_received", self, 15)
-        wait_event_name(self.from_device, "crc32_correct", self, 20) # Higher timeout in case of bad connection
+        wait_queue_message(self.from_device, msgs.OTA_URL_RECEIVED, self, 15)
+        wait_queue_message(self.from_device, msgs.CRC32_CORRECT, self, 20) # Higher timeout in case of bad connection
 
 def proxy_code(from_tester : mp.Queue, to_tester : mp.Queue, local_port : int):
     """
@@ -1138,23 +1148,23 @@ def proxy_code(from_tester : mp.Queue, to_tester : mp.Queue, local_port : int):
         # interpret commands
         in_msg = from_tester.get_nowait() if not from_tester.empty() else None
         if isinstance(in_msg, dict):
-            match in_msg.get("name"):
-                case "proxy_off":
+            match in_msg.get("msg"):
+                case msgs.PROXY_OFF:
                     enabled = False
                     log.info("proxy switched off")
-                    to_tester.put({"name" : "proxy_switched_off"})
-                case "proxy_on":
+                    to_tester.put({"msg" : msgs.PROXY_SWITCHED_OFF})
+                case msgs.PROXY_ON:
                     enabled = True
                     log.info("proxy switched on")
-                    to_tester.put({"name" : "proxy_switched_on"})
-                case "tests_completed":
+                    to_tester.put({"msg" : msgs.PROXY_SWITCHED_ON})
+                case msgs.TESTS_COMPLETED:
                     log.info("tester terminated, quitting")
                     break
-                case "reset_server_conn":
+                case msgs.RESET_SERVER_CONN:
                     server_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                     server_sock.setblocking(False)
                     log.info("server conn reset")
-                    to_tester.put({"name" : "server_conn_was_reset"})
+                    to_tester.put({"msg" : msgs.SERVER_CONN_WAS_RESET})
 
         time.sleep(0.05)
 
