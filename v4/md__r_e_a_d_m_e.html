@@ -413,7 +413,7 @@ Trackle client</h3>
 <ul>
 <li><b>trackle.setDeviceId(device_id) - trackleSetDeviceId(trackle_s, device_id)</b>: set a deviceId to the client. Follow <a href="#get-a-device-id-and-a-private-key">Get a Device ID and a private key</a> instructions.</li>
 <li><b>trackle.setKeys(private_key) - trackleSetKeys(trackle_s, private_key)</b>: set a private key to the client. Follow <a href="#get-a-device-id-and-a-private-key">Get a Device ID and a private key</a> instructions.</li>
-<li><b>trackle.setMillis(getMillis) - trackleSetMillis(trackle_s, getMillis)</b>: configure a callback that return the number of milliseconds at the time, the esp32 begins running the current program</li>
+<li><b>trackle.setMillis(getMillis) - trackleSetMillis(trackle_s, getMillis)</b>: configure a callback that return the number of milliseconds at the time, the esp32 begins running the current program <b>CRITICAL! This callback is mandatory and must be declared at the onset of library usage, preceding all others, as both the library's working and logs hinge on this callback.</b></li>
 <li><b>trackle.setSendCallback(send_cb_udp) - trackleSetSendCallback(trackle_s, send_cb_udp)</b>: configure a callback to write on udp cloud socket</li>
 <li><b>trackle.setReceiveCallback(receive_cb_udp) - trackleSetReceiveCallback(trackle_s, receive_cb_udp)</b>: configure a callback to read the udp cloud socket</li>
 <li><b>trackle.setConnectCallback(connect_cb_udp) - trackleSetConnectCallback(trackle_s, connect_cb_udp)</b>: configure a callback to connect the udp cloud socket</li>
