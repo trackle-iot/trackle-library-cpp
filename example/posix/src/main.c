@@ -79,7 +79,6 @@ int main()
     trackleSetConnectCallback(trackle_s, Callbacks_connect_udp_cb);
     trackleSetDisconnectCallback(trackle_s, Callbacks_disconnect_udp_cb);
     trackleSetSystemTimeCallback(trackle_s, Callbacks_set_time_cb);
-    trackleSetSleepCallback(trackle_s, Callbacks_sleep_ms_cb);
     trackleSetSystemRebootCallback(trackle_s, Callbacks_reboot_cb);
     trackleSetPublishHealthCheckInterval(trackle_s, 60 * 60 * 1000);
     trackleSetCompletedPublishCallback(trackle_s, Callbacks_complete_publish);

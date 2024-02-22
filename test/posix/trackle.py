@@ -76,11 +76,6 @@ setSystemTimeCallback = __lib.trackleSetSystemTimeCallback
 setSystemTimeCallback.argtypes = [ctypes.c_void_p, SYSTEM_TIME_CB]
 setSystemTimeCallback.restype = None
 
-SLEEP_CB = ctypes.CFUNCTYPE(None, ctypes.c_uint32)
-setSleepCallback = __lib.trackleSetSleepCallback
-setSleepCallback.argtypes = [ctypes.c_void_p, SLEEP_CB]
-setSleepCallback.restype = None
-
 REBOOT_CB = ctypes.CFUNCTYPE(None, ctypes.c_char_p)
 setSystemRebootCallback = __lib.trackleSetSystemRebootCallback
 setSystemRebootCallback.argtypes = [ctypes.c_void_p, REBOOT_CB]

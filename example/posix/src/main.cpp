@@ -81,7 +81,6 @@ int main()
     trackleInst.setConnectCallback(Callbacks_connect_udp_cb);
     trackleInst.setDisconnectCallback(Callbacks_disconnect_udp_cb);
     trackleInst.setSystemTimeCallback(Callbacks_set_time_cb);
-    trackleInst.setSleepCallback(Callbacks_sleep_ms_cb);
     trackleInst.setSystemRebootCallback(Callbacks_reboot_cb);
     trackleInst.setPublishHealthCheckInterval(60 * 60 * 1000);
     trackleInst.setCompletedPublishCallback(Callbacks_complete_publish);
