@@ -333,6 +333,8 @@ The minimal usage flow for Trackle client is as follows (C++ and C):
 
 - **trackle.setMillis(getMillis) - trackleSetMillis(trackle_s, getMillis)**:
 	configure a callback that return the number of milliseconds at the time, the esp32 begins running the current program
+    
+    **CRITICAL! This callback is mandatory and must be declared at the onset of library usage, preceding all others, as both the library's working and logs hinge on this callback.**
 
 - **trackle.setSendCallback(send_cb_udp) - trackleSetSendCallback(trackle_s, send_cb_udp)**:
 	configure a callback to write on udp cloud socket
