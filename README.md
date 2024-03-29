@@ -9,6 +9,8 @@
   \__/|_|  \___/\___|/  \_\|_|\___|(_)_|\___/
 ````
 
+![Test cases](https://github.com/bombardieri/trackle-library-cpp-autotest/actions/workflows/test_on_push.yml/badge.svg)
+
 Complete documentation can be found [here](https://trackle-iot.github.io/trackle-library-cpp/v4).
 
 ## Table of contents
