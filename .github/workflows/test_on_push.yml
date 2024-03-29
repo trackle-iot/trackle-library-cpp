@@ -1,4 +1,4 @@
-name: Test cases
+name: Test cases (branch v4)
 on: push
 jobs:
     test_on_push:
