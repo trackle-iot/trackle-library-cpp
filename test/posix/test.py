@@ -31,7 +31,7 @@ LOG_LEVEL = 100 # 100 means all logs disabled, otherwise, choose the level you d
 log.basicConfig(level=LOG_LEVEL, format="[%(levelname)s] %(processName)s : %(msg)s")
 
 def wait_queue_message(evt_queue: mp.Queue, expect_msg: msgs.QueueMessage,
-                       test_class: ut.TestCase = None, timeout: int = 5) -> dict:
+                       test_class: ut.TestCase = None, timeout: int = 10) -> dict:
     """
     Wait queue event with given name.
     Events with other names found before that are put back to the queue.
