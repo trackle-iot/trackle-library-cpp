@@ -896,6 +896,64 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertEqual(result["error"], 0, "error code in completed callback differs from 0")
         self.assertEqual(result["idx"], 2, "msg key in completed callback differs from 2")
 
+    def test_publish_12(self):
+        """
+        proxy off
+        publish no ack 1
+        proxy on
+        publish no ack 2
+        --
+        check publish no ack 1 not received
+        check publish no ack 2 received
+        check no online event received
+        """
+        # Connection
+        params = device.DeviceStartupParams(
+            cred.TRACKLE_PRIVATE_KEY_LIST,
+            self.proxy_port
+        )
+        self.spawn_device(params)
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
+        self.assertTrue(res["return"])
+        wait_queue_message(self.from_device, msgs.CONNECTED)
+        # Switch off proxy
+        self.to_proxy.put({"msg" : msgs.PROXY_OFF})
+        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_OFF)
+        # Publish event
+        self.to_device.put({"msg" : msgs.PUBLISH,
+                            "event" : "testing/test_publish_12_1",
+                            "data" : lorem.LOREM_IPSUM[:500],
+                            "ttl" : 30,
+                            "visibility" : trackle_enums.PublishVisibility.PUBLIC,
+                            "ack" : trackle_enums.PublishType.NO_ACK,
+                            "key" : 2})
+        # Wait with proxy off
+        time.sleep(20)
+        # Switch on proxy
+        self.to_proxy.put({"msg" : msgs.PROXY_ON})
+        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_ON)
+        # Publish event
+        self.to_device.put({"msg" : msgs.PUBLISH,
+                            "event" : "testing/test_publish_12_2",
+                            "data" : lorem.LOREM_IPSUM[:500],
+                            "ttl" : 30,
+                            "visibility" : trackle_enums.PublishVisibility.PUBLIC,
+                            "ack" : trackle_enums.PublishType.NO_ACK,
+                            "key" : 2})
+        # Check publish result
+        result = wait_sse_event(self.sse_client, "testing/test_publish_12_2", 15, self)
+        self.assertEqual(result["data"], lorem.LOREM_IPSUM[:500], "cloud data doesn't match")
+        result = wait_queue_message(self.from_device, msgs.PUBLISH_RESULT, self)
+        self.assertTrue(result["return"], "unexpected function return value")
+        with self.assertRaises(TimeoutError):
+            wait_sse_event(self.sse_client, "testing/test_publish_12_1", 5)
+        try:
+            result = wait_sse_event(self.sse_client, "trackle/status", 5)
+        except TimeoutError:
+            pass
+        else:
+            self.assertNotIn(result["data"], {"online", "ip-changed"}, "online event received")
+
     def test_signal_1(self):
         """
         signal - la chiamata alle api ritorna 200, viene chiamata la callback signal
