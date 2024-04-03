@@ -122,6 +122,8 @@ class TrackleLibraryTest(ut.TestCase):
         cls.to_device = None
         cls.from_device = None
 
+        mp.set_start_method('spawn')
+
         cls.to_proxy = mp.Queue()
         cls.from_proxy = mp.Queue()
 
