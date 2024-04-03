@@ -27,7 +27,7 @@ import trackle_enums
 import messages as msgs
 
 # Settings behaviours based on command line arguments
-LOG_LEVEL = 100 # 100 means all logs disabled, otherwise, choose the level you desire
+LOG_LEVEL = log.INFO # 100 means all logs disabled, otherwise, choose the level you desire
 log.basicConfig(level=LOG_LEVEL, format="[%(levelname)s] %(processName)s : %(msg)s")
 
 def wait_queue_message(evt_queue: mp.Queue, expect_msg: msgs.QueueMessage,
