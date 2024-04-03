@@ -11,7 +11,7 @@ jobs:
                    cd test/posix
                    make
             - name: Install Python test dependencies
-              run: python3 -m pip install sseclient
+              run: python3 -m pip install sseclient==0.0.27
             - name: Run tests
               run: |
                    cd test/posix
