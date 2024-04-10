@@ -35,13 +35,13 @@
 #define SOFTWARE_VERSION 1
 
 // Cloud POST functions
-static int funSuccess(const char *args);
-static int funFailure(const char *args);
-static int incrementCloudNumber(const char *args);
+static int funSuccess(const char *args, bool isOwner, const char *funName);
+static int funFailure(const char *args, bool isOwner, const char *funName);
+static int incrementCloudNumber(const char *args, bool isOwner, const char *funName);
 
 // Cloud GET functions
-static const void *getCloudNumberMessage(const char *args);
-static const void *getHalfCloudNumber(const char *args);
+static void *getCloudNumberMessage(const char *args, const char *varName);
+static void *getHalfCloudNumber(const char *args, const char *varName);
 
 // Cloud GET variables
 static int cloudNumber = 0;
@@ -119,17 +119,17 @@ int main()
 
 // BEGIN -- Cloud POST functions --------------------------------------------------------------------------------------------------------------------
 
-static int funSuccess(const char *args)
+static int funSuccess(const char *args, bool isOwner, const char *funName)
 {
     return 1;
 }
 
-static int funFailure(const char *args)
+static int funFailure(const char *args, bool isOwner, const char *funName)
 {
     return -1;
 }
 
-static int incrementCloudNumber(const char *args)
+static int incrementCloudNumber(const char *args, bool isOwner, const char *funName)
 {
     cloudNumber++;
     return 1;
@@ -140,13 +140,13 @@ static int incrementCloudNumber(const char *args)
 // BEGIN -- Cloud GET functions --------------------------------------------------------------------------------------------------------------------
 
 static char cloudNumberMessage[64];
-static const void *getCloudNumberMessage(const char *args)
+static void *getCloudNumberMessage(const char *args, const char *varName)
 {
     sprintf(cloudNumberMessage, "The number is %d !", cloudNumber);
     return cloudNumberMessage;
 }
 
-static const void *getHalfCloudNumber(const char *args)
+static void *getHalfCloudNumber(const char *args, const char *varName)
 {
     static char buffer[40];
     buffer[0] = '\0';

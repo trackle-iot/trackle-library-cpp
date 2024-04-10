@@ -37,13 +37,13 @@
 #define SOFTWARE_VERSION 1
 
 // Cloud POST functions
-static int funSuccess(const char *args, ...);
-static int funFailure(const char *args, ...);
-static int incrementCloudNumber(const char *args, ...);
+static int funSuccess(const char *args, bool isOwner, const char *funName);
+static int funFailure(const char *args, bool isOwner, const char *funName);
+static int incrementCloudNumber(const char *args, bool isOwner, const char *funName);
 
 // Cloud GET functions
-static void *getCloudNumberMessage(const char *args);
-static void *getHalfCloudNumber(const char *args);
+static void *getCloudNumberMessage(const char *args, const char *varName);
+static void *getHalfCloudNumber(const char *args, const char *varName);
 
 // Cloud GET variables
 static int cloudNumber = 0;
@@ -106,7 +106,7 @@ int main()
         Callbacks_sleep_ms_cb(MAIN_LOOP_PERIOD_MS);
         if (Callbacks_get_millis_cb() - prevPubMillis > 5000)
         {
-            trackleInst.publish("greetings", "Hello world!", 30, PRIVATE, WITH_ACK,msg_key);
+            trackleInst.publish("greetings", "Hello world!", 30, PRIVATE, WITH_ACK, msg_key);
             prevPubMillis = Callbacks_get_millis_cb();
             msg_key++;
         }
@@ -119,17 +119,17 @@ int main()
 
 // BEGIN -- Cloud POST functions --------------------------------------------------------------------------------------------------------------------
 
-static int funSuccess(const char *args, ...)
+static int funSuccess(const char *args, bool isOwner, const char *funName)
 {
     return 1;
 }
 
-static int funFailure(const char *args, ...)
+static int funFailure(const char *args, bool isOwner, const char *funName)
 {
     return -1;
 }
 
-static int incrementCloudNumber(const char *args, ...)
+static int incrementCloudNumber(const char *args, bool isOwner, const char *funName)
 {
     cloudNumber++;
     return 1;
@@ -141,16 +141,17 @@ static int incrementCloudNumber(const char *args, ...)
 
 static char cloudNumberBuffer[1024];
 
-static void *getCloudNumberMessage(const char *args)
+static void *getCloudNumberMessage(const char *args, const char *varName)
 {
     std::stringstream cnStream;
+    cnStream << "Var name is " << varName << "! ";
     cnStream << "The number is " << cloudNumber << "!";
     strncpy(cloudNumberBuffer, cnStream.str().c_str(), 1023);
     cloudNumberBuffer[1023] = '\0';
     return cloudNumberBuffer;
 }
 
-static void *getHalfCloudNumber(const char *args)
+static void *getHalfCloudNumber(const char *args, const char *varName)
 {
     std::stringstream cnStream;
     cnStream << "{\"halfCloudNumber\":" << (cloudNumber / 2) << "}";
