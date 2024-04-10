@@ -96,7 +96,7 @@ private:
          *
          * @return result of operation.
          */
-        bool addGet(const char *varKey, void *(*fn)(const char *), Data_TypeDef userVarType);
+        bool addGet(const char *varKey, user_variable_pointer_t fn, Data_TypeDef userVarType);
 
 public:
         /**
@@ -172,7 +172,7 @@ public:
          *
          * @return The return value is the result of the addGet function.
          */
-        bool get(const char *varKey, void *(*fn)(const char *), Data_TypeDef type);
+        bool get(const char *varKey, user_variable_pointer_t fn, Data_TypeDef type);
 
         /**
          * @brief It adds a function to the list of functions that can be called by the cloud

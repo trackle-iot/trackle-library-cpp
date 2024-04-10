@@ -123,17 +123,17 @@ namespace trackle
 
                 if (TrackleReturnType::BOOLEAN == var_type)
                 {
-                    const bool result = ((user_variable_bool_cb_t)(get_variable(variable_key)))(variable_arg);
+                    const bool result = ((user_variable_bool_cb_t)(get_variable(variable_key)))(variable_arg, variable_key);
                     response = Messages::variable_value(queue, message_id, token, result);
                 }
                 else if (TrackleReturnType::INT == var_type)
                 {
-                    const int32_t result = ((user_variable_int32_cb_t)(get_variable(variable_key)))(variable_arg);
+                    const int32_t result = ((user_variable_int32_cb_t)(get_variable(variable_key)))(variable_arg, variable_key);
                     response = Messages::variable_value(queue, message_id, token, result);
                 }
                 else if (TrackleReturnType::STRING == var_type || TrackleReturnType::JSON == var_type)
                 {
-                    const char *str_val = ((user_variable_char_cb_t)(get_variable(variable_key)))(variable_arg);
+                    const char *str_val = ((user_variable_char_cb_t)(get_variable(variable_key)))(variable_arg, variable_key);
 
                     // 2-byte leading length, 16 potential padding bytes
                     int max_length = message.capacity();
@@ -146,7 +146,7 @@ namespace trackle
                 }
                 else if (TrackleReturnType::DOUBLE == var_type)
                 {
-                    const double result = ((user_variable_double_cb_t)(get_variable(variable_key)))(variable_arg);
+                    const double result = ((user_variable_double_cb_t)(get_variable(variable_key)))(variable_arg, variable_key);
                     response = Messages::variable_value(queue, message_id, token, result);
                 }
 
