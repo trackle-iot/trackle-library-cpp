@@ -139,12 +139,12 @@ Functions</h2></td></tr>
 <tr class="memitem:af2457025474e00942d3d939703c9e922"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8h.html#af2457025474e00942d3d939703c9e922">trackleIsEnabled</a> (<a class="el" href="class_trackle.html">Trackle</a> *v) <a class="el" href="trackle__interface_8h.html#ae4ad8e0eba8e8694399616b10b5f06df">DYNLIB</a></td></tr>
 <tr class="memdesc:af2457025474e00942d3d939703c9e922"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a boolean value that indicates whether the <a class="el" href="class_trackle.html">Trackle</a> is enabled or not.  <a href="trackle__interface_8h.html#af2457025474e00942d3d939703c9e922">More...</a><br /></td></tr>
 <tr class="separator:af2457025474e00942d3d939703c9e922"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab6c2dce026446b335385cc9649e5c103"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8h.html#ab6c2dce026446b335385cc9649e5c103">trackleGet</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, const char *varKey, void *(*fn)(const char *), Data_TypeDef type) <a class="el" href="trackle__interface_8h.html#ae4ad8e0eba8e8694399616b10b5f06df">DYNLIB</a></td></tr>
-<tr class="memdesc:ab6c2dce026446b335385cc9649e5c103"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a getter function for a boolean variable.  <a href="trackle__interface_8h.html#ab6c2dce026446b335385cc9649e5c103">More...</a><br /></td></tr>
-<tr class="separator:ab6c2dce026446b335385cc9649e5c103"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a63003efafba195f450d01ead57f5a372"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8h.html#a63003efafba195f450d01ead57f5a372">tracklePost</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, const char *funcKey, user_function_int_char_t *func, Function_PermissionDef permission) <a class="el" href="trackle__interface_8h.html#ae4ad8e0eba8e8694399616b10b5f06df">DYNLIB</a></td></tr>
-<tr class="memdesc:a63003efafba195f450d01ead57f5a372"><td class="mdescLeft">&#160;</td><td class="mdescRight">It adds a function to the list of functions that can be called by the cloud.  <a href="trackle__interface_8h.html#a63003efafba195f450d01ead57f5a372">More...</a><br /></td></tr>
-<tr class="separator:a63003efafba195f450d01ead57f5a372"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01c41448e8d4316bb5c9eb90c423bbd4"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8h.html#a01c41448e8d4316bb5c9eb90c423bbd4">trackleGet</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, const char *varKey, user_variable_pointer_t fn, Data_TypeDef type) <a class="el" href="trackle__interface_8h.html#ae4ad8e0eba8e8694399616b10b5f06df">DYNLIB</a></td></tr>
+<tr class="memdesc:a01c41448e8d4316bb5c9eb90c423bbd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a getter function for a boolean variable.  <a href="trackle__interface_8h.html#a01c41448e8d4316bb5c9eb90c423bbd4">More...</a><br /></td></tr>
+<tr class="separator:a01c41448e8d4316bb5c9eb90c423bbd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af97c1b11786751dde6f40e0c9b9d94b0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8h.html#af97c1b11786751dde6f40e0c9b9d94b0">tracklePost</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, const char *funcKey, user_function_int_char_t func, Function_PermissionDef permission) <a class="el" href="trackle__interface_8h.html#ae4ad8e0eba8e8694399616b10b5f06df">DYNLIB</a></td></tr>
+<tr class="memdesc:af97c1b11786751dde6f40e0c9b9d94b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">It adds a function to the list of functions that can be called by the cloud.  <a href="trackle__interface_8h.html#af97c1b11786751dde6f40e0c9b9d94b0">More...</a><br /></td></tr>
+<tr class="separator:af97c1b11786751dde6f40e0c9b9d94b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeb5be9cf258c7d00656c91eb3c3d5606"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8h.html#aeb5be9cf258c7d00656c91eb3c3d5606">tracklePublish</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, const char *eventName, const char *data, int ttl, Event_Type eventType, Event_Flags eventFlag, uint32_t msg_key) <a class="el" href="trackle__interface_8h.html#ae4ad8e0eba8e8694399616b10b5f06df">DYNLIB</a></td></tr>
 <tr class="memdesc:aeb5be9cf258c7d00656c91eb3c3d5606"><td class="mdescLeft">&#160;</td><td class="mdescRight">It sends a publish to the cloud.  <a href="trackle__interface_8h.html#aeb5be9cf258c7d00656c91eb3c3d5606">More...</a><br /></td></tr>
 <tr class="separator:aeb5be9cf258c7d00656c91eb3c3d5606"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -700,8 +700,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ab6c2dce026446b335385cc9649e5c103"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab6c2dce026446b335385cc9649e5c103">&#9670;&nbsp;</a></span>trackleGet()</h2>
+<a id="a01c41448e8d4316bb5c9eb90c423bbd4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01c41448e8d4316bb5c9eb90c423bbd4">&#9670;&nbsp;</a></span>trackleGet()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -721,7 +721,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">void *(*)(const char *)&#160;</td>
+          <td class="paramtype">user_variable_pointer_t&#160;</td>
           <td class="paramname"><em>fn</em>, </td>
         </tr>
         <tr>
@@ -914,8 +914,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a63003efafba195f450d01ead57f5a372"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a63003efafba195f450d01ead57f5a372">&#9670;&nbsp;</a></span>tracklePost()</h2>
+<a id="af97c1b11786751dde6f40e0c9b9d94b0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af97c1b11786751dde6f40e0c9b9d94b0">&#9670;&nbsp;</a></span>tracklePost()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -935,7 +935,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">user_function_int_char_t *&#160;</td>
+          <td class="paramtype">user_function_int_char_t&#160;</td>
           <td class="paramname"><em>func</em>, </td>
         </tr>
         <tr>

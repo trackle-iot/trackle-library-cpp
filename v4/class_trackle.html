@@ -127,12 +127,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aa06b0bd3d6d09255ce440bdc850d23f0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#aa06b0bd3d6d09255ce440bdc850d23f0">get</a> (const char *varKey, user_variable_char_cb_t fn)</td></tr>
 <tr class="memdesc:aa06b0bd3d6d09255ce440bdc850d23f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a getter function for a variable of type char.  <a href="class_trackle.html#aa06b0bd3d6d09255ce440bdc850d23f0">More...</a><br /></td></tr>
 <tr class="separator:aa06b0bd3d6d09255ce440bdc850d23f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aca341ae8a3046e9258c30ec1c1ba3d36"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#aca341ae8a3046e9258c30ec1c1ba3d36">get</a> (const char *varKey, void *(*fn)(const char *), Data_TypeDef type)</td></tr>
-<tr class="memdesc:aca341ae8a3046e9258c30ec1c1ba3d36"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a getter function for a variable of type int.  <a href="class_trackle.html#aca341ae8a3046e9258c30ec1c1ba3d36">More...</a><br /></td></tr>
-<tr class="separator:aca341ae8a3046e9258c30ec1c1ba3d36"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aefdcc2e427a0aa296cda8df011da70ee"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#aefdcc2e427a0aa296cda8df011da70ee">post</a> (const char *funcKey, user_function_int_char_t *func, Function_PermissionDef permission=ALL_USERS)</td></tr>
-<tr class="memdesc:aefdcc2e427a0aa296cda8df011da70ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">It adds a function to the list of functions that can be called by the cloud.  <a href="class_trackle.html#aefdcc2e427a0aa296cda8df011da70ee">More...</a><br /></td></tr>
-<tr class="separator:aefdcc2e427a0aa296cda8df011da70ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a9daab4868604a0c45f36abfe630b63"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#a6a9daab4868604a0c45f36abfe630b63">get</a> (const char *varKey, user_variable_pointer_t fn, Data_TypeDef type)</td></tr>
+<tr class="memdesc:a6a9daab4868604a0c45f36abfe630b63"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a getter function for a variable of type int.  <a href="class_trackle.html#a6a9daab4868604a0c45f36abfe630b63">More...</a><br /></td></tr>
+<tr class="separator:a6a9daab4868604a0c45f36abfe630b63"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03155cedf61472457ddaac7fff8ae829"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#a03155cedf61472457ddaac7fff8ae829">post</a> (const char *funcKey, user_function_int_char_t func, Function_PermissionDef permission=ALL_USERS)</td></tr>
+<tr class="memdesc:a03155cedf61472457ddaac7fff8ae829"><td class="mdescLeft">&#160;</td><td class="mdescRight">It adds a function to the list of functions that can be called by the cloud.  <a href="class_trackle.html#a03155cedf61472457ddaac7fff8ae829">More...</a><br /></td></tr>
+<tr class="separator:a03155cedf61472457ddaac7fff8ae829"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac83ee878d3d273d22836f684bd9e1c39"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#ac83ee878d3d273d22836f684bd9e1c39">publish</a> (const char *eventName, const char *data, int ttl=DEFAULT_TTL, Event_Type eventType=PUBLIC, Event_Flags eventFlag=EMPTY_FLAGS, uint32_t msg_key=0)</td></tr>
 <tr class="memdesc:ac83ee878d3d273d22836f684bd9e1c39"><td class="mdescLeft">&#160;</td><td class="mdescRight">It sends a publish to the cloud.  <a href="class_trackle.html#ac83ee878d3d273d22836f684bd9e1c39">More...</a><br /></td></tr>
 <tr class="separator:ac83ee878d3d273d22836f684bd9e1c39"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -346,9 +346,9 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:a68858d50253ca401cca45faed04f224c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#a68858d50253ca401cca45faed04f224c">addSubscription</a> (const char *eventName, EventHandler handler, void *handlerData, Subscription_Scope_Type scope, const char *deviceID, void *reserved)</td></tr>
 <tr class="memdesc:a68858d50253ca401cca45faed04f224c"><td class="mdescLeft">&#160;</td><td class="mdescRight">It add a subscription to the subscriptions list.  <a href="class_trackle.html#a68858d50253ca401cca45faed04f224c">More...</a><br /></td></tr>
 <tr class="separator:a68858d50253ca401cca45faed04f224c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3e0fb8ad801f122c979621321c3d5499"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#a3e0fb8ad801f122c979621321c3d5499">addGet</a> (const char *varKey, void *(*fn)(const char *), Data_TypeDef <a class="el" href="trackle_8cpp.html#af31e4733797ca631e2ea70f5a6bf43ba">userVarType</a>)</td></tr>
-<tr class="memdesc:a3e0fb8ad801f122c979621321c3d5499"><td class="mdescLeft">&#160;</td><td class="mdescRight">It adds a variable to the list of variables that can be set by the cloud.  <a href="class_trackle.html#a3e0fb8ad801f122c979621321c3d5499">More...</a><br /></td></tr>
-<tr class="separator:a3e0fb8ad801f122c979621321c3d5499"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf69a90a32ce23dfd94dba259bbd240f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#aaf69a90a32ce23dfd94dba259bbd240f">addGet</a> (const char *varKey, user_variable_pointer_t fn, Data_TypeDef <a class="el" href="trackle_8cpp.html#af31e4733797ca631e2ea70f5a6bf43ba">userVarType</a>)</td></tr>
+<tr class="memdesc:aaf69a90a32ce23dfd94dba259bbd240f"><td class="mdescLeft">&#160;</td><td class="mdescRight">It adds a variable to the list of variables that can be set by the cloud.  <a href="class_trackle.html#aaf69a90a32ce23dfd94dba259bbd240f">More...</a><br /></td></tr>
+<tr class="separator:aaf69a90a32ce23dfd94dba259bbd240f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ae8c830db68ac40bc39a5eca9cc53e67c"></a>
@@ -391,8 +391,8 @@ Private Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a3e0fb8ad801f122c979621321c3d5499"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3e0fb8ad801f122c979621321c3d5499">&#9670;&nbsp;</a></span>addGet()</h2>
+<a id="aaf69a90a32ce23dfd94dba259bbd240f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf69a90a32ce23dfd94dba259bbd240f">&#9670;&nbsp;</a></span>addGet()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -409,7 +409,7 @@ Private Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">void *(*)(const char *)&#160;</td>
+          <td class="paramtype">user_variable_pointer_t&#160;</td>
           <td class="paramname"><em>fn</em>, </td>
         </tr>
         <tr>
@@ -905,8 +905,8 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="aca341ae8a3046e9258c30ec1c1ba3d36"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aca341ae8a3046e9258c30ec1c1ba3d36">&#9670;&nbsp;</a></span>get() <span class="overload">[5/5]</span></h2>
+<a id="a6a9daab4868604a0c45f36abfe630b63"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a9daab4868604a0c45f36abfe630b63">&#9670;&nbsp;</a></span>get() <span class="overload">[5/5]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -920,7 +920,7 @@ Private Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">void *(*)(const char *)&#160;</td>
+          <td class="paramtype">user_variable_pointer_t&#160;</td>
           <td class="paramname"><em>fn</em>, </td>
         </tr>
         <tr>
@@ -1056,8 +1056,8 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="aefdcc2e427a0aa296cda8df011da70ee"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aefdcc2e427a0aa296cda8df011da70ee">&#9670;&nbsp;</a></span>post()</h2>
+<a id="a03155cedf61472457ddaac7fff8ae829"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03155cedf61472457ddaac7fff8ae829">&#9670;&nbsp;</a></span>post()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1071,7 +1071,7 @@ Private Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">user_function_int_char_t *&#160;</td>
+          <td class="paramtype">user_function_int_char_t&#160;</td>
           <td class="paramname"><em>func</em>, </td>
         </tr>
         <tr>

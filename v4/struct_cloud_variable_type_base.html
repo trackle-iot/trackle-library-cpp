@@ -101,8 +101,8 @@ Collaboration diagram for CloudVariableTypeBase:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a6426a4012d120b187f79046f76593c19"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_cloud_variable_type_base.html#a6426a4012d120b187f79046f76593c19">CloudVariableTypeBase</a> (void *(*fn)(const char *), const char *varKey, Data_TypeDef type)</td></tr>
-<tr class="separator:a6426a4012d120b187f79046f76593c19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af44311a5d75731503cbe6374dc7ed3d4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_cloud_variable_type_base.html#af44311a5d75731503cbe6374dc7ed3d4">CloudVariableTypeBase</a> (user_variable_pointer_t fn, const char *varKey, Data_TypeDef type)</td></tr>
+<tr class="separator:af44311a5d75731503cbe6374dc7ed3d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
@@ -112,12 +112,12 @@ Data Fields</h2></td></tr>
 <tr class="separator:a7e8885e7621df2238fcad2d280a6ef3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac037aef01dc9ec294f68516a31baaba9"><td class="memItemLeft" align="right" valign="top">Data_TypeDef&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_cloud_variable_type_base.html#ac037aef01dc9ec294f68516a31baaba9">stringVarType</a></td></tr>
 <tr class="separator:ac037aef01dc9ec294f68516a31baaba9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aba93f0ccd3beab4c740b884843d1c296"><td class="memItemLeft" align="right" valign="top">void *(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_cloud_variable_type_base.html#aba93f0ccd3beab4c740b884843d1c296">funct</a> )(const char *)</td></tr>
-<tr class="separator:aba93f0ccd3beab4c740b884843d1c296"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad000792d7574d1b410f2337486d766ae"><td class="memItemLeft" align="right" valign="top">void *(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_cloud_variable_type_base.html#ad000792d7574d1b410f2337486d766ae">funct</a> )(const char *, const char *)</td></tr>
+<tr class="separator:ad000792d7574d1b410f2337486d766ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a6426a4012d120b187f79046f76593c19"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6426a4012d120b187f79046f76593c19">&#9670;&nbsp;</a></span>CloudVariableTypeBase()</h2>
+<a id="af44311a5d75731503cbe6374dc7ed3d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af44311a5d75731503cbe6374dc7ed3d4">&#9670;&nbsp;</a></span>CloudVariableTypeBase()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -128,7 +128,7 @@ Data Fields</h2></td></tr>
         <tr>
           <td class="memname"><a class="el" href="struct_cloud_variable_type_base.html">CloudVariableTypeBase</a> </td>
           <td>(</td>
-          <td class="paramtype">void *(*)(const char *)&#160;</td>
+          <td class="paramtype">user_variable_pointer_t&#160;</td>
           <td class="paramname"><em>fn</em>, </td>
         </tr>
         <tr>
@@ -159,14 +159,14 @@ Data Fields</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Field Documentation</h2>
-<a id="aba93f0ccd3beab4c740b884843d1c296"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aba93f0ccd3beab4c740b884843d1c296">&#9670;&nbsp;</a></span>funct</h2>
+<a id="ad000792d7574d1b410f2337486d766ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad000792d7574d1b410f2337486d766ae">&#9670;&nbsp;</a></span>funct</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void*(* funct) (const char *)</td>
+          <td class="memname">void*(* funct) (const char *, const char *)</td>
         </tr>
       </table>
 </div><div class="memdoc">

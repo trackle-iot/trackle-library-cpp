@@ -125,12 +125,12 @@ Functions</h2></td></tr>
 <tr class="memitem:acf370024cc2e0c34f6a0d6f7e3958b1e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8cpp.html#acf370024cc2e0c34f6a0d6f7e3958b1e">trackleIsEnabled</a> (<a class="el" href="class_trackle.html">Trackle</a> *v)</td></tr>
 <tr class="memdesc:acf370024cc2e0c34f6a0d6f7e3958b1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a boolean value that indicates whether the <a class="el" href="class_trackle.html">Trackle</a> is enabled or not.  <a href="trackle__interface_8cpp.html#acf370024cc2e0c34f6a0d6f7e3958b1e">More...</a><br /></td></tr>
 <tr class="separator:acf370024cc2e0c34f6a0d6f7e3958b1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae49acb7b040c8d481878b8093a1c7934"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8cpp.html#ae49acb7b040c8d481878b8093a1c7934">trackleGet</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, const char *varKey, void *(*fn)(const char *), Data_TypeDef type)</td></tr>
-<tr class="memdesc:ae49acb7b040c8d481878b8093a1c7934"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a getter function for a boolean variable.  <a href="trackle__interface_8cpp.html#ae49acb7b040c8d481878b8093a1c7934">More...</a><br /></td></tr>
-<tr class="separator:ae49acb7b040c8d481878b8093a1c7934"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3c75bfeedcd8e5850f19231894b07410"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8cpp.html#a3c75bfeedcd8e5850f19231894b07410">tracklePost</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, const char *funcKey, user_function_int_char_t *func, Function_PermissionDef permission)</td></tr>
-<tr class="memdesc:a3c75bfeedcd8e5850f19231894b07410"><td class="mdescLeft">&#160;</td><td class="mdescRight">It adds a function to the list of functions that can be called by the cloud.  <a href="trackle__interface_8cpp.html#a3c75bfeedcd8e5850f19231894b07410">More...</a><br /></td></tr>
-<tr class="separator:a3c75bfeedcd8e5850f19231894b07410"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa255eb004ec32106bc558fafc724f889"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8cpp.html#aa255eb004ec32106bc558fafc724f889">trackleGet</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, const char *varKey, user_variable_pointer_t fn, Data_TypeDef type)</td></tr>
+<tr class="memdesc:aa255eb004ec32106bc558fafc724f889"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a getter function for a boolean variable.  <a href="trackle__interface_8cpp.html#aa255eb004ec32106bc558fafc724f889">More...</a><br /></td></tr>
+<tr class="separator:aa255eb004ec32106bc558fafc724f889"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad21e7fea49e92664ccd2173beaa4a580"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8cpp.html#ad21e7fea49e92664ccd2173beaa4a580">tracklePost</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, const char *funcKey, user_function_int_char_t func, Function_PermissionDef permission)</td></tr>
+<tr class="memdesc:ad21e7fea49e92664ccd2173beaa4a580"><td class="mdescLeft">&#160;</td><td class="mdescRight">It adds a function to the list of functions that can be called by the cloud.  <a href="trackle__interface_8cpp.html#ad21e7fea49e92664ccd2173beaa4a580">More...</a><br /></td></tr>
+<tr class="separator:ad21e7fea49e92664ccd2173beaa4a580"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad47fb6ce4742bc0f3ecc9707d4e676cd"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8cpp.html#ad47fb6ce4742bc0f3ecc9707d4e676cd">tracklePublish</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, const char *eventName, const char *data, int ttl, Event_Type eventType, Event_Flags eventFlag, uint32_t msg_key)</td></tr>
 <tr class="memdesc:ad47fb6ce4742bc0f3ecc9707d4e676cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">It sends a publish to the cloud.  <a href="trackle__interface_8cpp.html#ad47fb6ce4742bc0f3ecc9707d4e676cd">More...</a><br /></td></tr>
 <tr class="separator:ad47fb6ce4742bc0f3ecc9707d4e676cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -667,8 +667,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ae49acb7b040c8d481878b8093a1c7934"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae49acb7b040c8d481878b8093a1c7934">&#9670;&nbsp;</a></span>trackleGet()</h2>
+<a id="aa255eb004ec32106bc558fafc724f889"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa255eb004ec32106bc558fafc724f889">&#9670;&nbsp;</a></span>trackleGet()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -688,7 +688,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">void *(*)(const char *)&#160;</td>
+          <td class="paramtype">user_variable_pointer_t&#160;</td>
           <td class="paramname"><em>fn</em>, </td>
         </tr>
         <tr>
@@ -881,8 +881,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a3c75bfeedcd8e5850f19231894b07410"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3c75bfeedcd8e5850f19231894b07410">&#9670;&nbsp;</a></span>tracklePost()</h2>
+<a id="ad21e7fea49e92664ccd2173beaa4a580"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad21e7fea49e92664ccd2173beaa4a580">&#9670;&nbsp;</a></span>tracklePost()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -902,7 +902,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">user_function_int_char_t *&#160;</td>
+          <td class="paramtype">user_function_int_char_t&#160;</td>
           <td class="paramname"><em>func</em>, </td>
         </tr>
         <tr>
