@@ -15,35 +15,35 @@ match platform.system():
 __lib = ctypes.cdll.LoadLibrary(f"lib/cloud_functions.{__DLL_EXTENSION}")
 
 get_echo_bool = __lib.CloudFun_getEchoBool
-get_echo_bool.argtypes = (ctypes.c_char_p,)
+get_echo_bool.argtypes = (ctypes.c_char_p, ctypes.c_char_p,)
 get_echo_bool.restype = ctypes.c_bool
 
 get_echo_int = __lib.CloudFun_getEchoInt
-get_echo_int.argtypes = (ctypes.c_char_p,)
+get_echo_int.argtypes = (ctypes.c_char_p, ctypes.c_char_p,)
 get_echo_int.restype = ctypes.c_int32
 
 get_echo_double = __lib.CloudFun_getEchoDouble
-get_echo_double.argtypes = (ctypes.c_char_p,)
+get_echo_double.argtypes = (ctypes.c_char_p, ctypes.c_char_p,)
 get_echo_double.restype = ctypes.c_double
 
 get_echo_string = __lib.CloudFun_getEchoString
-get_echo_string.argtypes = (ctypes.c_char_p,)
+get_echo_string.argtypes = (ctypes.c_char_p, ctypes.c_char_p,)
 get_echo_string.restype = ctypes.c_char_p
 
 get_echo_json = __lib.CloudFun_getEchoJson
-get_echo_json.argtypes = (ctypes.c_char_p,)
+get_echo_json.argtypes = (ctypes.c_char_p, ctypes.c_char_p,)
 get_echo_json.restype = ctypes.c_char_p
 
 post_failing = __lib.CloudFun_failingPost
-post_failing.argtypes = (ctypes.c_char_p,)
+post_failing.argtypes = (ctypes.c_char_p, ctypes.c_char_p,)
 post_failing.restype = ctypes.c_int
 
 post_success = __lib.CloudFun_successPost
-post_success.argtypes = (ctypes.c_char_p,)
+post_success.argtypes = (ctypes.c_char_p, ctypes.c_char_p,)
 post_success.restype = ctypes.c_int
 
 post_private = __lib.CloudFun_privatePost
-post_private.argtypes = (ctypes.c_char_p,)
+post_private.argtypes = (ctypes.c_char_p, ctypes.c_char_p,)
 post_private.restype = ctypes.c_int
 
 complete_publish = __lib.CloudFun_completePublish

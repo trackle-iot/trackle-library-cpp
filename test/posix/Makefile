@@ -1,3 +1,4 @@
+# on mac M1, build with: arch -x86_64 make
 CC = gcc
 CCX = g++
 TRACKLE_LIB = ../..
