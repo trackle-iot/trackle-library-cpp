@@ -1361,10 +1361,15 @@ void Trackle::setMillis(millisCallback *millis)
  */
 void setConnectionStatus(Connection_Status_Type newStatus)
 {
-    if (newStatus != connectionStatus && connectionStatusCb)
+    if (newStatus != connectionStatus)
     {
         connectionStatus = newStatus;
-        (*connectionStatusCb)(newStatus);
+
+        // if callback was defined, call it
+        if (connectionStatusCb)
+        {
+            (*connectionStatusCb)(newStatus);
+        }
     }
 }
 
