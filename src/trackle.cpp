@@ -1363,9 +1363,9 @@ void setConnectionStatus(Connection_Status_Type newStatus)
 {
     if (newStatus != connectionStatus && connectionStatusCb)
     {
+        connectionStatus = newStatus;
         (*connectionStatusCb)(newStatus);
     }
-    connectionStatus = newStatus;
 }
 
 /**
