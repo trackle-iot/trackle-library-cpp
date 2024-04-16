@@ -184,7 +184,7 @@ public:
          *
          * @return A boolean value.
          */
-        bool post(const char *funcKey, user_function_int_char_t *func, Function_PermissionDef permission = ALL_USERS);
+        bool post(const char *funcKey, user_function_int_char_t func, Function_PermissionDef permission = ALL_USERS);
 
         /**
          * @brief It sends a publish to the cloud

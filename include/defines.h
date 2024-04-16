@@ -42,7 +42,7 @@ typedef enum
     CON_ERROR_RECONNECTION = 4,
 } Cloud_Connection_Error;
 
-typedef int(user_function_int_char_t)(const char *paramString, bool isOwner, const char* funKey);
+typedef int(*user_function_int_char_t)(const char *paramString, bool isOwner, const char* funKey);
 
 typedef bool (*user_variable_bool_cb_t)(const char *paramString, const char* varKey);
 typedef int (*user_variable_int32_cb_t)(const char *paramString, const char* varKey);

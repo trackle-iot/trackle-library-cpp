@@ -199,7 +199,7 @@ trackle::protocol::Connection_Properties_Type connectionPropTypeList[5] = {
     {30, 10, 2},  // ETHERNET
     {30, 10, 2},  // CELLULAR
     {150, 20, 5}, // LPWA
-};                // in seconds
+}; // in seconds
 
 /**
  * It increases the connection timeout by a factor of 2, and adds a random number between 0 and 0.512
@@ -468,10 +468,10 @@ bool Trackle::get(const char *varKey, user_variable_pointer_t fn, Data_TypeDef t
 
 struct CloudFunctionTypeBase
 {
-    user_function_int_char_t *pUserFunc;
+    user_function_int_char_t pUserFunc;
     Function_PermissionDef permission;
     char userFuncKey[MAX_FUNCTION_KEY_LENGTH + 1];
-    CloudFunctionTypeBase(const char *funcKey, user_function_int_char_t *userFunc, Function_PermissionDef perms)
+    CloudFunctionTypeBase(const char *funcKey, user_function_int_char_t userFunc, Function_PermissionDef perms)
     {
         strncpy(userFuncKey, funcKey, sizeof(userFuncKey));
         userFuncKey[sizeof(userFuncKey) - 1] = '\0';
@@ -530,7 +530,7 @@ CloudFunctionTypeBase *find_func_by_key(const char *funcKey)
     return NULL;
 }
 
-bool Trackle::post(const char *funcKey, user_function_int_char_t *func, Function_PermissionDef permission)
+bool Trackle::post(const char *funcKey, user_function_int_char_t func, Function_PermissionDef permission)
 {
     if (funcs.size() >= MAX_FUNCTION_COUNT)
     {

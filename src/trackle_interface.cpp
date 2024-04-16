@@ -50,7 +50,7 @@ bool trackleGet(Trackle *v, const char *varKey, user_variable_pointer_t fn, Data
 
 // TRACKLE.FUNCTION ------------------------------------------------------------
 
-bool tracklePost(Trackle *v, const char *funcKey, user_function_int_char_t *func, Function_PermissionDef permission)
+bool tracklePost(Trackle *v, const char *funcKey, user_function_int_char_t func, Function_PermissionDef permission)
 {
     IF_NOT_INITIALIZED_WARNING();
     return v->post(funcKey, func, permission);

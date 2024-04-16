@@ -63,7 +63,7 @@ extern "C"
      * @trackle
      * @copydetails Trackle::post()
      */
-    bool tracklePost(Trackle *v, const char *funcKey, user_function_int_char_t *func, Function_PermissionDef permission) DYNLIB;
+    bool tracklePost(Trackle *v, const char *funcKey, user_function_int_char_t func, Function_PermissionDef permission) DYNLIB;
 
     /*!
      * @copybrief Trackle::publish()
