@@ -9,23 +9,23 @@
 
 // GET functions
 
-bool CloudFun_getEchoBool(const char *args)
+bool CloudFun_getEchoBool(const char *args, const char *key)
 {
     return atoi(args);
 }
 
-int32_t CloudFun_getEchoInt(const char *args)
+int32_t CloudFun_getEchoInt(const char *args, const char *key)
 {
     return atoi(args);
 }
 
-double CloudFun_getEchoDouble(const char *args)
+double CloudFun_getEchoDouble(const char *args, const char *key)
 {
     return atof(args);
 }
 
 static char stringVal[64];
-char *CloudFun_getEchoString(const char *args)
+char *CloudFun_getEchoString(const char *args, const char *key)
 {
     strncpy(stringVal, args, 64);
     stringVal[63] = '\0';
@@ -33,7 +33,7 @@ char *CloudFun_getEchoString(const char *args)
 }
 
 static char jsonVal[64];
-char *CloudFun_getEchoJson(const char *args)
+char *CloudFun_getEchoJson(const char *args, const char *key)
 {
     strncpy(jsonVal, args, 64);
     jsonVal[63] = '\0';
@@ -42,18 +42,18 @@ char *CloudFun_getEchoJson(const char *args)
 
 // POST functions
 
-int CloudFun_failingPost(const char *args)
+int CloudFun_failingPost(const char *args, const char *key)
 {
     return -10;
 }
 
-int CloudFun_successPost(const char *args)
+int CloudFun_successPost(const char *args, const char *key)
 {
     return 10;
 }
 
 bool privatePostExecuted = false;
-int CloudFun_privatePost(const char *args)
+int CloudFun_privatePost(const char *args, const char *key)
 {
     privatePostExecuted = true;
     return 16;

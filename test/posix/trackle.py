@@ -12,7 +12,7 @@ match platform.system():
     case "Linux":
         __DLL_EXTENSION = "so"
     case _:
-        raise OSError("Operating system not supported")
+        raise NotImplementedError("Operating system not supported")
 
 __lib = ctypes.cdll.LoadLibrary(f"lib/trackle_library.{__DLL_EXTENSION}")
 
@@ -76,11 +76,6 @@ setSystemTimeCallback = __lib.trackleSetSystemTimeCallback
 setSystemTimeCallback.argtypes = [ctypes.c_void_p, SYSTEM_TIME_CB]
 setSystemTimeCallback.restype = None
 
-SLEEP_CB = ctypes.CFUNCTYPE(None, ctypes.c_uint32)
-setSleepCallback = __lib.trackleSetSleepCallback
-setSleepCallback.argtypes = [ctypes.c_void_p, SLEEP_CB]
-setSleepCallback.restype = None
-
 REBOOT_CB = ctypes.CFUNCTYPE(None, ctypes.c_char_p)
 setSystemRebootCallback = __lib.trackleSetSystemRebootCallback
 setSystemRebootCallback.argtypes = [ctypes.c_void_p, REBOOT_CB]
@@ -93,6 +88,15 @@ setFirmwareVersion.restype = None
 setOtaMethod = __lib.trackleSetOtaMethod
 setOtaMethod.argtypes = [ctypes.c_int]
 setOtaMethod.restype = None
+
+OTA_UPDATE_CB = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p, ctypes.c_uint32)
+setOtaUpdateCallback = __lib.trackleSetOtaUpdateCallback
+setOtaUpdateCallback.argtypes = [ctypes.c_void_p, OTA_UPDATE_CB]
+setOtaUpdateCallback.restype = None
+
+setOtaUpdateDone = __lib.trackleSetOtaUpdateDone
+setOtaUpdateDone.argtypes = [ctypes.c_void_p, ctypes.c_int]
+setOtaUpdateDone.restype = None
 
 setConnectionType = __lib.trackleSetConnectionType
 setConnectionType.argtypes = [ctypes.c_int]
@@ -148,32 +152,32 @@ disconnect = __lib.trackleDisconnect
 disconnect.argtypes = [ctypes.c_void_p]
 disconnect.restype = None
 
-POST_CB = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p)
+POST_CB = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p, ctypes.c_char_p)
 post = __lib.tracklePost
 post.argtypes = [ctypes.c_void_p, ctypes.c_char_p, POST_CB, ctypes.c_int]
 post.restype = ctypes.c_bool
 
-GET_BOOL_CB = ctypes.CFUNCTYPE(ctypes.c_bool, ctypes.c_char_p)
+GET_BOOL_CB = ctypes.CFUNCTYPE(ctypes.c_bool, ctypes.c_char_p, ctypes.c_char_p)
 register_get_bool = __lib.TestAuxFun_trackleGetBool
 register_get_bool.argtypes = (ctypes.c_void_p, ctypes.c_char_p, GET_BOOL_CB)
 register_get_bool.restype = ctypes.c_bool
 
-GET_INT32_CB = ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.c_char_p)
+GET_INT32_CB = ctypes.CFUNCTYPE(ctypes.c_int32, ctypes.c_char_p, ctypes.c_char_p)
 register_get_int32 = __lib.TestAuxFun_trackleGetInt32
 register_get_int32.argtypes = (ctypes.c_void_p, ctypes.c_char_p, GET_INT32_CB)
 register_get_int32.restype = ctypes.c_bool
 
-GET_DOUBLE_CB = ctypes.CFUNCTYPE(ctypes.c_double, ctypes.c_char_p)
+GET_DOUBLE_CB = ctypes.CFUNCTYPE(ctypes.c_double, ctypes.c_char_p, ctypes.c_char_p)
 register_get_double = __lib.TestAuxFun_trackleGetDouble
 register_get_double.argtypes = (ctypes.c_void_p, ctypes.c_char_p, GET_DOUBLE_CB)
 register_get_double.restype = ctypes.c_bool
 
-GET_STRING_CB = ctypes.CFUNCTYPE(ctypes.c_char_p, ctypes.c_char_p)
+GET_STRING_CB = ctypes.CFUNCTYPE(ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p)
 register_get_string = __lib.TestAuxFun_trackleGetString
 register_get_string.argtypes = (ctypes.c_void_p, ctypes.c_char_p, GET_STRING_CB)
 register_get_string.restype = ctypes.c_bool
 
-GET_JSON_CB = ctypes.CFUNCTYPE(ctypes.c_char_p, ctypes.c_char_p)
+GET_JSON_CB = ctypes.CFUNCTYPE(ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p)
 register_get_json = __lib.TestAuxFun_trackleGetJson
 register_get_json.argtypes = (ctypes.c_void_p, ctypes.c_char_p, GET_JSON_CB)
 register_get_json.restype = ctypes.c_bool

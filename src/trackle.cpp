@@ -199,7 +199,7 @@ trackle::protocol::Connection_Properties_Type connectionPropTypeList[5] = {
     {30, 10, 2},  // ETHERNET
     {30, 10, 2},  // CELLULAR
     {150, 20, 5}, // LPWA
-};                // in seconds
+}; // in seconds
 
 /**
  * It increases the connection timeout by a factor of 2, and adds a random number between 0 and 0.512
@@ -269,9 +269,9 @@ struct CloudVariableTypeBase
     // For this reason, here we keep a reference to callback function using void *(*)(const char*).
     // It's client's responsibility to cast such pointer to the correct type according to userVarType.
     // URL to SO answer: https://stackoverflow.com/questions/36645660/why-cant-i-cast-a-function-pointer-to-void
-    void *(*funct)(const char *);
+    void *(*funct)(const char *, const char *);
 
-    CloudVariableTypeBase(void *(*fn)(const char *), const char *varKey, Data_TypeDef type)
+    CloudVariableTypeBase(user_variable_pointer_t fn, const char *varKey, Data_TypeDef type)
     {
         strncpy(userVarKey, varKey, sizeof(userVarKey) - 1);
         userVarKey[sizeof(userVarKey) - 1] = '\0';
@@ -341,7 +341,7 @@ bool Trackle::isEnabled()
     return cloudEnabled;
 }
 
-bool Trackle::addGet(const char *varKey, void *(*fn)(const char *), Data_TypeDef userVarType)
+bool Trackle::addGet(const char *varKey, user_variable_pointer_t fn, Data_TypeDef userVarType)
 {
     if (!varKey)
     {
@@ -431,7 +431,7 @@ bool Trackle::get(const char *varKey, user_variable_bool_cb_t fn)
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
-    return addGet(varKey, ((void *(*)(const char *))(fn)), VAR_BOOLEAN);
+    return addGet(varKey, (user_variable_pointer_t)(fn), VAR_BOOLEAN);
 #pragma GCC diagnostic pop
 }
 
@@ -439,7 +439,7 @@ bool Trackle::get(const char *varKey, user_variable_int32_cb_t fn)
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
-    return addGet(varKey, ((void *(*)(const char *))(fn)), VAR_INT);
+    return addGet(varKey, (user_variable_pointer_t)(fn), VAR_INT);
 #pragma GCC diagnostic pop
 }
 
@@ -447,7 +447,7 @@ bool Trackle::get(const char *varKey, user_variable_double_cb_t fn)
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
-    return addGet(varKey, ((void *(*)(const char *))(fn)), VAR_DOUBLE);
+    return addGet(varKey, (user_variable_pointer_t)(fn), VAR_DOUBLE);
 #pragma GCC diagnostic pop
 }
 
@@ -455,11 +455,11 @@ bool Trackle::get(const char *varKey, user_variable_char_cb_t fn)
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
-    return addGet(varKey, ((void *(*)(const char *))(fn)), VAR_CHAR);
+    return addGet(varKey, (user_variable_pointer_t)(fn), VAR_CHAR);
 #pragma GCC diagnostic pop
 }
 
-bool Trackle::get(const char *varKey, void *(*fn)(const char *), Data_TypeDef type)
+bool Trackle::get(const char *varKey, user_variable_pointer_t fn, Data_TypeDef type)
 {
     return addGet(varKey, fn, type);
 }
@@ -468,10 +468,10 @@ bool Trackle::get(const char *varKey, void *(*fn)(const char *), Data_TypeDef ty
 
 struct CloudFunctionTypeBase
 {
-    user_function_int_char_t *pUserFunc;
+    user_function_int_char_t pUserFunc;
     Function_PermissionDef permission;
     char userFuncKey[MAX_FUNCTION_KEY_LENGTH + 1];
-    CloudFunctionTypeBase(const char *funcKey, user_function_int_char_t *userFunc, Function_PermissionDef perms)
+    CloudFunctionTypeBase(const char *funcKey, user_function_int_char_t userFunc, Function_PermissionDef perms)
     {
         strncpy(userFuncKey, funcKey, sizeof(userFuncKey));
         userFuncKey[sizeof(userFuncKey) - 1] = '\0';
@@ -530,7 +530,7 @@ CloudFunctionTypeBase *find_func_by_key(const char *funcKey)
     return NULL;
 }
 
-bool Trackle::post(const char *funcKey, user_function_int_char_t *func, Function_PermissionDef permission)
+bool Trackle::post(const char *funcKey, user_function_int_char_t func, Function_PermissionDef permission)
 {
     if (funcs.size() >= MAX_FUNCTION_COUNT)
     {
@@ -1138,7 +1138,7 @@ int call_function(const char *function_key, const char *arg, const char *user_ca
     {
         if (function->permission == ALL_USERS || (function->permission == OWNER_ONLY && user_is_owner(user_caller_id)))
         {
-            int result = (*function->pUserFunc)(arg, user_is_owner(user_caller_id));
+            int result = (*function->pUserFunc)(arg, user_is_owner(user_caller_id), function_key);
             callback((void *)result, TrackleReturnType::INT);
             LOG(TRACE, "function %s called with args %s, result = %d", function_key, arg, result);
         }
@@ -1308,7 +1308,7 @@ void Trackle::test(string param)
     for (int i = (int)funcs.size(); i-- > 0;)
     {
         LOG(TRACE, "testing function %s with param %s", funcs[i].userFuncKey, param.c_str());
-        int result = (*funcs[i].pUserFunc)(param.c_str());
+        int result = (*funcs[i].pUserFunc)(param.c_str(), true, funcs[i].userFuncKey);
         LOG(TRACE, "function %s result = %d", param.c_str(), result);
     }
 
@@ -1361,11 +1361,16 @@ void Trackle::setMillis(millisCallback *millis)
  */
 void setConnectionStatus(Connection_Status_Type newStatus)
 {
-    if (newStatus != connectionStatus && connectionStatusCb)
+    if (newStatus != connectionStatus)
     {
-        (*connectionStatusCb)(newStatus);
+        connectionStatus = newStatus;
+
+        // if callback was defined, call it
+        if (connectionStatusCb)
+        {
+            (*connectionStatusCb)(newStatus);
+        }
     }
-    connectionStatus = newStatus;
 }
 
 /**

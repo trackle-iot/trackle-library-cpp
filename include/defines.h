@@ -42,12 +42,13 @@ typedef enum
     CON_ERROR_RECONNECTION = 4,
 } Cloud_Connection_Error;
 
-typedef int(user_function_int_char_t)(const char *paramString, ...);
+typedef int(*user_function_int_char_t)(const char *paramString, bool isOwner, const char* funKey);
 
-typedef bool (*user_variable_bool_cb_t)(const char *paramString);
-typedef int (*user_variable_int32_cb_t)(const char *paramString);
-typedef double (*user_variable_double_cb_t)(const char *paramString);
-typedef const char *(*user_variable_char_cb_t)(const char *paramString);
+typedef bool (*user_variable_bool_cb_t)(const char *paramString, const char* varKey);
+typedef int (*user_variable_int32_cb_t)(const char *paramString, const char* varKey);
+typedef double (*user_variable_double_cb_t)(const char *paramString, const char* varKey);
+typedef const char *(*user_variable_char_cb_t)(const char *paramString, const char* varKey);
+typedef void *(*user_variable_pointer_t)(const char *paramString, const char* varKey);
 
 typedef void (*EventHandler)(const char *name, const char *data);
 

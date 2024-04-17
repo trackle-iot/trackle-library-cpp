@@ -41,3 +41,14 @@ class ConnectionType(enum.IntEnum):
     LTE = 3
     NBIOT = 4
     CAT_M = 5
+
+class OtaError(enum.IntEnum):
+    """ States of OTA process """
+    OTA_ERR_OK = 0,             #  No error
+    OTA_ERR_ALREADY_RUNNING = 1 #  OTA already in progress
+    OTA_ERR_PARTITION = 2       #  partition error (not found, invalid, conflict, etc..)
+    OTA_ERR_MEMORY = 3          #  not enough free memory
+    OTA_ERR_VALIDATE_FAILED = 4 #  image validation failed (crc, wrong platform, etc..)
+    OTA_ERR_INCOMPLETE = 5      #  download interrupter
+    OTA_ERR_COMPLETING = 6      #  download completed but image not validated
+    OTA_ERR_GENERIC = 7         #  all other errors

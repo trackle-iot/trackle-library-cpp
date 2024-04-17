@@ -56,14 +56,14 @@ extern "C"
      * @trackle
      * @copydetails Trackle::get()
      */
-    bool trackleGet(Trackle *v, const char *varKey, void *(*fn)(const char *), Data_TypeDef type) DYNLIB;
+    bool trackleGet(Trackle *v, const char *varKey, user_variable_pointer_t fn, Data_TypeDef type) DYNLIB;
 
     /*!
      * @copybrief Trackle::post()
      * @trackle
      * @copydetails Trackle::post()
      */
-    bool tracklePost(Trackle *v, const char *funcKey, user_function_int_char_t *func, Function_PermissionDef permission) DYNLIB;
+    bool tracklePost(Trackle *v, const char *funcKey, user_function_int_char_t func, Function_PermissionDef permission) DYNLIB;
 
     /*!
      * @copybrief Trackle::publish()

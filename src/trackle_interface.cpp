@@ -38,7 +38,7 @@ bool trackleIsEnabled(Trackle *v)
     return v->isEnabled();
 }
 
-bool trackleGet(Trackle *v, const char *varKey, void *(*fn)(const char *), Data_TypeDef type)
+bool trackleGet(Trackle *v, const char *varKey, user_variable_pointer_t fn, Data_TypeDef type)
 {
     IF_NOT_INITIALIZED_WARNING();
     return v->get(varKey, fn, (Data_TypeDef)type);
@@ -50,7 +50,7 @@ bool trackleGet(Trackle *v, const char *varKey, void *(*fn)(const char *), Data_
 
 // TRACKLE.FUNCTION ------------------------------------------------------------
 
-bool tracklePost(Trackle *v, const char *funcKey, user_function_int_char_t *func, Function_PermissionDef permission)
+bool tracklePost(Trackle *v, const char *funcKey, user_function_int_char_t func, Function_PermissionDef permission)
 {
     IF_NOT_INITIALIZED_WARNING();
     return v->post(funcKey, func, permission);

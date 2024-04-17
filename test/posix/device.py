@@ -8,8 +8,11 @@ import ctypes
 import time
 import importlib
 import warnings
+import threading
 
 import credentials
+import messages as msgs
+from trackle_enums import OtaError
 
 @dataclass
 class DeviceStartupParams:
@@ -20,6 +23,8 @@ class DeviceStartupParams:
     components_list: str = ""
     imei: str = ""
     iccid: str = ""
+    fw_version: int = 1
+    reason_for_ota_failure: OtaError | None = None
 
 class ConnectionStatus:
 
@@ -36,11 +41,11 @@ class ConnectionStatus:
         if not self.__connected and self.__trackle.connected(self.__trackle_instance):
             self.__connected = True
             log.info("connection status changed: connected")
-            self.__to_tester.put({"name": "connected"})
+            self.__to_tester.put({"msg": msgs.CONNECTED})
         elif self.__connected and not self.__trackle.connected(self.__trackle_instance):
             self.__connected = False
             log.info("connection status changed: disconnected")
-            self.__to_tester.put({"name": "disconnected"})
+            self.__to_tester.put({"msg": "disconnected"})
 
 def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : DeviceStartupParams):
 
@@ -48,6 +53,7 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
 
     trackle = importlib.import_module("trackle", "")
     callbacks = importlib.import_module("callbacks", "")
+    
     cloud_functions = importlib.import_module("cloud_functions", "")
 
     log_cb = trackle.LOG_CB(callbacks.log)
@@ -71,6 +77,7 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
     get_echo_json_cb = trackle.GET_JSON_CB(cloud_functions.get_echo_json)
 
     trackle_s = trackle.new()
+
     trackle.init(trackle_s)
 
     trackle.setDeviceId(trackle_s, credentials.TRACKLE_ID)
@@ -81,8 +88,13 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
     trackle.setEnabled(trackle_s, True)
 
     trackle.setKeys(trackle_s, credentials.list_to_private_key(startup_params.private_key))
-    trackle.setFirmwareVersion(trackle_s, 1)
-    trackle.setOtaMethod(trackle_s, trackle.OTAMethod.NO_OTA)
+    trackle.setFirmwareVersion(trackle_s, startup_params.fw_version)
+    trackle.setOtaMethod(trackle_s, trackle.OTAMethod.SEND_URL)
+
+    trackle_lock = threading.Lock()
+    ota_callback = callbacks.make_ota_callback(trackle, trackle_s, to_tester, startup_params.reason_for_ota_failure, trackle_lock)
+    trackle.setOtaUpdateCallback(trackle_s, ota_callback)
+    
     trackle.setConnectionType(trackle_s, trackle.ConnectionType.UNDEFINED)
     if startup_params.claim_code:
         trackle.setClaimCode(trackle_s, startup_params.claim_code.encode("utf-8"))
@@ -120,7 +132,7 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
     conn_status = ConnectionStatus(trackle_s, to_tester, trackle)
 
     res = trackle.connect(trackle_s)
-    to_tester.put({"name" : "connect_result", "return":res})
+    to_tester.put({"msg" : msgs.CONNECT_RESULT, "return":res})
 
     log.info("setup completed")
 
@@ -132,18 +144,19 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
         
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            trackle.loop(trackle_s)
+            with trackle_lock:
+                trackle.loop(trackle_s)
 
         # --------- Test runner commands interpretation ---------
 
         in_msg = from_tester.get_nowait() if not from_tester.empty() else None
         if isinstance(in_msg, dict):
-            match in_msg.get("name"):
-                case "kill_device":
-                    log.info("killing device")
-                    to_tester.put({"name" : "killing"})
+            match in_msg.get("msg"):
+                case msgs.KILL_DEVICE:
+                    log.info("msgs.KILLING device")
+                    to_tester.put({"msg" : msgs.KILLING})
                     break
-                case "multipublish":
+                case msgs.MULTIPUBLISH:
                     if {"event", "data", "ttl", "visibility", "key", "times"}.issubset(set(in_msg)):
                         result = []
                         for _ in range(in_msg["times"]):
@@ -157,11 +170,11 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
                                                     trackle.PublishType.NO_ACK,
                                                     in_msg["key"])
                             result.append(res)
-                        to_tester.put({"name" : "multipublish_result", "return" : result})
+                        to_tester.put({"msg" : msgs.MULTIPUBLISH_RESULT, "return" : result})
                         log.info("multipublish received")
                     else:
                         log.error("invalid multipublish")
-                case "multipublish_long":
+                case msgs.MULTIPUBLISH_LONG:
                     if {"event", "data", "ttl", "visibility"}.issubset(set(in_msg)):
                         result = []
                         for msg_key, event_name in enumerate(in_msg["event"]):
@@ -175,11 +188,11 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
                                                     trackle.PublishType.WITH_ACK,
                                                     msg_key+1)
                             result.append(res)
-                        to_tester.put({"name" : "multipublish_long_result", "return" : result})
+                        to_tester.put({"msg" : msgs.MULTIPUBLISH_LONG_RESULT, "return" : result})
                         log.info("multipublish-long received")
                     else:
                         log.error("invalid multipublish-long")
-                case "publish":
+                case msgs.PUBLISH:
                     if {"event", "data", "ttl", "visibility", "ack", "key"}.issubset(set(in_msg)):
                         with warnings.catch_warnings():
                             warnings.simplefilter("ignore")
@@ -190,15 +203,15 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
                                                 in_msg["visibility"],
                                                 in_msg["ack"],
                                                 in_msg["key"])
-                        to_tester.put({"name" : "publish_result", "return" : res})
+                        to_tester.put({"msg" : msgs.PUBLISH_RESULT, "return" : res})
                         log.info("publish received")
                     else:
                         log.error("invalid publish")
-                case "was_private_post_executed":
+                case msgs.WAS_PRIVATE_POST_EXECUTED:
                     executed = cloud_functions.was_private_post_executed()
-                    to_tester.put({"name": "private_post_exec_status", "executed": executed})
+                    to_tester.put({"msg": msgs.PRIVATE_POST_EXEC_STATUS, "executed": executed})
                     log.info("was private post executed received")
-                case "get_time":
+                case msgs.GET_TIME:
                     with warnings.catch_warnings():
                         warnings.simplefilter("ignore")
                         trackle.get_time(trackle_s)
@@ -211,7 +224,7 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
             if cloud_functions.get_publish_completed(i):
                 publish_error = cloud_functions.get_publish_error(i)
                 log.info("completed msg publish %d with error %d", i, publish_error)
-                to_tester.put({"name": "publish_completed", "error": publish_error, "idx": i})
+                to_tester.put({"msg": msgs.PUBLISH_COMPLETED, "error": publish_error, "idx": i})
                 cloud_functions.reset_publish_completed(i)
 
         # Check if available new sent publish
@@ -219,20 +232,20 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
             if cloud_functions.get_publish_send(i):
                 publish_published = cloud_functions.get_publish_published(i)
                 log.info("sent msg publish %d that succeeded? %d", i, publish_published)
-                to_tester.put({"name": "publish_sent", "published": publish_published, "idx": i})
+                to_tester.put({"msg": msgs.PUBLISH_SENT, "published": publish_published, "idx": i})
                 cloud_functions.reset_publish_sent(i)
 
         # Check if signal called
         if cloud_functions.was_signal_called():
-            to_tester.put({"name": "signal_called"})
+            to_tester.put({"msg": msgs.SIGNAL_CALLED})
             cloud_functions.reset_signal_called()
 
         # Check if reboot called
         if cloud_functions.was_reboot_called():
-            to_tester.put({"name": "reboot_called"})
+            to_tester.put({"msg": msgs.REBOOT_CALLED})
             cloud_functions.reset_reboot_called()
 
         # Check if get time called
         if cloud_functions.was_get_time_called():
-            to_tester.put({"name": "get_time_called"})
+            to_tester.put({"msg": msgs.GET_TIME_CALLED})
             cloud_functions.reset_get_time_called()
