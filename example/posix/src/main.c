@@ -19,6 +19,7 @@
 
 // Standard library includes
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <inttypes.h>
@@ -48,6 +49,8 @@ static int cloudNumber = 0;
 
 int main()
 {
+    srand(time(NULL));
+
     printf("Starting up C example ...\n");
 
     printf("Device ID:");
@@ -93,6 +96,8 @@ int main()
     trackleGet(trackle_s, "getHalfCloudNumber", getHalfCloudNumber, VAR_JSON);
 
     printf("Startup completed. Running.\n");
+
+    Callbacks_setConnectionOverride(true, "192.168.1.124", 5684);
 
     trackleConnect(trackle_s);
 

@@ -24,6 +24,7 @@
 #include <ctime>
 #include <cstring>
 #include <cinttypes>
+#include <stdlib.h>
 
 // Trackle libraries includes
 #include <trackle.h>
@@ -44,15 +45,17 @@ static int incrementCloudNumber(const char *args, bool isOwner, const char *funN
 // Cloud GET functions
 static void *getCloudNumberMessage(const char *args, const char *varName);
 static void *getHalfCloudNumber(const char *args, const char *varName);
-bool getBoolFn(const char *args, const char* varKey);
-int getIntFn(const char *args, const char* varKey);
-double getDoubleFn(const char *args, const char* varKey);
+bool getBoolFn(const char *args, const char *varKey);
+int getIntFn(const char *args, const char *varKey);
+double getDoubleFn(const char *args, const char *varKey);
 
 // Cloud GET variables
 static int cloudNumber = 0;
 
 int main()
 {
+    srand(time(NULL));
+
     std::cout << "Starting up C++ example ...\n";
 
     std::cout << "Device ID:";
@@ -166,7 +169,7 @@ static void *getHalfCloudNumber(const char *args, const char *varName)
     return cloudNumberBuffer;
 }
 
-bool getBoolFn(const char *args, const char* varKey)
+bool getBoolFn(const char *args, const char *varKey)
 {
     bool c = false;
     if (strcmp(args, "1") == 0)
@@ -177,13 +180,13 @@ bool getBoolFn(const char *args, const char* varKey)
     return c;
 }
 
-int getIntFn(const char *args, const char* varKey)
+int getIntFn(const char *args, const char *varKey)
 {
     int a = atoi(args);
     return a;
 }
 
-double getDoubleFn(const char *args, const char* varKey)
+double getDoubleFn(const char *args, const char *varKey)
 {
     double b = atof(args);
     return b;
