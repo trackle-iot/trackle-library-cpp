@@ -483,6 +483,13 @@ namespace trackle
                         // TODO: This will cause all the application events to be sent even if the session was resumed
                         return SESSION_CONNECTED;
                     }
+                    else if (IO_ERROR_GENERIC_RECEIVE == error)
+                    {
+                        LOG(ERROR, "Handshake: received error on HELLO from server");
+                        this->status = CHANNEL_INIT;
+
+                        return IO_ERROR_GENERIC_RECEIVE;
+                    }
                 }
                 else
                 {
