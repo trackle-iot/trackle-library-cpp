@@ -38,7 +38,6 @@ using namespace trackle::protocol;
 #define DEFAULT_CONNECTION_TIMEOUT 1000
 #define RECONNECTION_TIMEOUT 3750
 #define MAX_RECONNECTION_RETRY_INCREMENT 4 // 2^4 * 3750 = 60 seconds
-bool first_connection_completed = false;
 uint16_t connection_retry = 0;
 uint32_t connection_timeout = DEFAULT_CONNECTION_TIMEOUT;
 
@@ -202,7 +201,8 @@ trackle::protocol::Connection_Properties_Type connectionPropTypeList[5] = {
 }; // in seconds
 
 /**
- * It increases the connection timeout by a factor of 2, and adds a random number between 0 and 0.512
+ * The function increases the connection timeout with each retry  by a factor of 2
+ * adding a random factor to the timeout value (between 0 and 0.512)
  */
 void increase_connection_timeout()
 {
@@ -1983,22 +1983,12 @@ void Trackle::loop()
          */
         if (ret < 0)
         {
-            if (!first_connection_completed)
-            {
-                // if never connected, don't increase connection retry timeout
-                LOG(TRACE, "Cloud connection error, never connected successfull...");
-                reset_connection_timeout();
-            }
-            else
-            {
-                // on cloud connection error, increase connection retry timeout
-                LOG(TRACE, "Cloud connection error, increment reconnection timeout...");
-                increase_connection_timeout();
-            }
+            // on cloud connection error, increase connection retry timeout
+            LOG(TRACE, "Cloud connection error, increment reconnection timeout...");
+            increase_connection_timeout();
         }
         else if (ret > 0) /* on success connection, reset timeout */
         {
-            first_connection_completed = true;
             reset_connection_timeout();
         }
         else
