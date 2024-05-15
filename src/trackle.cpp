@@ -100,43 +100,36 @@ uint8_t token = 0;    // 1 - 255
  *
  * @return The next publish counter.
  */
-
 uint32_t getNextPublishCounter()
 {
     uint32_t p = prefix;
+
     if (p == 0)
-    { // init
-// get an unbiased random in (0, 199], so that we get ids=prefix+counter (p_ppc_ccc_ccc) in the range [10_000_000, 1_999_999_999]
-#if MAX_COUNTER != 9999999
-#error "The current MAX_COUNTER value requires a tweak in getNextPublishCounter()"
-#endif
-        constexpr uint32_t top = 199;
-        constexpr uint32_t max_v = 0xFFFFFFFF / top * top;
-        for (int i = 0; i < 20; ++i)
-        {
-            uint32_t r = HAL_RNG_GetRandomNumber();
-            if (r >= max_v)
-            {
-                p = (r % top) + 1;
-                break;
-            }
-        }
-        if (p == 0)
-        {
-            prefix = 0xFFFFFFFF;
-            LOG(WARN, "Couldn't generate a proper random prefix for the publish counter; use 0");
-        }
+    {
+        // Inizializzazione
+        prefix = (HAL_RNG_GetRandomNumber() % 199) + 1; // Genera un numero da 1 a 199
+        p = prefix;
     }
-    else if (p == 0xFFFFFFFF)
-    { // fallback on error
-        p = 0;
+
+    if (p == 0)
+    {
+        LOG(WARN, "Couldn't generate a proper random prefix for the publish counter; use 0");
     }
+    else
+    {
+        LOG(INFO, "Generated a random prefix: %" PRIu32, p);
+    }
+
     counter++;
     if (counter >= MAX_COUNTER)
     {
         counter = 0;
     }
-    return p | counter;
+
+    // Calcola la base per il prefisso come MAX_COUNTER + 1
+    uint32_t base = MAX_COUNTER + 1;
+
+    return (p * base) + counter;
 }
 
 /**
