@@ -653,6 +653,13 @@ public:
         void setFirmwareVersion(int firmwareversion);
 
         /**
+         * @brief This sets the firmware build in the library.
+         *
+         * @param firmwarebuild The firmware build of the product.
+         */
+        void setFirmwareBuild(int firmwarebuild);
+        
+        /**
          * @brief This sets the product id of Trackle.
          *
          * @param productid The product id of the device.

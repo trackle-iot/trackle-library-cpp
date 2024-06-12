@@ -149,6 +149,7 @@ extern "C"
 		uint16_t size;
 		product_id_t product_id;
 		product_firmware_version_t product_version;
+		product_firmware_build_t product_build;
 		uint16_t reserved; // make the padding explicit
 	} product_details_t;
 
@@ -189,6 +190,7 @@ extern "C"
 	void trackle_protocol_remove_event_handlers(ProtocolFacade *protocol, const char *event_name, void *reserved = NULL);
 	void trackle_protocol_set_product_id(ProtocolFacade *protocol, product_id_t product_id, unsigned int param = 0, void *reserved = NULL);
 	void trackle_protocol_set_product_firmware_version(ProtocolFacade *protocol, product_firmware_version_t product_firmware_version, unsigned int param = 0, void *reserved = NULL);
+	void trackle_protocol_set_product_firmware_build(ProtocolFacade *protocol, product_firmware_build_t product_firmware_build, unsigned int param = 0, void *reserved = NULL);
 	void trackle_protocol_get_product_details(ProtocolFacade *protocol, product_details_t *product_details, void *reserved = NULL);
 
 	// int trackle_protocol_set_connection_property(ProtocolFacade *protocol, unsigned property_id, unsigned data, trackle::protocol::connection_properties_t *conn_prop, void *reserved);

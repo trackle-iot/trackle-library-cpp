@@ -10,6 +10,7 @@
 typedef uint32_t system_tick_t;
 typedef uint16_t product_id_t;
 typedef uint16_t product_firmware_version_t;
+typedef uint8_t product_firmware_build_t;
 
 namespace trackle
 {

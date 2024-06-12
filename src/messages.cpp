@@ -102,7 +102,7 @@ namespace trackle
 
 		size_t Messages::hello(uint8_t *buf, message_id_t message_id, uint8_t flags,
 							   uint16_t platform_id, uint16_t product_id,
-							   uint16_t product_firmware_version, bool confirmable, const uint8_t *device_id, uint16_t device_id_len)
+							   uint16_t product_firmware_version, uint8_t product_firmware_build, bool confirmable, const uint8_t *device_id, uint16_t device_id_len)
 		{
 			// TODO: why no token? because the response is not sent separately. But really we should use a token for all messages that expect a response.
 			buf[0] = COAP_MSG_HEADER(confirmable ? CoAPType::CON : CoAPType::NON, 0);
@@ -116,7 +116,7 @@ namespace trackle
 			buf[8] = product_id & 0xff;
 			buf[9] = product_firmware_version >> 8;
 			buf[10] = product_firmware_version & 0xff;
-			buf[11] = 0; // reserved flags
+			buf[11] = product_firmware_build;
 			buf[12] = flags;
 			buf[13] = platform_id >> 8;
 			buf[14] = platform_id & 0xFF;
