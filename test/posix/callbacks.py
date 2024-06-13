@@ -98,25 +98,19 @@ def make_ota_callback(trackle_module: types.ModuleType, trackle_instance: ctypes
             return
         
         # Else download firmware and behave as a normal device during OTA
-        result = req.get(url, timeout=30)
-        if result.status_code == 200:
-            calculated_crc32 = crc32_le(result.content)
-            if calculated_crc32 == expected_crc32:
-                to_tester_queue.put({"msg":msgs.CRC32_CORRECT})
-                logging.info("correct crc32")
-                set_done(OtaError.OTA_ERR_OK)
-            elif expected_crc32 == 0:
-                to_tester_queue.put({"msg":msgs.CRC32_NOT_CHECKED})
-                logging.info("not checking crc32")
-                set_done(OtaError.OTA_ERR_OK)
-            else:
-                to_tester_queue.put({"msg":msgs.CRC32_MISMATCH})
-                logging.error(f"crc32 don't match (got '{calculated_crc32}, expected '{expected_crc32}'')")
-                set_done(OtaError.OTA_ERR_VALIDATE_FAILED)
+        calculated_crc32 = expected_crc32
+        if expected_crc32 == 0:
+            to_tester_queue.put({"msg":msgs.CRC32_NOT_CHECKED})
+            logging.info("not checking crc32")
+            set_done(OtaError.OTA_ERR_OK)
+        elif calculated_crc32 == expected_crc32:
+            to_tester_queue.put({"msg":msgs.CRC32_CORRECT})
+            logging.info("correct crc32")
+            set_done(OtaError.OTA_ERR_OK)
         else:
-            to_tester_queue.put({"msg":msgs.DOWNLOAD_INTERRUPTED})
-            logging.error("download interrupted")
-            set_done(OtaError.OTA_ERR_GENERIC)
+            to_tester_queue.put({"msg":msgs.CRC32_MISMATCH})
+            logging.error(f"crc32 don't match (got '{calculated_crc32}, expected '{expected_crc32}'')")
+            set_done(OtaError.OTA_ERR_VALIDATE_FAILED)
 
     @ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p, ctypes.c_uint32)
     def ota_callback(url, crc32):

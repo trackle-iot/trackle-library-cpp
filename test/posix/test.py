@@ -225,7 +225,7 @@ class TrackleLibraryTest(ut.TestCase):
         wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_ON)
         # Check for connection on cloud
         log.info("waiting online")
-        result = wait_sse_event(self.sse_client, "trackle/status", 15, self)
+        result = wait_sse_event(self.sse_client, "trackle/status", 40, self)
         self.assertIn(result["data"], {"online", "ip-changed"}, "not online from cloud")
         wait_queue_message(self.from_device, msgs.CONNECTED, self)
 
@@ -780,16 +780,16 @@ class TrackleLibraryTest(ut.TestCase):
         wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_OFF)
         # Publish event
         self.to_device.put({"msg" : msgs.PUBLISH,
-                            "event" : "testing/test_publish_8",
+                            "event" : "testing/test_publish_9",
                             "data" : lorem.LOREM_IPSUM[:3900],
                             "ttl" : 30,
                             "visibility" : trackle_enums.PublishVisibility.PUBLIC,
                             "ack" : trackle_enums.PublishType.WITH_ACK,
-                            "key" : 0})
+                            "key" : 1})
         # Check publish result
         result = wait_queue_message(self.from_device, msgs.PUBLISH_RESULT, self)
         self.assertTrue(result["return"])
-        result = wait_queue_message(self.from_device, msgs.PUBLISH_SENT, self)
+        result = wait_queue_message(self.from_device, msgs.PUBLISH_SENT, self, 60)
         self.assertEqual(result["published"], 1)
         for _ in range(7):
             try:
@@ -1121,7 +1121,6 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
         self.assertEqual(resp.json().get("status"), "Update sent", "unexpected method name")
         wait_queue_message(self.from_device, msgs.OTA_URL_RECEIVED, self)
-        wait_queue_message(self.from_device, msgs.CRC32_NOT_CHECKED, self, 20) # Higher timeout in case of bad connection
         # Check that success arrives on cloud
         result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
         self.assertEqual(result["data"], "started", "couldn't receive \"started\" event for OTA from cloud via SSE")

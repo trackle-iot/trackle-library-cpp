@@ -55,6 +55,7 @@ OBJS = *.o
 
 # Flags to be passed to compiler before compiling DLL pieces
 DLL_FLAGS = -DDISABLE_EXAMPLES_LOGGING
+#DLL_FLAGS = ""
 
 default: dll_trackle dll_callbacks dll_cloudfunctions
 
