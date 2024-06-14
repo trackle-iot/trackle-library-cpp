@@ -257,8 +257,6 @@ Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:aea86972f4f24610259bdb36bfc20bdff"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#aea86972f4f24610259bdb36bfc20bdff">first_connection_completed</a> = false</td></tr>
-<tr class="separator:aea86972f4f24610259bdb36bfc20bdff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a393c457fef3fc122d92d67999b2ae121"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a393c457fef3fc122d92d67999b2ae121">connection_retry</a> = 0</td></tr>
 <tr class="separator:a393c457fef3fc122d92d67999b2ae121"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa1b93a2bca49e1f34af849501d96340b"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#aa1b93a2bca49e1f34af849501d96340b">connection_timeout</a> = <a class="el" href="trackle_8cpp.html#ad1d35b0a1fafc882e1fe0eaf622a2a81">DEFAULT_CONNECTION_TIMEOUT</a></td></tr>
@@ -1450,7 +1448,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>It increases the connection timeout by a factor of 2, and adds a random number between 0 and 0.512 </p>
+<p>The function increases the connection timeout with each retry by a factor of 2 adding a random factor to the timeout value (between 0 and 0.512) </p>
 
 </div>
 </div>
@@ -2305,20 +2303,6 @@ Variables</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">firmwareChunkCallback* firmwareChunkCb = NULL</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="aea86972f4f24610259bdb36bfc20bdff"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aea86972f4f24610259bdb36bfc20bdff">&#9670;&nbsp;</a></span>first_connection_completed</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool first_connection_completed = false</td>
         </tr>
       </table>
 </div><div class="memdoc">

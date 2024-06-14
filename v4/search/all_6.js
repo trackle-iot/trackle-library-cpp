@@ -6,7 +6,6 @@ var searchData=
   ['find_5fvar_5fby_5fkey_65',['find_var_by_key',['../trackle_8cpp.html#a89fee425b0c49b4ccf2edafcb4ea2d33',1,'trackle.cpp']]],
   ['finishupdatecb_66',['finishUpdateCb',['../trackle_8cpp.html#a909ce05e2d979fbd7560ac1260cd3822',1,'trackle.cpp']]],
   ['firmwarechunkcb_67',['firmwareChunkCb',['../trackle_8cpp.html#a6e60ac29fdab8b5df355ced13325d1b1',1,'trackle.cpp']]],
-  ['first_5fconnection_5fcompleted_68',['first_connection_completed',['../trackle_8cpp.html#aea86972f4f24610259bdb36bfc20bdff',1,'trackle.cpp']]],
-  ['funcs_69',['funcs',['../trackle_8cpp.html#a3ec629319e81f0a5a840c68da7582feb',1,'trackle.cpp']]],
-  ['funct_70',['funct',['../struct_cloud_variable_type_base.html#ad000792d7574d1b410f2337486d766ae',1,'CloudVariableTypeBase']]]
+  ['funcs_68',['funcs',['../trackle_8cpp.html#a3ec629319e81f0a5a840c68da7582feb',1,'trackle.cpp']]],
+  ['funct_69',['funct',['../struct_cloud_variable_type_base.html#ad000792d7574d1b410f2337486d766ae',1,'CloudVariableTypeBase']]]
 ];

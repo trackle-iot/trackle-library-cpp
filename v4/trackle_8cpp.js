@@ -84,7 +84,6 @@ var trackle_8cpp =
     [ "file_index", "trackle_8cpp.html#a23b32ed5ab98421cf678bbc35c0fc45d", null ],
     [ "finishUpdateCb", "trackle_8cpp.html#a909ce05e2d979fbd7560ac1260cd3822", null ],
     [ "firmwareChunkCb", "trackle_8cpp.html#a6e60ac29fdab8b5df355ced13325d1b1", null ],
-    [ "first_connection_completed", "trackle_8cpp.html#aea86972f4f24610259bdb36bfc20bdff", null ],
     [ "funcs", "trackle_8cpp.html#a3ec629319e81f0a5a840c68da7582feb", null ],
     [ "getRandomCb", "trackle_8cpp.html#ab9c9c3f54df7cbbaaab60cc031f16ab5", null ],
     [ "health_check_interval", "trackle_8cpp.html#a569d1b53f9ae006bf8f47be8a1955994", null ],
