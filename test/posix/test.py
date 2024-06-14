@@ -1345,8 +1345,7 @@ def proxy_code(from_tester : mp.Queue, to_tester : mp.Queue, local_port : int):
             payload, device_addr = device_sock.recvfrom(2048)
             if enabled:
                 try:
-                    server_addr = (f"{cred.TRACKLE_ID_STRING}.udp.device.trackle.io", 5684)
-                    # server_addr = ("192.168.1.124", 5684)
+                    server_addr = (SERVER_ADDRESS, SERVER_PORT)
                     server_sock.sendto(payload, server_addr)
                 except OSError as exc:
                     log.error(exc)
