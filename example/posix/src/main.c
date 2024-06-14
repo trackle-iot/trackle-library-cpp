@@ -34,6 +34,7 @@
 #define MAIN_LOOP_PERIOD_MS 20 // Main loop period in milliseconds
 
 #define SOFTWARE_VERSION 1
+#define SOFTWARE_BUILD 2
 
 // Cloud POST functions
 static int funSuccess(const char *args, bool isOwner, const char *funName);
@@ -72,6 +73,7 @@ int main()
     // Set cloud credentials
     trackleSetKeys(trackle_s, HARDCODED_PRIVATE_KEY);
     trackleSetFirmwareVersion(trackle_s, SOFTWARE_VERSION);
+    trackleSetFirmwareBuild(trackle_s, SOFTWARE_BUILD);
     trackleSetOtaMethod(trackle_s, NO_OTA);
     trackleSetConnectionType(trackle_s, CONNECTION_TYPE_WIFI);
 
@@ -96,8 +98,6 @@ int main()
     trackleGet(trackle_s, "getHalfCloudNumber", getHalfCloudNumber, VAR_JSON);
 
     printf("Startup completed. Running.\n");
-
-    Callbacks_setConnectionOverride(true, "192.168.1.124", 5684);
 
     trackleConnect(trackle_s);
 
