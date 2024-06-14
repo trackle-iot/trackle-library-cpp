@@ -43,6 +43,7 @@ var class_trackle =
     [ "setDisconnectCallback", "class_trackle.html#a79c7c3ff14e2f8c0798fd46bc2fd8af5", null ],
     [ "setEnabled", "class_trackle.html#ad0dfcaf75dde1e5f9c47c4e370aae888", null ],
     [ "setFinishFirmwareUpdateCallback", "class_trackle.html#ae3daca8731a38bdc3877f8b20b0cd661", null ],
+    [ "setFirmwareBuild", "class_trackle.html#a12b41c69675a58bc7ed6c4d6f574e161", null ],
     [ "setFirmwareVersion", "class_trackle.html#a1763a5ef4ec4a7ba55fcde732d8636c6", null ],
     [ "setIccid", "class_trackle.html#ae82399739d89fe183b9da648c6282d21", null ],
     [ "setImei", "class_trackle.html#a90f0e97b5c982a0cf23250d439c57244", null ],

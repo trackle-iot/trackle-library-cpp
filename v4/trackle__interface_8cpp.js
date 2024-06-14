@@ -32,6 +32,7 @@ var trackle__interface_8cpp =
     [ "trackleSetDisconnectCallback", "trackle__interface_8cpp.html#ae578b6785e9491442ac67b9b585b0673", null ],
     [ "trackleSetEnabled", "trackle__interface_8cpp.html#a9f808a978f946b212641978335fd58b0", null ],
     [ "trackleSetFinishFirmwareUpdateCallback", "trackle__interface_8cpp.html#a283922c6f3b6ca77838855cbbeeab4f5", null ],
+    [ "trackleSetFirmwareBuild", "trackle__interface_8cpp.html#aaf9ce350ccd089870db6bcf534b4727b", null ],
     [ "trackleSetFirmwareVersion", "trackle__interface_8cpp.html#a0d83ce906352e317fe169cbbe6d7f595", null ],
     [ "trackleSetIccid", "trackle__interface_8cpp.html#a97af6ae6ac18cf6b947e507b3bfc0b64", null ],
     [ "trackleSetImei", "trackle__interface_8cpp.html#afd47596631521373b2a47270978d88af", null ],
