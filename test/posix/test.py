@@ -1283,6 +1283,43 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertEqual(result["data"], "started", "couldn't receive \"started\" event for OTA from cloud via SSE")
         result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
         self.assertEqual(result["data"], f"failed,{trackle_enums.OtaError.OTA_ERR_MEMORY.value}", "couldn't receive \"failed\" event for OTA from cloud via SSE")
+    
+    def test_39_ota_4(self):
+        """
+        Test OTA firmware update when in development mode (no CRC check). Busy.
+        """
+        # Send PUT to put in development mode
+        self.switch_development_mode(True)
+        # Connection
+        params = device.DeviceStartupParams(
+            cred.TRACKLE_PRIVATE_KEY_LIST,
+            self.proxy_port
+        )
+        self.spawn_device(params)
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
+        self.assertTrue(res["return"])
+        wait_queue_message(self.from_device, msgs.CONNECTED)
+        # Send PUT with OTA url
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
+        json_body = {"firmware_url": "https://iotready.fra1.cdn.digitaloceanspaces.com/Iotready/firmware_test_suite_22.bin"}
+        resp = req.put(url, headers=self.headers, json=json_body, timeout=15)
+        self.assertEqual(resp.status_code, 200, "request failed")
+        self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
+        self.assertEqual(resp.json().get("status"), "Update sent", "unexpected method name")
+        wait_queue_message(self.from_device, msgs.OTA_URL_RECEIVED, self)
+        # Check that failure arrives on cloud
+        result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
+        self.assertEqual(result["data"], "started", "couldn't receive \"started\" event for OTA from cloud via SSE")
+        time.sleep(1)
+        # Send PUT with OTA url for second OTA start, busy
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
+        json_body = {"firmware_url": "https://iotready.fra1.cdn.digitaloceanspaces.com/Iotready/firmware_test_suite_22.bin"}
+        resp = req.put(url, headers=self.headers, json=json_body, timeout=15)
+        self.assertEqual(resp.status_code, 200, "request failed")
+        self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
+        self.assertEqual(resp.json().get("status"), "Update sent", "unexpected method name")
+        result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
+        self.assertEqual(result["data"], f"busy", "couldn't receive \"busy\" event for OTA from cloud via SSE")
 
 
 def proxy_code(from_tester : mp.Queue, to_tester : mp.Queue, local_port : int):
