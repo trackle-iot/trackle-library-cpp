@@ -2,6 +2,7 @@ import ctypes
 import platform
 import zlib
 import struct
+import time
 import threading
 import logging
 import multiprocessing as mp
@@ -78,6 +79,7 @@ def make_ota_callback(trackle_module: types.ModuleType, trackle_instance: ctypes
 
     def ota_thread_code(url, expected_crc32):
         """ OTA thread function code """
+        time.sleep(2)
 
         def crc32_le(b):
             """ Calculate CRC32 with bytes in little-endian """

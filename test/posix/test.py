@@ -1,5 +1,9 @@
 #!/usr/bin/env python3.10
 
+# to run single test use command ./test.py TrackleLibraryTest.xxx_test_name_xxx
+# 
+
+
 """ Test cases and test runner """
 
 import logging as log
@@ -15,6 +19,7 @@ import copy
 import numbers
 import contextlib
 import sys
+import argparse
 
 import requests as req
 import requests.auth as req_auth
@@ -28,6 +33,11 @@ import messages as msgs
 
 # Settings behaviours based on command line arguments
 LOG_LEVEL = 100 # 100 means all logs disabled, otherwise, choose the level you desire
+
+API_URL = "https://api.trackle.io"
+SERVER_ADDRESS = f"{cred.TRACKLE_ID_STRING}.udp.device.trackle.io"
+SERVER_PORT = 5684
+
 log.basicConfig(level=LOG_LEVEL, format="[%(levelname)s] %(processName)s : %(msg)s")
 
 def wait_queue_message(evt_queue: mp.Queue, expect_msg: msgs.QueueMessage,
@@ -99,7 +109,7 @@ class TrackleLibraryTest(ut.TestCase):
     @classmethod
     def switch_development_mode(cls, mode: bool):
         """ Switch development mode ON or OFF on the cloud for test device """
-        url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         json_body = {"development": mode}
         resp = req.put(url, headers=cls.headers, json=json_body, timeout=15)
         if resp.json().get("development") != mode:
@@ -108,7 +118,7 @@ class TrackleLibraryTest(ut.TestCase):
     @classmethod
     def force_release(cls, version: int | None, intelligent: bool):
         """ Force a particular release on device """
-        url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         json_body = {"desired_firmware_version": str(version) if version else None, "flash":intelligent}
         resp = req.put(url, headers=cls.headers, json=json_body, timeout=15)
         if resp.status_code != 200:
@@ -137,7 +147,7 @@ class TrackleLibraryTest(ut.TestCase):
         cls.spawned_devices = 0
         # oauth authentication
         log.info("authenticating to Trackle through OAuth ...")
-        oauth_url = "https://api.trackle.io/oauth/token"
+        oauth_url = f"{API_URL}/oauth/token"
         oauth_headers = {"Content-Type": "application/x-www-form-urlencoded;charset=utf-8"}
         oauth_data = {"grant_type": "client_credentials"}
         oauth_basic = req_auth.HTTPBasicAuth(cred.TRACKLE_CLIENT_ID, cred.TRACKLE_CLIENT_SECRET)
@@ -151,7 +161,7 @@ class TrackleLibraryTest(ut.TestCase):
         # building metadata for every single request
         cls.headers = {"Authorization": f"Bearer {temp_token}"}
         # opening sse events stream
-        sse_url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/events"
+        sse_url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/events"
         cls.sse_client = scnw.SSEClientNoWait(sse_url, headers=cls.headers)
 
     @classmethod
@@ -166,7 +176,7 @@ class TrackleLibraryTest(ut.TestCase):
         wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_ON)
         wait_queue_message(self.from_proxy, msgs.SERVER_CONN_WAS_RESET)
         # Wait a moment
-        time.sleep(2)
+        time.sleep(1)
         # Ignore events from previous test case
         self.sse_client.clear_pending_events()
         # switching ON development mode to prevent undesired OTA during test
@@ -174,6 +184,8 @@ class TrackleLibraryTest(ut.TestCase):
         self.switch_development_mode(False)
         self.force_release(None, False)
         self.switch_development_mode(True)
+        # Wait a moment
+        time.sleep(1)
         
 
     def tearDown(self):
@@ -182,7 +194,7 @@ class TrackleLibraryTest(ut.TestCase):
         if self.from_device is not None:
             wait_queue_message(self.from_device, msgs.KILLING)
 
-    def test_connect_1(self):
+    def test_01_connect_1(self):
         """
         connessione con successo
         connect ritorna true, in cloud arriva l'online
@@ -200,7 +212,7 @@ class TrackleLibraryTest(ut.TestCase):
         result = wait_sse_event(self.sse_client, "trackle/status", 5, self)
         self.assertIn(result["data"], {"online", "ip-changed"}, "not online from cloud")
 
-    def test_connect_2(self):
+    def test_02_connect_2(self):
         """
         riconnessione dopo errore per rete assente, con proxy
         pausa 20s, connect ritorna true, in cloud arriva l'online dopo aver riattivato il proxy
@@ -229,7 +241,7 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertIn(result["data"], {"online", "ip-changed"}, "not online from cloud")
         wait_queue_message(self.from_device, msgs.CONNECTED, self)
 
-    def test_connect_3(self):
+    def test_03_connect_3(self):
         """
         connessione con connettività alla rete, senza internet, con proxy, errore handshake
         connect ritorna true, i log stampano handshake error, in cloud non arriva l'online
@@ -249,7 +261,7 @@ class TrackleLibraryTest(ut.TestCase):
         with self.assertRaises(TimeoutError):
             wait_sse_event(self.sse_client, "trackle/status", 15)
 
-    def test_connect_4(self):
+    def test_04_connect_4(self):
         """
         connessione con chiave privata errata, errore handshake
         connect ritorna true, i log stampano handshake error, in cloud non arriva l'online
@@ -269,7 +281,7 @@ class TrackleLibraryTest(ut.TestCase):
         with self.assertRaises(TimeoutError):
             wait_sse_event(self.sse_client, "trackle/status", 5)
 
-    def test_get_1_1(self):
+    def test_05_get_1_1(self):
         """
         get di una variabile boolean
         il valore di ritorno della GET corrisponde al valore impostato alla variabile
@@ -286,7 +298,7 @@ class TrackleLibraryTest(ut.TestCase):
         wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send GET True
         method = "getEchoBool"
-        url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
         params = {"args" : "1"}
         resp = req.get(url, headers=self.headers, params=params, timeout=15)
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
@@ -294,7 +306,7 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertIsInstance(resp.json().get("result"), bool)
         self.assertEqual(resp.json().get("result"), True, "unexpected result")
 
-    def test_get_1_2(self):
+    def test_06_get_1_2(self):
         """
         get di una variabile boolean
         il valore di ritorno della GET corrisponde al valore impostato alla variabile
@@ -311,7 +323,7 @@ class TrackleLibraryTest(ut.TestCase):
         wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send GET False
         method = "getEchoBool"
-        url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
         params = {"args" : "0"}
         resp = req.get(url, headers=self.headers, params=params, timeout=15)
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
@@ -319,7 +331,7 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertIsInstance(resp.json().get("result"), bool)
         self.assertEqual(resp.json().get("result"), False, "unexpected result")
 
-    def test_get_2(self):
+    def test_07_get_2(self):
         """
         get di una variabile numerica (intero)
         il valore di ritorno della GET corrisponde al valore impostato alla variabile
@@ -335,7 +347,7 @@ class TrackleLibraryTest(ut.TestCase):
         wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send GET
         method = "getEchoInt"
-        url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
         params = {"args" : "14"}
         resp = req.get(url, headers=self.headers, params=params, timeout=15)
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
@@ -343,7 +355,7 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertIsInstance(resp.json().get("result"), numbers.Number)
         self.assertEqual(resp.json().get("result"), 14, "unexpected result")
 
-    def test_get_3(self):
+    def test_08_get_3(self):
         """
         get di una variabile numerica (double)
         il valore di ritorno della GET corrisponde al valore impostato alla variabile
@@ -359,7 +371,7 @@ class TrackleLibraryTest(ut.TestCase):
         wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send GET
         method = "getEchoDouble"
-        url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
         params = {"args" : "1.23456"}
         resp = req.get(url, headers=self.headers, params=params, timeout=15)
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
@@ -367,7 +379,7 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertIsInstance(resp.json().get("result"), numbers.Number)
         self.assertAlmostEqual(resp.json().get("result"), 1.23456, 5, "unexpected result")
 
-    def test_get_4(self):
+    def test_09_get_4(self):
         """
         get di una variabile stringa
         il valore di ritorno della GET corrisponde al valore impostato alla variabile
@@ -384,7 +396,7 @@ class TrackleLibraryTest(ut.TestCase):
         wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send GET
         method = "getEchoString"
-        url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
         params = {"args" : quick_brown_fox}
         resp = req.get(url, headers=self.headers, params=params, timeout=15)
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
@@ -392,7 +404,7 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertIsInstance(resp.json().get("result"), str)
         self.assertEqual(resp.json().get("result"), quick_brown_fox, "unexpected result")
 
-    def test_get_5(self):
+    def test_10_get_5(self):
         """
         get di una variabile json
         il valore di ritorno della GET corrisponde al valore impostato alla variabile
@@ -410,7 +422,7 @@ class TrackleLibraryTest(ut.TestCase):
         wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send GET
         method = "getEchoJson"
-        url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
         params = {"args" : test_json}
         resp = req.get(url, headers=self.headers, params=params, timeout=15)
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
@@ -418,7 +430,7 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertIsInstance(resp.json().get("result"), dict)
         self.assertDictEqual(resp.json().get("result"), test_json_dict, "unexpected res")
 
-    def test_post_1(self):
+    def test_11_post_1(self):
         """
         post con ritorno positivo
         il valore di ritorno della POST corrisponde al valore ritornato dalla funzione nel firmware
@@ -434,14 +446,14 @@ class TrackleLibraryTest(ut.TestCase):
         wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send POST
         method = "postSuccess"
-        url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
         json_body = {"args": ""}
         resp = req.post(url, headers=self.headers, data=json_body, timeout=15)
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
         self.assertEqual(resp.json().get("name"), "postSuccess", "unexpected method name")
         self.assertEqual(resp.json().get("return_value"), 10, "unexpected return value")
 
-    def test_post_2(self):
+    def test_12_post_2(self):
         """
         post con ritorno negativo
         il valore di ritorno della POST corrisponde al valore ritornato dalla funzione nel firmware
@@ -457,14 +469,14 @@ class TrackleLibraryTest(ut.TestCase):
         wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send POST
         method = "postFailing"
-        url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
         json_body = {"args": ""}
         resp = req.post(url, headers=self.headers, data=json_body, timeout=15)
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
         self.assertEqual(resp.json().get("name"), "postFailing", "unexpected method name")
         self.assertEqual(resp.json().get("return_value"), -10, "unexpected return value")
 
-    def test_post_3(self):
+    def test_13_post_3(self):
         """
         post di una funzione privata da utente non customer, errore 403
         il codice di stato della richiesta HTTP è 403, nel firmware non viene chiamata la funzione
@@ -480,7 +492,7 @@ class TrackleLibraryTest(ut.TestCase):
         wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send POST
         method = "postPrivate"
-        url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
         json_body = {"args": ""}
         resp = req.post(url, headers=self.headers, data=json_body, timeout=15)
         self.to_device.put({"msg":msgs.WAS_PRIVATE_POST_EXECUTED})
@@ -488,7 +500,7 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertFalse(res["executed"])
         self.assertEqual(resp.status_code, 403)
 
-    def test_publish_1(self):
+    def test_14_publish_1(self):
         """
         pubblicazione evento singolo with ack -
             1: return true,
@@ -523,7 +535,7 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertEqual(result["error"], 0, "error code in completed callback differs from 0")
         self.assertEqual(result["idx"], 3, "msg key in completed callback differs from 3")
 
-    def test_publish_2(self):
+    def test_15_publish_2(self):
         """
         pubblicazione evento singolo without ack
             1: return true
@@ -554,7 +566,7 @@ class TrackleLibraryTest(ut.TestCase):
         with self.assertRaises(TimeoutError):
             wait_queue_message(self.from_device, msgs.PUBLISH_COMPLETED)
 
-    def test_publish_3(self):
+    def test_16_publish_3(self):
         """
         pubblicazione evento lungo, blockwise
             1: return true,
@@ -589,7 +601,7 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertEqual(result["error"], 0, "error code in completed callback differs from 0")
         self.assertEqual(result["idx"], 4, "msg key in completed callback differs from 4")
 
-    def test_publish_4(self):
+    def test_17_publish_4(self):
         """
         pubblicazione evento lungo, blockwise without ack
             1: return true
@@ -620,7 +632,7 @@ class TrackleLibraryTest(ut.TestCase):
         with self.assertRaises(TimeoutError):
             wait_queue_message(self.from_device, msgs.PUBLISH_COMPLETED)
 
-    def test_publish_5(self):
+    def test_18_publish_5(self):
         """
         pubblicazione 5 eventi singoli, errore BANDWIDTH_EXCEDED  
             - per i primi 4 eventi1: return true, 2: published true: 3: error 0, 4
@@ -651,7 +663,7 @@ class TrackleLibraryTest(ut.TestCase):
         with self.assertRaises(TimeoutError):
             wait_sse_event(self.sse_client, "testing/test_publish_5", 5)
 
-    def test_publish_6(self):
+    def test_19_publish_6(self):
         """
         pubblicazione evento di sistema "trackle", errore no system event
             - 1 return false e log no system event
@@ -682,7 +694,7 @@ class TrackleLibraryTest(ut.TestCase):
         with self.assertRaises(TimeoutError):
             wait_queue_message(self.from_device, msgs.PUBLISH_COMPLETED)
 
-    def test_publish_7(self):
+    def test_20_publish_7(self):
         """
         pubblicazione evento di sistema "iotready", errore no system event
             - 1 return false e log no system event
@@ -713,7 +725,7 @@ class TrackleLibraryTest(ut.TestCase):
         with self.assertRaises(TimeoutError):
             wait_queue_message(self.from_device, msgs.PUBLISH_COMPLETED)
 
-    def test_publish_8(self):
+    def test_21_publish_8(self):
         """
         pubblicazione blockwise con ritrasmissione, con proxy, ok
             - si spegne il proxy,
@@ -758,7 +770,7 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertEqual(result["error"], 0, "error code in completed callback differs from 0")
         self.assertEqual(result["idx"], 2, "msg key in completed callback differs from 2")
 
-    def test_publish_9(self):
+    def test_22_publish_9(self):
         """
         pubblicazione con ritrasmissione, con proxy, errore
             - si spegne il proxy,
@@ -802,7 +814,7 @@ class TrackleLibraryTest(ut.TestCase):
             self.fail("timeout waiting for completion call")
         self.assertNotEqual(result["error"], 0)
 
-    def test_publish_10(self):
+    def test_23_publish_10(self):
         """
         pubblicazione 5 eventi blockwise, errore no free message block 
             - per i primi 4 eventi1: return true, 2: published true: 3: error 0, 4
@@ -851,7 +863,7 @@ class TrackleLibraryTest(ut.TestCase):
         with self.assertRaises(TimeoutError):
             wait_sse_event(self.sse_client, "testing/test_publish_10_5", 5)
 
-    def test_publish_11(self):
+    def test_24_publish_11(self):
         """
         pubblicazione singola con ritrasmissione, con proxy, ok
             - si spegne il proxy,
@@ -896,7 +908,7 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertEqual(result["error"], 0, "error code in completed callback differs from 0")
         self.assertEqual(result["idx"], 2, "msg key in completed callback differs from 2")
 
-    def test_publish_12(self):
+    def test_25_publish_12(self):
         """
         proxy off
         publish no ack 1
@@ -954,7 +966,7 @@ class TrackleLibraryTest(ut.TestCase):
         else:
             self.assertNotIn(result["data"], {"online", "ip-changed"}, "online event received")
 
-    def test_signal_1(self):
+    def test_26_signal_1(self):
         """
         signal - la chiamata alle api ritorna 200, viene chiamata la callback signal
         """
@@ -968,7 +980,7 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send PUT with signal
-        url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         json_body = {"signal": "1"}
         resp = req.put(url, headers=self.headers, data=json_body, timeout=15)
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
@@ -976,7 +988,7 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertTrue(resp.json().get("signaling"), "unexpected return value")
         wait_queue_message(self.from_device, msgs.SIGNAL_CALLED, self)
 
-    def test_ping_1(self):
+    def test_27_ping_1(self):
         """
         ping - la chiamata alle api ritorna 200
         """
@@ -990,12 +1002,12 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send PUT with ping
-        url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/ping"
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/ping"
         json_body = {}
         resp = req.put(url, headers=self.headers, data=json_body, timeout=15)
         self.assertTrue(resp.json().get("online"), "unexpected return value")
 
-    def test_reboot_1(self):
+    def test_28_reboot_1(self):
         """
         reset - la chiamata alle api ritorna 200, viene chiamata la callback reset
         """
@@ -1009,13 +1021,13 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send PUT with reset
-        url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         json_body = {"reset": "reboot"}
         resp = req.put(url, headers=self.headers, data=json_body, timeout=15)
         self.assertTrue(resp.json().get("ok"), "unexpected method name")
         wait_queue_message(self.from_device, msgs.REBOOT_CALLED, self)
 
-    def test_claim_code_1(self):
+    def test_29_claim_code_1(self):
         """
         reset - la chiamata alle api ritorna 200, viene chiamata la callback reset
         """
@@ -1034,7 +1046,7 @@ class TrackleLibraryTest(ut.TestCase):
         result = wait_sse_event(self.sse_client, "trackle/device/claim/code", 5, self)
         self.assertEqual(result["data"], claim_code, "wrong claim code")
 
-    def test_get_time_1(self):
+    def test_30_get_time_1(self):
         """
         get_time - si chiama trackleGetTime
         """
@@ -1051,7 +1063,7 @@ class TrackleLibraryTest(ut.TestCase):
         self.to_device.put({"msg" : msgs.GET_TIME})
         wait_queue_message(self.from_device, msgs.GET_TIME_CALLED, self)
 
-    def test_component_list_1(self):
+    def test_31_component_list_1(self):
         """
         components list - si imposta una stringa con trackle.setComponentsList prima della connect
         si controllo dopo la connessione avvenuta con una chiamata all'api device che l'attributo
@@ -1069,11 +1081,12 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send GET for device information
-        url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
+        time.sleep(1)
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         resp = req.get(url, headers=self.headers, timeout=15)
         self.assertEqual(resp.json().get("firmware_components_list"), components_list, "wrong list")
 
-    def test_imei_iccid_1(self):
+    def test_32_imei_iccid_1(self):
         """
         imei and iccid list - si imposta l'imei con trackle.setImei e l'iccid con trackle.setIccid 
         prima della connect, si controllo dopo la connessione avvenuta con una chiamata all'api device 
@@ -1093,12 +1106,13 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send GET for device information
-        url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
+        time.sleep(1)
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         resp = req.get(url, headers=self.headers, timeout=15)
         self.assertEqual(resp.json().get("imei"), imei, "wrong imei")
         self.assertEqual(resp.json().get("iccid"), iccid, "wrong iccid")
 
-    def test_ota_1_1(self):
+    def test_33_ota_1_1(self):
         """
         Test OTA firmware update when in development mode (no CRC check). Succeeding.
         """
@@ -1114,7 +1128,7 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send PUT with OTA url
-        url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         json_body = {"firmware_url": "https://iotready.fra1.cdn.digitaloceanspaces.com/Iotready/firmware_test_suite_22.bin"}
         resp = req.put(url, headers=self.headers, json=json_body, timeout=15)
         self.assertEqual(resp.status_code, 200, "request failed")
@@ -1127,7 +1141,7 @@ class TrackleLibraryTest(ut.TestCase):
         result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
         self.assertEqual(result["data"], "success", "couldn't receive \"success\" event for OTA from cloud via SSE")
 
-    def test_ota_1_2(self):
+    def test_34_ota_1_2(self):
         """
         Test OTA firmware update when in development mode (no CRC check). Failing.
         """
@@ -1144,7 +1158,7 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
         # Send PUT with OTA url
-        url = f"https://api.trackle.io/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         json_body = {"firmware_url": "https://iotready.fra1.cdn.digitaloceanspaces.com/Iotready/firmware_test_suite_22.bin"}
         resp = req.put(url, headers=self.headers, json=json_body, timeout=15)
         self.assertEqual(resp.status_code, 200, "request failed")
@@ -1158,7 +1172,7 @@ class TrackleLibraryTest(ut.TestCase):
         result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
         self.assertEqual(result["data"], f"failed,{trackle_enums.OtaError.OTA_ERR_INCOMPLETE.value}", "couldn't receive \"failed\" event for OTA from cloud via SSE")
 
-    def test_ota_2_1(self):
+    def test_35_ota_2_1(self):
         """
         Test OTA firmware update when NOT in development mode (CRC check enabled). Succeeding.
         """
@@ -1185,7 +1199,7 @@ class TrackleLibraryTest(ut.TestCase):
         result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
         self.assertEqual(result["data"], "success", "couldn't receive \"success\" event for OTA from cloud via SSE")
 
-    def test_ota_2_2(self):
+    def test_36_ota_2_2(self):
         """
         Test OTA firmware update when NOT in development mode (CRC check enabled). Failing.
         """
@@ -1213,7 +1227,7 @@ class TrackleLibraryTest(ut.TestCase):
         result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
         self.assertEqual(result["data"], f"failed,{trackle_enums.OtaError.OTA_ERR_VALIDATE_FAILED.value}", "couldn't receive \"failed\" event for OTA from cloud via SSE")
     
-    def test_ota_3_1(self):
+    def test_37_ota_3_1(self):
         """
         Test OTA firmware while already connected. Succeeding.
         """
@@ -1241,7 +1255,7 @@ class TrackleLibraryTest(ut.TestCase):
         result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
         self.assertEqual(result["data"], "success", "couldn't receive \"success\" event for OTA from cloud via SSE")
 
-    def test_ota_3_2(self):
+    def test_38_ota_3_2(self):
         """
         Test OTA firmware while already connected. Failing.
         """
@@ -1295,6 +1309,7 @@ def proxy_code(from_tester : mp.Queue, to_tester : mp.Queue, local_port : int):
             if enabled:
                 try:
                     server_addr = (f"{cred.TRACKLE_ID_STRING}.udp.device.trackle.io", 5684)
+                    # server_addr = ("192.168.1.124", 5684)
                     server_sock.sendto(payload, server_addr)
                 except OSError as exc:
                     log.error(exc)
@@ -1332,4 +1347,41 @@ def proxy_code(from_tester : mp.Queue, to_tester : mp.Queue, local_port : int):
         time.sleep(0.05)
 
 if __name__  == "__main__":
-    ut.main(argv=sys.argv)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-t','--test', nargs='+', help='Test list', required=False)
+    parser.add_argument('-a','--address', help='Coap server address', required=False)
+    parser.add_argument('-p','--port', help='Coap server port', required=False)
+    parser.add_argument('-s','--apiserver', help='Api server url', required=False)
+
+    # add test.py to test array
+    args = parser.parse_args()
+    test = "all"
+
+    if not args.test:
+        args.test = []
+    else:
+        test = ' '.join(args.test)
+
+    # add TrackleLibraryTest. to test name
+    for i in range(len(args.test)):
+        args.test[i] = "TrackleLibraryTest." + args.test[i] 
+
+    # add first parameter to test array
+    args.test.insert(0, "./test.py")
+    
+    if args.address:
+        SERVER_ADDRESS = args.address
+
+    if args.port:
+        SERVER_PORT = args.port
+
+    if args.apiserver:
+        API_URL = args.apiserver
+
+    print("Api url:", API_URL)
+    print("Coap server address:", SERVER_ADDRESS)
+    print("Coap server port:", SERVER_PORT)
+    print("Test:", test)
+
+    ut.main(argv=args.test)
