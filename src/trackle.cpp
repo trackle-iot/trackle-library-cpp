@@ -905,8 +905,15 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
             {
                 LOG(ERROR, "Ota already in progress...");
                 char ota_cloud_message[256];
-                sprintf(ota_cloud_message, "busy");
+
+                char *copy = strdup(data);
+                char *url = strtok_r(copy, ",", &copy);
+                char *crc32 = strtok_r(copy, ",", &copy);
+                char *job_id = strtok_r(copy, ",", &copy);
+
+                sprintf(ota_cloud_message, "busy,%s", job_id);
                 ((Trackle *)handler)->publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
+                free(copy);
             }
             else
             {
