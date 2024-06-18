@@ -41,11 +41,11 @@ TINY_INCLUDES = -I"$(TRACKLE_LIB)/lib/tinydtls" \
 			    -I"$(TRACKLE_LIB)/lib/tinydtls/sha2"
 
 
-# Include directories used by all examples
-SHARED_INCLUDES = -I"$(TRACKLE_LIB)/example/posix/include"
+# Include directories for callbacks
+SHARED_INCLUDES = -I"$(TRACKLE_LIB)/test/posix/include"
 
 # Compilation units of calbacks
-CALLBACKS_SRCS = $(TRACKLE_LIB)/example/posix/src/callbacks.c
+CALLBACKS_SRCS = $(TRACKLE_LIB)/test/posix/src/callbacks.c
 
 # Compilation units of cloud functions for tests
 CLOUD_FUNCTIONS_SRCS = cloud_functions.c
