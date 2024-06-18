@@ -2,7 +2,7 @@ name: Test cases (branch v4)
 on: push
 jobs:
     test_on_push:
-        runs-on: macos-12
+        runs-on: ubuntu-22.04
         steps:
             - name: Check out code with submodules
               uses: actions/checkout@v2
