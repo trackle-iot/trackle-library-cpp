@@ -105,15 +105,9 @@ int Callbacks_connect_udp_cb(const char *address, int port)
     {
         address = overriddenAddress;
         port = overriddenPort;
+    }
 
-        struct in_addr addr = {.s_addr = inet_addr(address)};
-        res = gethostbyaddr(&addr, sizeof(struct in_addr), AF_INET);
-    }
-    // else it's a domain, resolve it with DNS.
-    else
-    {
-        res = gethostbyname(address);
-    }
+    res = gethostbyname(address);
 
     if (res)
         EXAMPLE_LOG("Dns address %s resolved\n", address);
@@ -180,13 +174,16 @@ void Callbacks_set_proxy_enabled(bool status) {
  */
 int Callbacks_send_udp_cb(const unsigned char *buf, uint32_t buflen, void *tmp)
 {
-    if (proxyEnabled) {
+    if (proxyEnabled)
+    {
         size_t sent = sendto(cloud_socket, (const char *)buf, buflen, 0, (struct sockaddr *)&cloud_addr, sizeof(cloud_addr));
         if ((int)sent > 0)
             EXAMPLE_LOG("%u send_cb_udp sent %d\n", Callbacks_get_millis_cb(), sent);
 
         return (int)sent;
-    } else {
+    }
+    else
+    {
         EXAMPLE_LOG("%u send_cb_udp, proxy disabled...\n", Callbacks_get_millis_cb());
         return buflen;
     }
@@ -202,7 +199,8 @@ int Callbacks_send_udp_cb(const unsigned char *buf, uint32_t buflen, void *tmp)
  */
 int Callbacks_receive_udp_cb(unsigned char *buf, uint32_t buflen, void *tmp)
 {
-    if (proxyEnabled) {
+    if (proxyEnabled)
+    {
         size_t res = recvfrom(cloud_socket, (char *)buf, buflen, 0, (struct sockaddr *)NULL, NULL);
         if ((int)res > 0)
             EXAMPLE_LOG("%u receive_cb_udp received %d\n", Callbacks_get_millis_cb(), res);
@@ -212,7 +210,9 @@ int Callbacks_receive_udp_cb(unsigned char *buf, uint32_t buflen, void *tmp)
             res = 0;
 
         return (int)res;
-    } else {
+    }
+    else
+    {
         // EXAMPLE_LOG("%u receive_cb_udp, proxy disabled...\n", Callbacks_get_millis_cb());
         return 0;
     }

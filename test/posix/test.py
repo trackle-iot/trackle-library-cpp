@@ -34,6 +34,10 @@ import messages as msgs
 # Settings behaviours based on command line arguments
 LOG_LEVEL = 100 # 100 means all logs disabled, otherwise, choose the level you desire
 
+global API_URL
+global SERVER_ADDRESS
+global SERVER_PORT
+
 API_URL = "https://api.trackle.io"
 SERVER_ADDRESS = f"{cred.TRACKLE_ID_STRING}.udp.device.trackle.io"
 SERVER_PORT = 5684
@@ -185,6 +189,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -204,6 +210,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             False # proxy off
         )
         self.spawn_device(params)
@@ -232,6 +240,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             False
         )
         self.spawn_device(params)
@@ -252,6 +262,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             new_private_key,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -270,6 +282,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -295,6 +309,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -319,6 +335,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -343,6 +361,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -368,6 +388,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -394,6 +416,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -418,6 +442,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -441,6 +467,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -464,6 +492,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -490,6 +520,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -523,6 +555,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -556,6 +590,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -589,6 +625,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -621,6 +659,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -651,6 +691,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -682,6 +724,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -716,6 +760,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -761,6 +807,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -803,6 +851,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -854,6 +904,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -902,6 +954,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -953,6 +1007,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -975,6 +1031,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -994,6 +1052,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -1015,6 +1075,8 @@ class TrackleLibraryTest(ut.TestCase):
         claim_code = "test_claim_code"
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True,
             claim_code
         )
@@ -1033,6 +1095,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -1053,6 +1117,8 @@ class TrackleLibraryTest(ut.TestCase):
         components_list = "component1, component2, component3"
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True,
             components_list=components_list
         )
@@ -1077,6 +1143,8 @@ class TrackleLibraryTest(ut.TestCase):
         iccid = "123456789012345678"
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True,
             imei=imei,
             iccid=iccid
@@ -1101,6 +1169,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)
@@ -1130,6 +1200,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True,
             reason_for_ota_failure = trackle_enums.OtaError.OTA_ERR_INCOMPLETE
         )
@@ -1163,6 +1235,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True,
             fw_version = 21
         )
@@ -1190,6 +1264,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True,
             fw_version = 21,
             reason_for_ota_failure=trackle_enums.OtaError.OTA_ERR_VALIDATE_FAILED
@@ -1216,6 +1292,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True,
             fw_version = 21
         )
@@ -1244,6 +1322,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True,
             fw_version = 21,
             reason_for_ota_failure=trackle_enums.OtaError.OTA_ERR_MEMORY
@@ -1273,6 +1353,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
             True
         )
         self.spawn_device(params)

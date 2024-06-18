@@ -21,6 +21,8 @@ log.basicConfig(level=LOG_LEVEL, format="[%(levelname)s] %(processName)s : %(msg
 class DeviceStartupParams:
     """Startup parameters for a virtual device implemented by device_code"""
     private_key: list
+    server_address: str = ""
+    server_port: int = 0
     proxy_status: bool = True
     claim_code: str = ""
     components_list: str = ""
@@ -134,7 +136,7 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
     trackle.register_get_string(trackle_s, b"getEchoString", get_echo_string_cb)
     trackle.register_get_json(trackle_s, b"getEchoJson", get_echo_json_cb)
 
-    # callbacks.set_connection_override(True, b"127.0.0.1", startup_params.proxy_port)
+    callbacks.set_connection_override(True, startup_params.server_address.encode("utf-8"), startup_params.server_port)
 
     conn_status = ConnectionStatus(trackle_s, to_tester, trackle)
 
