@@ -42,6 +42,7 @@
 // Socket for connection to cloud
 static struct sockaddr_in cloud_addr;
 static int cloud_socket = -1;
+bool proxyEnabled = true;
 
 #define MAX_CONN_ADDRESS_LEN 64
 static char overriddenAddress[MAX_CONN_ADDRESS_LEN + 1] = {0};
@@ -164,6 +165,11 @@ int Callbacks_disconnect_udp_cb()
     return 1;
 }
 
+void Callbacks_set_proxy_enabled(bool status) {
+    EXAMPLE_LOG("%u Callbacks_set_proxy_enabled %d..\n", Callbacks_get_millis_cb(), status);
+    proxyEnabled = status;
+}
+
 /**
  * It sends the data to the cloud server
  *
@@ -174,11 +180,16 @@ int Callbacks_disconnect_udp_cb()
  */
 int Callbacks_send_udp_cb(const unsigned char *buf, uint32_t buflen, void *tmp)
 {
-    size_t sent = sendto(cloud_socket, (const char *)buf, buflen, 0, (struct sockaddr *)&cloud_addr, sizeof(cloud_addr));
-    if ((int)sent > 0)
-        EXAMPLE_LOG("send_cb_udp sent %d\n", sent);
+    if (proxyEnabled) {
+        size_t sent = sendto(cloud_socket, (const char *)buf, buflen, 0, (struct sockaddr *)&cloud_addr, sizeof(cloud_addr));
+        if ((int)sent > 0)
+            EXAMPLE_LOG("%u send_cb_udp sent %d\n", Callbacks_get_millis_cb(), sent);
 
-    return (int)sent;
+        return (int)sent;
+    } else {
+        EXAMPLE_LOG("%u send_cb_udp, proxy disabled...\n", Callbacks_get_millis_cb());
+        return buflen;
+    }
 }
 
 /**
@@ -191,15 +202,20 @@ int Callbacks_send_udp_cb(const unsigned char *buf, uint32_t buflen, void *tmp)
  */
 int Callbacks_receive_udp_cb(unsigned char *buf, uint32_t buflen, void *tmp)
 {
-    size_t res = recvfrom(cloud_socket, (char *)buf, buflen, 0, (struct sockaddr *)NULL, NULL);
-    if ((int)res > 0)
-        EXAMPLE_LOG("receive_cb_udp received %d\n", res);
+    if (proxyEnabled) {
+        size_t res = recvfrom(cloud_socket, (char *)buf, buflen, 0, (struct sockaddr *)NULL, NULL);
+        if ((int)res > 0)
+            EXAMPLE_LOG("%u receive_cb_udp received %d\n", Callbacks_get_millis_cb(), res);
 
-    // on timeout error, set bytes received to 0
-    if ((int)res < 0 && errno == EAGAIN)
-        res = 0;
+        // on timeout error, set bytes received to 0
+        if ((int)res < 0 && errno == EAGAIN)
+            res = 0;
 
-    return (int)res;
+        return (int)res;
+    } else {
+        // EXAMPLE_LOG("%u receive_cb_udp, proxy disabled...\n", Callbacks_get_millis_cb());
+        return 0;
+    }
 }
 
 void Callbacks_log_cb(const char *msg, int level, const char *category, void *attribute, void *reserved)
