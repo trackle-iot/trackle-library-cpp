@@ -34,6 +34,10 @@ get_millis = __lib.Callbacks_get_millis_cb
 get_millis.argtypes = None
 get_millis.restype = ctypes.c_uint32
 
+set_proxy_enabled = __lib.Callbacks_set_proxy_enabled
+set_proxy_enabled.argtypes = (ctypes.c_bool,)
+set_proxy_enabled.restype = None
+
 send_udp = __lib.Callbacks_send_udp_cb
 send_udp.argtypes = (ctypes.c_void_p, ctypes.c_uint32, ctypes.c_void_p)
 send_udp.restype = ctypes.c_int

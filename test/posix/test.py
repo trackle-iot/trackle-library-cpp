@@ -133,16 +133,6 @@ class TrackleLibraryTest(ut.TestCase):
         cls.from_device = None
 
         mp.set_start_method('spawn')
-
-        cls.to_proxy = mp.Queue()
-        cls.from_proxy = mp.Queue()
-
-        cls.proxy_port = random.randint(49152, 65535)
-        cls.proxy_proc = mp.Process(target=proxy_code,
-                            args=(cls.to_proxy, cls.from_proxy, cls.proxy_port),
-                            name="proxy")
-        cls.proxy_proc.start()
-
         # spawned devices to 0
         cls.spawned_devices = 0
         # oauth authentication
@@ -166,17 +156,10 @@ class TrackleLibraryTest(ut.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.to_proxy.put({"msg": msgs.TESTS_COMPLETED})
-        cls.proxy_proc.join()
+        cls.to_device.put({"msg": msgs.TESTS_COMPLETED})
+        # cls.proxy_proc.join()
 
     def setUp(self):
-        # Switching on proxy and reset
-        self.to_proxy.put({"msg" : msgs.PROXY_ON})
-        self.to_proxy.put({"msg": msgs.RESET_SERVER_CONN})
-        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_ON)
-        wait_queue_message(self.from_proxy, msgs.SERVER_CONN_WAS_RESET)
-        # Wait a moment
-        time.sleep(1)
         # Ignore events from previous test case
         self.sse_client.clear_pending_events()
         # switching ON development mode to prevent undesired OTA during test
@@ -202,7 +185,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT, self)
@@ -217,24 +200,23 @@ class TrackleLibraryTest(ut.TestCase):
         riconnessione dopo errore per rete assente, con proxy
         pausa 20s, connect ritorna true, in cloud arriva l'online dopo aver riattivato il proxy
         """
-        # Switching off proxy
-        self.to_proxy.put({"msg" : msgs.PROXY_OFF})
-        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_OFF)
+
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            False # proxy off
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT, self)
         self.assertTrue(res["return"])
+
         # Wait
         for _ in range(4):
             with self.assertRaises(TimeoutError):
                 wait_sse_event(self.sse_client, "trackle/status", 5)
         # Switching on proxy
-        self.to_proxy.put({"msg" : msgs.PROXY_ON})
-        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_ON)
+        self.to_device.put({"msg" : msgs.PROXY_ON})
+        wait_queue_message(self.from_device, msgs.PROXY_SWITCHED_ON)
         # Check for connection on cloud
         log.info("waiting online")
         result = wait_sse_event(self.sse_client, "trackle/status", 40, self)
@@ -246,13 +228,11 @@ class TrackleLibraryTest(ut.TestCase):
         connessione con connettività alla rete, senza internet, con proxy, errore handshake
         connect ritorna true, i log stampano handshake error, in cloud non arriva l'online
         """
-        # Switching off proxy
-        self.to_proxy.put({"msg" : msgs.PROXY_OFF})
-        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_OFF)
+
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            False
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT, self)
@@ -272,7 +252,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             new_private_key,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT, self)
@@ -290,7 +270,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -315,7 +295,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -339,7 +319,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -363,7 +343,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -388,7 +368,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -414,7 +394,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -438,7 +418,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -461,7 +441,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -484,7 +464,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -510,7 +490,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -543,7 +523,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -576,7 +556,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -609,7 +589,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -641,7 +621,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -671,7 +651,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -702,7 +682,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -736,15 +716,15 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
         # Switch off proxy
-        self.to_proxy.put({"msg" : msgs.PROXY_OFF})
-        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_OFF)
+        self.to_device.put({"msg" : msgs.PROXY_OFF})
+        wait_queue_message(self.from_device, msgs.PROXY_SWITCHED_OFF)
         # Publish event
         self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "testing/test_publish_8",
@@ -756,8 +736,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Wait with proxy off
         time.sleep(10)
         # Switch on proxy
-        self.to_proxy.put({"msg" : msgs.PROXY_ON})
-        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_ON)
+        self.to_device.put({"msg" : msgs.PROXY_ON})
+        wait_queue_message(self.from_device, msgs.PROXY_SWITCHED_ON)
         # Check publish result
         result = wait_queue_message(self.from_device, msgs.PUBLISH_RESULT, self)
         self.assertTrue(result["return"], "unexpected function return value")
@@ -781,15 +761,15 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
         # Switch off proxy
-        self.to_proxy.put({"msg" : msgs.PROXY_OFF})
-        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_OFF)
+        self.to_device.put({"msg" : msgs.PROXY_OFF})
+        wait_queue_message(self.from_device, msgs.PROXY_SWITCHED_OFF)
         # Publish event
         self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "testing/test_publish_9",
@@ -823,7 +803,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -874,15 +854,15 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
         # Switch off proxy
-        self.to_proxy.put({"msg" : msgs.PROXY_OFF})
-        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_OFF)
+        self.to_device.put({"msg" : msgs.PROXY_OFF})
+        wait_queue_message(self.from_device, msgs.PROXY_SWITCHED_OFF)
         # Publish event
         self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "testing/test_publish_11",
@@ -894,8 +874,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Wait with proxy off
         time.sleep(10)
         # Switch on proxy
-        self.to_proxy.put({"msg" : msgs.PROXY_ON})
-        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_ON)
+        self.to_device.put({"msg" : msgs.PROXY_ON})
+        wait_queue_message(self.from_device, msgs.PROXY_SWITCHED_ON)
         # Check publish result
         result = wait_queue_message(self.from_device, msgs.PUBLISH_RESULT, self)
         self.assertTrue(result["return"], "unexpected function return value")
@@ -922,15 +902,15 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
         # Switch off proxy
-        self.to_proxy.put({"msg" : msgs.PROXY_OFF})
-        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_OFF)
+        self.to_device.put({"msg" : msgs.PROXY_OFF})
+        wait_queue_message(self.from_device, msgs.PROXY_SWITCHED_OFF)
         # Publish event
         self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "testing/test_publish_12_1",
@@ -942,8 +922,8 @@ class TrackleLibraryTest(ut.TestCase):
         # Wait with proxy off
         time.sleep(20)
         # Switch on proxy
-        self.to_proxy.put({"msg" : msgs.PROXY_ON})
-        wait_queue_message(self.from_proxy, msgs.PROXY_SWITCHED_ON)
+        self.to_device.put({"msg" : msgs.PROXY_ON})
+        wait_queue_message(self.from_device, msgs.PROXY_SWITCHED_ON)
         # Publish event
         self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "testing/test_publish_12_2",
@@ -973,7 +953,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -995,7 +975,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -1014,7 +994,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -1035,7 +1015,7 @@ class TrackleLibraryTest(ut.TestCase):
         claim_code = "test_claim_code"
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port,
+            True,
             claim_code
         )
         self.spawn_device(params)
@@ -1053,7 +1033,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -1073,7 +1053,7 @@ class TrackleLibraryTest(ut.TestCase):
         components_list = "component1, component2, component3"
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port,
+            True,
             components_list=components_list
         )
         self.spawn_device(params)
@@ -1097,7 +1077,7 @@ class TrackleLibraryTest(ut.TestCase):
         iccid = "123456789012345678"
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port,
+            True,
             imei=imei,
             iccid=iccid
         )
@@ -1121,7 +1101,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -1150,7 +1130,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port,
+            True,
             reason_for_ota_failure = trackle_enums.OtaError.OTA_ERR_INCOMPLETE
         )
         self.spawn_device(params)
@@ -1183,7 +1163,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port,
+            True,
             fw_version = 21
         )
         self.spawn_device(params)
@@ -1210,7 +1190,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port,
+            True,
             fw_version = 21,
             reason_for_ota_failure=trackle_enums.OtaError.OTA_ERR_VALIDATE_FAILED
         )
@@ -1236,7 +1216,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port,
+            True,
             fw_version = 21
         )
         self.spawn_device(params)
@@ -1264,7 +1244,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port,
+            True,
             fw_version = 21,
             reason_for_ota_failure=trackle_enums.OtaError.OTA_ERR_MEMORY
         )
@@ -1293,7 +1273,7 @@ class TrackleLibraryTest(ut.TestCase):
         # Connection
         params = device.DeviceStartupParams(
             cred.TRACKLE_PRIVATE_KEY_LIST,
-            self.proxy_port
+            True
         )
         self.spawn_device(params)
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
@@ -1320,67 +1300,6 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertEqual(resp.json().get("status"), "Update sent", "unexpected method name")
         result = wait_sse_event(self.sse_client, "trackle/flash/status", 5, self)
         self.assertEqual(result["data"], f"busy", "couldn't receive \"busy\" event for OTA from cloud via SSE")
-
-
-def proxy_code(from_tester : mp.Queue, to_tester : mp.Queue, local_port : int):
-    """
-    Code for process that implements UDP proxy.
-    Proxy is enabled by default.
-    """
-
-    # sockets init
-    server_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    device_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    server_sock.setblocking(False)
-    device_sock.setblocking(False)
-    device_sock.bind(("127.0.0.1", local_port))
-    log.info("Proxy listening on port %d of 127.0.0.1", local_port)
-
-    enabled = True
-    device_addr = None
-    while True:
-
-        # device to server
-        with contextlib.suppress(OSError):
-            payload, device_addr = device_sock.recvfrom(2048)
-            if enabled:
-                try:
-                    server_addr = (SERVER_ADDRESS, SERVER_PORT)
-                    server_sock.sendto(payload, server_addr)
-                except OSError as exc:
-                    log.error(exc)
-
-        # server to device
-        with contextlib.suppress(OSError):
-            payload, _ = server_sock.recvfrom(2048)
-            if enabled:
-                try:
-                    device_sock.sendto(payload, device_addr)
-                except OSError as exc:
-                    log.error(exc)
-
-        # interpret commands
-        in_msg = from_tester.get_nowait() if not from_tester.empty() else None
-        if isinstance(in_msg, dict):
-            match in_msg.get("msg"):
-                case msgs.PROXY_OFF:
-                    enabled = False
-                    log.info("proxy switched off")
-                    to_tester.put({"msg" : msgs.PROXY_SWITCHED_OFF})
-                case msgs.PROXY_ON:
-                    enabled = True
-                    log.info("proxy switched on")
-                    to_tester.put({"msg" : msgs.PROXY_SWITCHED_ON})
-                case msgs.TESTS_COMPLETED:
-                    log.info("tester terminated, quitting")
-                    break
-                case msgs.RESET_SERVER_CONN:
-                    server_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                    server_sock.setblocking(False)
-                    log.info("server conn reset")
-                    to_tester.put({"msg" : msgs.SERVER_CONN_WAS_RESET})
-
-        time.sleep(0.05)
 
 if __name__  == "__main__":
 

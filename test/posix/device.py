@@ -14,11 +14,14 @@ import credentials
 import messages as msgs
 from trackle_enums import OtaError
 
+LOG_LEVEL = 100 # 100 means all logs disabled, otherwise, choose the level you desire
+log.basicConfig(level=LOG_LEVEL, format="[%(levelname)s] %(processName)s : %(msg)s")
+
 @dataclass
 class DeviceStartupParams:
     """Startup parameters for a virtual device implemented by device_code"""
     private_key: list
-    proxy_port: int
+    proxy_status: bool = True
     claim_code: str = ""
     components_list: str = ""
     imei: str = ""
@@ -53,6 +56,10 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
 
     trackle = importlib.import_module("trackle", "")
     callbacks = importlib.import_module("callbacks", "")
+
+    # Switching on proxy and reset
+    callbacks.set_proxy_enabled(startup_params.proxy_status)    
+    time.sleep(1)
     
     cloud_functions = importlib.import_module("cloud_functions", "")
 
@@ -83,7 +90,7 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
     trackle.setDeviceId(trackle_s, credentials.TRACKLE_ID)
 
     trackle.setLogCallback(trackle_s, log_cb)
-    trackle.setLogLevel(trackle_s, trackle.LogLevel.WARN)
+    trackle.setLogLevel(trackle_s, trackle.LogLevel.INFO)
 
     trackle.setEnabled(trackle_s, True)
 
@@ -127,7 +134,7 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
     trackle.register_get_string(trackle_s, b"getEchoString", get_echo_string_cb)
     trackle.register_get_json(trackle_s, b"getEchoJson", get_echo_json_cb)
 
-    callbacks.set_connection_override(True, b"127.0.0.1", startup_params.proxy_port)
+    # callbacks.set_connection_override(True, b"127.0.0.1", startup_params.proxy_port)
 
     conn_status = ConnectionStatus(trackle_s, to_tester, trackle)
 
@@ -216,6 +223,14 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
                         warnings.simplefilter("ignore")
                         trackle.get_time(trackle_s)
                     log.info("get time received")
+                case msgs.PROXY_OFF:
+                    callbacks.set_proxy_enabled(False)
+                    log.info("proxy switched off")
+                    to_tester.put({"msg" : msgs.PROXY_SWITCHED_OFF})
+                case msgs.PROXY_ON:
+                    callbacks.set_proxy_enabled(True)
+                    log.info("proxy switched on")
+                    to_tester.put({"msg" : msgs.PROXY_SWITCHED_ON})
 
         # ----- Asynchronous events signaling towards test runner --------
 
