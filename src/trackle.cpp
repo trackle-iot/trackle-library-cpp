@@ -907,9 +907,16 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
                 char ota_cloud_message[256];
 
                 char *copy = strdup(data);
-                char *url = strtok_r(copy, ",", &copy);
-                char *crc32 = strtok_r(copy, ",", &copy);
-                char *job_id = strtok_r(copy, ",", &copy);
+                if (copy == NULL)
+                {
+                    LOG(ERROR, "strdup failed");
+                    return;
+                }
+                char *saveptr = copy;
+
+                char *url = strtok_r(copy, ",", &saveptr);
+                char *crc32 = strtok_r(NULL, ",", &saveptr);
+                char *job_id = strtok_r(NULL, ",", &saveptr);
 
                 sprintf(ota_cloud_message, "busy,%s", job_id);
                 ((Trackle *)handler)->publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
@@ -920,18 +927,25 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
                 LOG(INFO, "otaUpdateCb %s", data);
                 memset(ota_data.ota_job_id, 0, 64);
 
-                // set dafault value to 0 number
+                // set default value to 0 number
                 ota_data.ota_job_id[0] = '0';
 
                 char *copy = strdup(data);
-                char *url = strtok_r(copy, ",", &copy);
+                if (copy == NULL)
+                {
+                    LOG(ERROR, "strdup failed");
+                    return;
+                }
+                char *saveptr = copy;
+
+                char *url = strtok_r(copy, ",", &saveptr);
                 uint32_t crc = 0;
                 uint32_t ota_type = 0; // 0 undefined, 1 product, 2 developer
 
                 if (url != NULL)
                 {
-                    char *crc32 = strtok_r(copy, ",", &copy);
-                    char *job_id = strtok_r(copy, ",", &copy);
+                    char *crc32 = strtok_r(NULL, ",", &saveptr);
+                    char *job_id = strtok_r(NULL, ",", &saveptr);
 
                     if (crc32 != NULL && job_id != NULL)
                     {
