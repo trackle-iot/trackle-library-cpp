@@ -301,6 +301,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ac503a345ce4e85de5709a376fc6fd7b1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8h.html#ac503a345ce4e85de5709a376fc6fd7b1">trackleSetFirmwareVersion</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, int firmwareversion) <a class="el" href="trackle__interface_8h.html#ae4ad8e0eba8e8694399616b10b5f06df">DYNLIB</a></td></tr>
 <tr class="memdesc:ac503a345ce4e85de5709a376fc6fd7b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">This sets the firmware version in the library.  <a href="trackle__interface_8h.html#ac503a345ce4e85de5709a376fc6fd7b1">More...</a><br /></td></tr>
 <tr class="separator:ac503a345ce4e85de5709a376fc6fd7b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a04190d7eb76c9d3096c601305408fde6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8h.html#a04190d7eb76c9d3096c601305408fde6">trackleSetFirmwareBuild</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, int firmwarebuild) <a class="el" href="trackle__interface_8h.html#ae4ad8e0eba8e8694399616b10b5f06df">DYNLIB</a></td></tr>
+<tr class="memdesc:a04190d7eb76c9d3096c601305408fde6"><td class="mdescLeft">&#160;</td><td class="mdescRight">This sets the firmware build in the library.  <a href="trackle__interface_8h.html#a04190d7eb76c9d3096c601305408fde6">More...</a><br /></td></tr>
+<tr class="separator:a04190d7eb76c9d3096c601305408fde6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad9a41e1cb5e2fb6c83331cf1bd6f6234"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8h.html#ad9a41e1cb5e2fb6c83331cf1bd6f6234">trackleSetProductId</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, int productid) <a class="el" href="trackle__interface_8h.html#ae4ad8e0eba8e8694399616b10b5f06df">DYNLIB</a></td></tr>
 <tr class="memdesc:ad9a41e1cb5e2fb6c83331cf1bd6f6234"><td class="mdescLeft">&#160;</td><td class="mdescRight">This sets the product id of <a class="el" href="class_trackle.html">Trackle</a>.  <a href="trackle__interface_8h.html#ad9a41e1cb5e2fb6c83331cf1bd6f6234">More...</a><br /></td></tr>
 <tr class="separator:ad9a41e1cb5e2fb6c83331cf1bd6f6234"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1419,6 +1422,43 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">v</td><td>The <a class="el" href="class_trackle.html">Trackle</a> struct. </td></tr>
     <tr><td class="paramname">finish</td><td>A callback function that is called when the firmware update is complete. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a04190d7eb76c9d3096c601305408fde6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a04190d7eb76c9d3096c601305408fde6">&#9670;&nbsp;</a></span>trackleSetFirmwareBuild()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void trackleSetFirmwareBuild </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_trackle.html">Trackle</a> *&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>firmwarebuild</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This sets the firmware build in the library. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">v</td><td>The <a class="el" href="class_trackle.html">Trackle</a> struct. </td></tr>
+    <tr><td class="paramname">firmwarebuild</td><td>The firmware build of the product. </td></tr>
   </table>
   </dd>
 </dl>
