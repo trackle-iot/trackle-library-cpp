@@ -42,7 +42,7 @@
  *
  * @return 1 buffer filled
  */
-int dtls_prng(unsigned char *buf, size_t len);
+int dtls_prng(uint8_t *buf, unsigned len);
 
 /** @} */
 

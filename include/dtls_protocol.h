@@ -66,7 +66,7 @@ namespace trackle
 				get_product_details(deets);
 				size_t len = Messages::hello(message.buf(), 0,
 											 flags, PLATFORM_ID, deets.product_id,
-											 deets.product_version, true,
+											 deets.product_version, deets.product_build, true,
 											 device_id, sizeof(device_id));
 				return len;
 			}

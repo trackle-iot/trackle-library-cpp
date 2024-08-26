@@ -1824,6 +1824,11 @@ void Trackle::setFirmwareVersion(int firmwareversion)
     trackle_protocol_set_product_firmware_version(protocol, firmwareversion);
 }
 
+void Trackle::setFirmwareBuild(int firmwarebuild)
+{
+    trackle_protocol_set_product_firmware_build(protocol, firmwarebuild);
+}
+
 void Trackle::setProductId(int productid)
 {
     trackle_protocol_set_product_id(protocol, productid);

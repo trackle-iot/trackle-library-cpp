@@ -154,6 +154,12 @@ void trackle_protocol_set_product_firmware_version(ProtocolFacade *protocol, pro
     protocol->set_product_firmware_version(product_firmware_version);
 }
 
+void trackle_protocol_set_product_firmware_build(ProtocolFacade *protocol, product_firmware_build_t product_firmware_build, unsigned, void *)
+{
+    ASSERT_ON_SYSTEM_OR_MAIN_THREAD();
+    protocol->set_product_firmware_build(product_firmware_build);
+}
+
 void trackle_protocol_get_product_details(ProtocolFacade *protocol, product_details_t *details, void *reserved)
 {
     ASSERT_ON_SYSTEM_OR_MAIN_THREAD();
