@@ -901,18 +901,19 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
     {
         if (otaUpdateCb)
         {
+
+            char *copy = strdup(data);
+            if (copy == NULL)
+            {
+                LOG(ERROR, "strdup failed");
+                return;
+            }
+            char *saveptr = copy;
+
             if (ota_data.running)
             {
                 LOG(ERROR, "Ota already in progress...");
                 char ota_cloud_message[256];
-
-                char *copy = strdup(data);
-                if (copy == NULL)
-                {
-                    LOG(ERROR, "strdup failed");
-                    return;
-                }
-                char *saveptr = copy;
 
                 char *url = strtok_r(copy, ",", &saveptr);
                 char *crc32 = strtok_r(NULL, ",", &saveptr);
@@ -920,7 +921,6 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
 
                 sprintf(ota_cloud_message, "busy,%s", job_id);
                 ((Trackle *)handler)->publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
-                free(copy);
             }
             else
             {
@@ -929,14 +929,6 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
 
                 // set default value to 0 number
                 ota_data.ota_job_id[0] = '0';
-
-                char *copy = strdup(data);
-                if (copy == NULL)
-                {
-                    LOG(ERROR, "strdup failed");
-                    return;
-                }
-                char *saveptr = copy;
 
                 char *url = strtok_r(copy, ",", &saveptr);
                 uint32_t crc = 0;
@@ -967,8 +959,6 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
                     ota_type = 0;
                 }
 
-                free(copy);
-
                 if (ota_type > 0)
                 {
                     int ota_error = (*otaUpdateCb)(url, crc);
@@ -989,6 +979,8 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
                     }
                 }
             }
+
+            free(copy);
         }
         else
         {
