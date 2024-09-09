@@ -38,7 +38,6 @@ using namespace trackle::protocol;
 #define DEFAULT_CONNECTION_TIMEOUT 1000
 #define RECONNECTION_TIMEOUT 3750
 #define MAX_RECONNECTION_RETRY_INCREMENT 4 // 2^4 * 3750 = 60 seconds
-bool first_connection_completed = false;
 uint16_t connection_retry = 0;
 uint32_t connection_timeout = DEFAULT_CONNECTION_TIMEOUT;
 
@@ -101,43 +100,36 @@ uint8_t token = 0;    // 1 - 255
  *
  * @return The next publish counter.
  */
-
 uint32_t getNextPublishCounter()
 {
     uint32_t p = prefix;
+
     if (p == 0)
-    { // init
-// get an unbiased random in (0, 199], so that we get ids=prefix+counter (p_ppc_ccc_ccc) in the range [10_000_000, 1_999_999_999]
-#if MAX_COUNTER != 9999999
-#error "The current MAX_COUNTER value requires a tweak in getNextPublishCounter()"
-#endif
-        constexpr uint32_t top = 199;
-        constexpr uint32_t max_v = 0xFFFFFFFF / top * top;
-        for (int i = 0; i < 20; ++i)
-        {
-            uint32_t r = HAL_RNG_GetRandomNumber();
-            if (r >= max_v)
-            {
-                p = (r % top) + 1;
-                break;
-            }
-        }
-        if (p == 0)
-        {
-            prefix = 0xFFFFFFFF;
-            LOG(WARN, "Couldn't generate a proper random prefix for the publish counter; use 0");
-        }
+    {
+        // Inizializzazione
+        prefix = (HAL_RNG_GetRandomNumber() % 199) + 1; // Genera un numero da 1 a 199
+        p = prefix;
     }
-    else if (p == 0xFFFFFFFF)
-    { // fallback on error
-        p = 0;
+
+    if (p == 0)
+    {
+        LOG(WARN, "Couldn't generate a proper random prefix for the publish counter; use 0");
     }
+    else
+    {
+        LOG(INFO, "Generated a random prefix: %" PRIu32, p);
+    }
+
     counter++;
     if (counter >= MAX_COUNTER)
     {
         counter = 0;
     }
-    return p | counter;
+
+    // Calcola la base per il prefisso come MAX_COUNTER + 1
+    uint32_t base = MAX_COUNTER + 1;
+
+    return (p * base) + counter;
 }
 
 /**
@@ -202,7 +194,8 @@ trackle::protocol::Connection_Properties_Type connectionPropTypeList[5] = {
 }; // in seconds
 
 /**
- * It increases the connection timeout by a factor of 2, and adds a random number between 0 and 0.512
+ * The function increases the connection timeout with each retry  by a factor of 2
+ * adding a random factor to the timeout value (between 0 and 0.512)
  */
 void increase_connection_timeout()
 {
@@ -908,11 +901,25 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
     {
         if (otaUpdateCb)
         {
+
+            char *copy = strdup(data);
+            if (copy == NULL)
+            {
+                LOG(ERROR, "strdup failed");
+                return;
+            }
+            char *saveptr = copy;
+
             if (ota_data.running)
             {
                 LOG(ERROR, "Ota already in progress...");
                 char ota_cloud_message[256];
-                sprintf(ota_cloud_message, "busy");
+
+                char *url = strtok_r(copy, ",", &saveptr);
+                char *crc32 = strtok_r(NULL, ",", &saveptr);
+                char *job_id = strtok_r(NULL, ",", &saveptr);
+
+                sprintf(ota_cloud_message, "busy,%s", job_id);
                 ((Trackle *)handler)->publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
             }
             else
@@ -920,18 +927,17 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
                 LOG(INFO, "otaUpdateCb %s", data);
                 memset(ota_data.ota_job_id, 0, 64);
 
-                // set dafault value to 0 number
+                // set default value to 0 number
                 ota_data.ota_job_id[0] = '0';
 
-                char *copy = strdup(data);
-                char *url = strtok_r(copy, ",", &copy);
+                char *url = strtok_r(copy, ",", &saveptr);
                 uint32_t crc = 0;
                 uint32_t ota_type = 0; // 0 undefined, 1 product, 2 developer
 
                 if (url != NULL)
                 {
-                    char *crc32 = strtok_r(copy, ",", &copy);
-                    char *job_id = strtok_r(copy, ",", &copy);
+                    char *crc32 = strtok_r(NULL, ",", &saveptr);
+                    char *job_id = strtok_r(NULL, ",", &saveptr);
 
                     if (crc32 != NULL && job_id != NULL)
                     {
@@ -953,8 +959,6 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
                     ota_type = 0;
                 }
 
-                free(copy);
-
                 if (ota_type > 0)
                 {
                     int ota_error = (*otaUpdateCb)(url, crc);
@@ -975,6 +979,8 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
                     }
                 }
             }
+
+            free(copy);
         }
         else
         {
@@ -1983,22 +1989,12 @@ void Trackle::loop()
          */
         if (ret < 0)
         {
-            if (!first_connection_completed)
-            {
-                // if never connected, don't increase connection retry timeout
-                LOG(TRACE, "Cloud connection error, never connected successfull...");
-                reset_connection_timeout();
-            }
-            else
-            {
-                // on cloud connection error, increase connection retry timeout
-                LOG(TRACE, "Cloud connection error, increment reconnection timeout...");
-                increase_connection_timeout();
-            }
+            // on cloud connection error, increase connection retry timeout
+            LOG(TRACE, "Cloud connection error, increment reconnection timeout...");
+            increase_connection_timeout();
         }
         else if (ret > 0) /* on success connection, reset timeout */
         {
-            first_connection_completed = true;
             reset_connection_timeout();
         }
         else
@@ -2014,6 +2010,11 @@ void Trackle::loop()
 void Trackle::setFirmwareVersion(int firmwareversion)
 {
     trackle_protocol_set_product_firmware_version(protocol, firmwareversion);
+}
+
+void Trackle::setFirmwareBuild(int firmwarebuild)
+{
+    trackle_protocol_set_product_firmware_build(protocol, firmwarebuild);
 }
 
 void Trackle::setProductId(int productid)

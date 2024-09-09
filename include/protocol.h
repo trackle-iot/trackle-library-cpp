@@ -71,6 +71,11 @@ namespace trackle
 			product_firmware_version_t product_firmware_version;
 
 			/**
+			 * The product build for this device.
+			 */
+			product_firmware_build_t product_firmware_build;
+
+			/**
 			 * Descriptor callbacks that provide externally hosted functions and variables.
 			 */
 			TrackleDescriptor descriptor;
@@ -509,12 +514,19 @@ namespace trackle
 				this->product_firmware_version = product_firmware_version;
 			}
 
-			inline void get_product_details(product_details_t &details)
+			inline void set_product_firmware_build(
+				product_firmware_build_t product_firmware_build)
+			{
+				this->product_firmware_build = product_firmware_build;
+			}
+
+			inline void	get_product_details(product_details_t &details)
 			{
 				if (details.size >= 4)
 				{
 					details.product_id = this->product_id;
 					details.product_version = this->product_firmware_version;
+					details.product_build = this->product_firmware_build;
 				}
 			}
 

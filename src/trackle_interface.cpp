@@ -360,6 +360,12 @@ void trackleSetFirmwareVersion(Trackle *v, int firmwareversion)
     v->setFirmwareVersion(firmwareversion);
 }
 
+void trackleSetFirmwareBuild(Trackle *v, int firmwarebuild)
+{
+    IF_NOT_INITIALIZED_WARNING();
+    v->setFirmwareBuild(firmwarebuild);
+}
+
 void trackleSetProductId(Trackle *v, int productid)
 {
     IF_NOT_INITIALIZED_WARNING();

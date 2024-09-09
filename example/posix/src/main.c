@@ -19,6 +19,7 @@
 
 // Standard library includes
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <inttypes.h>
@@ -33,6 +34,7 @@
 #define MAIN_LOOP_PERIOD_MS 20 // Main loop period in milliseconds
 
 #define SOFTWARE_VERSION 1
+#define SOFTWARE_BUILD 2
 
 // Cloud POST functions
 static int funSuccess(const char *args, bool isOwner, const char *funName);
@@ -48,6 +50,8 @@ static int cloudNumber = 0;
 
 int main()
 {
+    srand(time(NULL));
+
     printf("Starting up C example ...\n");
 
     printf("Device ID:");
@@ -69,6 +73,7 @@ int main()
     // Set cloud credentials
     trackleSetKeys(trackle_s, HARDCODED_PRIVATE_KEY);
     trackleSetFirmwareVersion(trackle_s, SOFTWARE_VERSION);
+    trackleSetFirmwareBuild(trackle_s, SOFTWARE_BUILD);
     trackleSetOtaMethod(trackle_s, NO_OTA);
     trackleSetConnectionType(trackle_s, CONNECTION_TYPE_WIFI);
 

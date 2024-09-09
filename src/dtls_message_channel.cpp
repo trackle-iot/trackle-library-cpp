@@ -9,13 +9,14 @@ LOG_SOURCE_CATEGORY("comm.dtls")
 #include <string.h>
 
 #define ECDSA_KEY_LENGTH 32
+#define MALFORMED_PACKET_LEN 15
 
 unsigned char ecdsa_priv_key[ECDSA_KEY_LENGTH];
 unsigned char ecdsa_pub_key_x[ECDSA_KEY_LENGTH];
 unsigned char ecdsa_pub_key_y[ECDSA_KEY_LENGTH];
 unsigned char server_certificate[DTLS_PUBLIC_KEY_LENGTH];
 
-uint8_t malformed[15] = {0x16, 0xfe, 0xfd, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00};
+uint8_t malformed[MALFORMED_PACKET_LEN] = {0x16, 0xfe, 0xfd, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00};
 uint8_t malformed_counter = 0;
 bool valid_dtls_session = false;
 
@@ -434,21 +435,34 @@ namespace trackle
 
 			if (len > 0)
 			{
-				dtls_handle_message(dtls_context, &dst, buf, len);
-				memset(buf, 0, buflen);
-				memcpy(buf, dtls_data.read_buf, dtls_data.read_len);
+				// reset dtls_data.read_len to avoid error
+				dtls_data.read_len = 0;
+				int dtls_res = dtls_handle_message(dtls_context, &dst, buf, len);
+				LOG(TRACE, "dtls_handle_message error %d, dtls_data.read_len %d", dtls_res, dtls_data.read_len);
 
-				// check malformed TODO add check len 15
-				int res = memcmp(dtls_data.read_buf, malformed, dtls_data.read_len);
+				// check malformed only if data received > 0
+				int res = -1;
+				if (dtls_data.read_len == 0)
+				{
+					res = memcmp(buf, malformed, MALFORMED_PACKET_LEN);
+					LOG(TRACE, "Check malformed packet: %d", (res == 0));
+				}
+
 				if (res == 0)
 				{
-					LOG(TRACE, "Malformed dtls packet");
+					LOG(WARN, "Malformed dtls packet");
 					malformed_counter++;
+
+					// if already in move session, disconnect on malformed
+					if (move_session)
+					{
+						malformed_counter = 2;
+					}
 
 					// todo scrivere funzionamento
 					if (malformed_counter == 1)
 					{
-						LOG(TRACE, "Handle ip change");
+						LOG(INFO, "Handle ip change");
 						this->command(MessageChannel::MOVE_SESSION, nullptr);
 
 						// send ping
@@ -462,7 +476,7 @@ namespace trackle
 					}
 					else
 					{
-						LOG(TRACE, "Too much malformed packet, disconnecting.....");
+						LOG(INFO, "Too much malformed packet, disconnecting.....");
 						this->command(MessageChannel::CLOSE, nullptr);
 
 						return IO_ERROR_GENERIC_RECEIVE;
@@ -473,6 +487,9 @@ namespace trackle
 					malformed_counter = 0;
 				}
 			}
+
+			memset(buf, 0, buflen);
+			memcpy(buf, dtls_data.read_buf, dtls_data.read_len);
 
 			message.set_length(dtls_data.read_len);
 			if (dtls_data.read_len > 0)

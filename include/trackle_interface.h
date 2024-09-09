@@ -437,6 +437,13 @@ extern "C"
     void trackleSetFirmwareVersion(Trackle *v, int firmwareversion) DYNLIB;
 
     /*!
+     * @copybrief Trackle::setFirmwareBuild()
+     * @trackle
+     * @copydetails Trackle::setFirmwareBuild()
+     */
+    void trackleSetFirmwareBuild(Trackle *v, int firmwarebuild) DYNLIB;
+
+    /*!
      * @copybrief Trackle::setProductId()
      * @trackle
      * @copydetails Trackle::setProductId()
