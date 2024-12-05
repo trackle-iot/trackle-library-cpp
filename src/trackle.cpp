@@ -117,7 +117,7 @@ uint32_t getNextPublishCounter()
     }
     else
     {
-        LOG(INFO, "Generated a random prefix: %" PRIu32, p);
+        LOG(TRACE, "Generated a random prefix: %" PRIu32, p);
     }
 
     counter++;
@@ -139,18 +139,15 @@ uint32_t getNextPublishCounter()
  */
 uint8_t getNextToken()
 {
-    if (token == UINT8_MAX)
+    // Increment token and ensure it's always greater than 0
+    token++;
+    
+    if (token == 0)
     {
-        // Handle special case when num is already the maximum value for uint8_t
-        // In this case, returning 1 to wrap around and stay greater than 0
-        return 1;
+        token = 1;
     }
-    else
-    {
-        // Increment token and ensure it's always greater than 0
-        token++;
-        return token;
-    }
+
+    return token;
 }
 
 constexpr char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7',
