@@ -2,7 +2,7 @@ var trackle__interface_8cpp =
 [
     [ "IF_NOT_INITIALIZED_WARNING", "trackle__interface_8cpp.html#a93395b8a39c51a878ec51aecdb76f046", null ],
     [ "deleteTrackle", "trackle__interface_8cpp.html#a0cc175482389c8cec36ff1989736b013", null ],
-    [ "newTrackle", "trackle__interface_8cpp.html#ae772428563bddfc49886b726f481dc54", null ],
+    [ "newTrackle", "trackle__interface_8cpp.html#a96e6e4ba8c3a81bc54cc00b14e11e56a", null ],
     [ "trackleConnect", "trackle__interface_8cpp.html#aef549035ec512d70ee939b3b624dd1f2", null ],
     [ "trackleConnected", "trackle__interface_8cpp.html#a2aa50871ca07a588d379170186022911", null ],
     [ "trackleConnectionCompleted", "trackle__interface_8cpp.html#aa545471e170e573f31f32534e58c8aad", null ],
@@ -14,7 +14,7 @@ var trackle__interface_8cpp =
     [ "trackleEnableUpdates", "trackle__interface_8cpp.html#a7e9d29acf12045b3a85607759b340bb5", null ],
     [ "trackleGet", "trackle__interface_8cpp.html#aa255eb004ec32106bc558fafc724f889", null ],
     [ "trackleGetConnectionStatus", "trackle__interface_8cpp.html#ae60f5a64624b452e6c93cdd05876ee11", null ],
-    [ "trackleGetLogLevelName", "trackle__interface_8cpp.html#a25c321681f700492cd944f486f283963", null ],
+    [ "trackleGetLogLevelName", "trackle__interface_8cpp.html#a17091da7833c1abc38e7c9a6dd70be2a", null ],
     [ "trackleGetTime", "trackle__interface_8cpp.html#a1edb048fb3986b64500eb1fc3b22d4f6", null ],
     [ "trackleInit", "trackle__interface_8cpp.html#a237ac53efa719bb60d178eaad44e94e8", null ],
     [ "trackleIsEnabled", "trackle__interface_8cpp.html#acf370024cc2e0c34f6a0d6f7e3958b1e", null ],
