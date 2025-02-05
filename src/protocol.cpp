@@ -161,6 +161,9 @@ namespace trackle
             if (block == NULL)
                 return;
 
+            LOG(WARN, "block->currBlockIndex %d", block->currBlockIndex);
+            LOG(WARN, "%d %d", block->currBlockIndex * MAX_BLOCK_SIZE, block->totBytesNumber);
+
             // Remember: totBytesNumber starts from 2nd block
             if ((error != SYSTEM_ERROR_NONE) || ((block->currBlockIndex) * MAX_BLOCK_SIZE >= block->totBytesNumber))
             {
@@ -182,7 +185,7 @@ namespace trackle
         {
             const auto codeClass = (int)responseCode >> 5;
             const auto codeDetail = (int)responseCode & 0x1f;
-            LOG(TRACE, "message id %d complete with code %d.%02d", msg_id, codeClass, codeDetail);
+            LOG(WARN, "message id %d complete with code %d.%02d", msg_id, codeClass, codeDetail);
 
             // Server received previous block, send the next.
             if (responseCode == CoAPCode::CONTINUE)
@@ -806,7 +809,7 @@ namespace trackle
 
         int Protocol::get_describe_data(trackle_protocol_describe_data *data, void *reserved)
         {
-            data->maximum_size = 1024;             // a conservative guess based on dtls and lightssl encryption overhead and the CoAP data
+            data->maximum_size = 1024;            // a conservative guess based on dtls and lightssl encryption overhead and the CoAP data
             BufferAppender2 appender(nullptr, 0); // don't need to store the data, just count the size
             build_describe_message(appender, data->flags);
             data->current_size = appender.dataSize();

@@ -143,6 +143,14 @@ void trackleSetSendPublishCallback(Trackle *v, publishSendCallback *publish)
     v->setSendPublishCallback(publish);
 }
 
+#ifdef TRACKLE_USE_EXTERNAL_BUFFER
+bool trackleSetExternalBuffer(Trackle *v, uint8_t *extBuffer, size_t size)
+{
+    IF_NOT_INITIALIZED_WARNING();
+    return v->setExternalBuffer(extBuffer, size);
+}
+#endif
+
 void trackleSetPrepareForFirmwareUpdateCallback(Trackle *v, prepareFirmwareUpdateCallback *prepare)
 {
     IF_NOT_INITIALIZED_WARNING();

@@ -29,6 +29,29 @@ extern "C"
 {
 #endif
 
+#ifdef _DOXYGEN_
+    /*!
+     * @copybrief TRACKLE_USE_EXTERNAL_BUFFER
+     * @trackle
+     * @copydetails TRACKLE_USE_EXTERNAL_BUFFER
+     */
+#define TRACKLE_USE_EXTERNAL_BUFFER
+
+    /*!
+     * @copybrief TRACKLE_BLOCKS_NUMBER
+     * @trackle
+     * @copydetails TRACKLE_BLOCKS_NUMBER
+     */
+#define TRACKLE_BLOCKS_NUMBER 32
+
+    /*!
+     * @copybrief TRACKLE_CONCURRENT_MESSAGES
+     * @trackle
+     * @copydetails TRACKLE_CONCURRENT_MESSAGES
+     */
+#define TRACKLE_CONCURRENT_MESSAGES 4
+#endif
+
     typedef struct Trackle Trackle;
     typedef struct Diagnostic Diagnostic;
 
@@ -162,6 +185,15 @@ extern "C"
      * @copydetails Trackle::setSendPublishCallback()
      */
     void trackleSetSendPublishCallback(Trackle *v, publishSendCallback *publish) DYNLIB;
+
+#ifdef TRACKLE_USE_EXTERNAL_BUFFER
+    /*!
+     * @copybrief Trackle::setExternalBuffer()
+     * @trackle
+     * @copydetails Trackle::setExternalBuffer()
+     */
+    bool trackleSetExternalBuffer(Trackle *v, uint8_t *extBuffer, size_t size) DYNLIB;
+#endif
 
     /*!
      * @copybrief Trackle::setPrepareForFirmwareUpdateCallback()

@@ -141,7 +141,7 @@ uint8_t getNextToken()
 {
     // Increment token and ensure it's always greater than 0
     token++;
-    
+
     if (token == 0)
     {
         token = 1;
@@ -581,9 +581,8 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
     bool res = false; // global return
 
     // if packet size is ok, else return false
-    if (strlen(data) <= MAX_BLOCK_SIZE * MAX_BLOCKS_NUMBER)
+    if (strlen(data) <= MAX_BLOCK_SIZE * trackle::protocol::trackle_get_blocks_number())
     {
-
         if (eventFlag & WITH_ACK) // se c'è il flag WITH_ACK
         {
 
@@ -1556,6 +1555,13 @@ void Trackle::setSendPublishCallback(publishSendCallback *publish)
 {
     sendPublishCb = publish;
 }
+
+#ifdef TRACKLE_USE_EXTERNAL_BUFFER
+bool Trackle::setExternalBuffer(uint8_t *extBuffer, size_t size)
+{
+    return trackle::protocol::trackle_set_external_buffer(extBuffer, size);
+}
+#endif
 
 void Trackle::setPrepareForFirmwareUpdateCallback(prepareFirmwareUpdateCallback *prepare)
 {
