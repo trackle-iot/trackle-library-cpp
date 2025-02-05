@@ -135,6 +135,7 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
     trackle.register_get_double(trackle_s, b"getEchoDouble", get_echo_double_cb)
     trackle.register_get_string(trackle_s, b"getEchoString", get_echo_string_cb)
     trackle.register_get_json(trackle_s, b"getEchoJson", get_echo_json_cb)
+    trackle.register_set_external_buffer(trackle_s);
 
     callbacks.set_connection_override(True, startup_params.server_address.encode("utf-8"), startup_params.server_port)
 
