@@ -2032,7 +2032,7 @@ check_client_certificate_verify(dtls_context_t *ctx,
 			    sha256hash, sizeof(sha256hash),
 			    result_r, result_s);
 
-  if (ret < 0) {
+  if (ret <= 0) {
     dtls_alert("wrong signature err: %i\n", ret);
     return dtls_alert_fatal_create(DTLS_ALERT_HANDSHAKE_FAILURE);
   }
