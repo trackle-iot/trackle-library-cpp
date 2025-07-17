@@ -914,16 +914,22 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
                 return;
             }
             char *saveptr = copy;
+            char *url = strtok_r(copy, ",", &saveptr);
+            char *crc32 = strtok_r(NULL, ",", &saveptr);
+            char *job_id = strtok_r(NULL, ",", &saveptr);
+            char *signature = strtok_r(NULL, ",", &saveptr);
 
-            if (ota_data.running)
+            if (!updates_enabled && !updates_forced)
+            {
+                LOG(WARN, "Ota upgrade refused: enabled %d, forced: %d", updates_enabled, updates_forced);
+                char ota_cloud_message[256];
+                sprintf(ota_cloud_message, "disabled,%s", job_id);
+                ((Trackle *)handler)->publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
+            }
+            else if (ota_data.running)
             {
                 LOG(ERROR, "Ota already in progress...");
                 char ota_cloud_message[256];
-
-                char *url = strtok_r(copy, ",", &saveptr);
-                char *crc32 = strtok_r(NULL, ",", &saveptr);
-                char *job_id = strtok_r(NULL, ",", &saveptr);
-
                 sprintf(ota_cloud_message, "busy,%s", job_id);
                 ((Trackle *)handler)->publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
             }
@@ -931,19 +937,16 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
             {
                 LOG(INFO, "otaUpdateCb %s", data);
                 memset(ota_data.ota_job_id, 0, 64);
+                memset(ota_data.firmware_signature, 0, 64);
 
                 // set default value to 0 number
                 ota_data.ota_job_id[0] = '0';
 
-                char *url = strtok_r(copy, ",", &saveptr);
                 uint32_t crc = 0;
                 uint32_t ota_type = 0; // 0 undefined, 1 product, 2 developer
 
                 if (url != NULL)
                 {
-                    char *crc32 = strtok_r(NULL, ",", &saveptr);
-                    char *job_id = strtok_r(NULL, ",", &saveptr);
-
                     if (crc32 != NULL && job_id != NULL)
                     {
                         // product firmware update
