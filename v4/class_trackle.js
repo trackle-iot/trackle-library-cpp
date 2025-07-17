@@ -55,6 +55,7 @@ var class_trackle =
     [ "setOtaMethod", "class_trackle.html#a02617a364c08920d21e7f979122b778f", null ],
     [ "setOtaUpdateCallback", "class_trackle.html#adf2b79aa3d58737fa6a6ab7095e9524f", null ],
     [ "setOtaUpdateDone", "class_trackle.html#a6af5cd84b3659f8af8224ccf77bc7c65", null ],
+    [ "setOtaVerificationKey", "class_trackle.html#a09dcdfd8dadc0a78befbf23f5e88543a", null ],
     [ "setPincodeCallback", "class_trackle.html#a9d5c75733d1125183c007980d4c869ac", null ],
     [ "setPingInterval", "class_trackle.html#a15a74d309e49892407df84efdcf611d2", null ],
     [ "setPrepareForFirmwareUpdateCallback", "class_trackle.html#a3bc30b74dc4feb3d356dbd678181a91b", null ],
@@ -82,5 +83,6 @@ var class_trackle =
     [ "unsubscribe", "class_trackle.html#a04fc89aa31e530fde28909fa75cdef76", null ],
     [ "updatesEnabled", "class_trackle.html#ac5f8dd0e968f22dccfcdace2b385b06d", null ],
     [ "updatesForced", "class_trackle.html#a78d168594765750f177923dfbed4988c", null ],
-    [ "updatesPending", "class_trackle.html#af585132474515d55d6a1f06634b79d5f", null ]
+    [ "updatesPending", "class_trackle.html#af585132474515d55d6a1f06634b79d5f", null ],
+    [ "verifyOtaSignature", "class_trackle.html#a21893f2ec743ed762ada4a6c8c14b3ec", null ]
 ];

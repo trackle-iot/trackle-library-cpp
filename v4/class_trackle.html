@@ -302,6 +302,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a78d168594765750f177923dfbed4988c" id="r_a78d168594765750f177923dfbed4988c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#a78d168594765750f177923dfbed4988c">updatesForced</a> ()</td></tr>
 <tr class="memdesc:a78d168594765750f177923dfbed4988c"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function returns true if the updates are forced, and false if they are not.  <br /></td></tr>
 <tr class="separator:a78d168594765750f177923dfbed4988c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a21893f2ec743ed762ada4a6c8c14b3ec" id="r_a21893f2ec743ed762ada4a6c8c14b3ec"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#a21893f2ec743ed762ada4a6c8c14b3ec">verifyOtaSignature</a> (const uint8_t *firmware_hash, size_t length)</td></tr>
+<tr class="memdesc:a21893f2ec743ed762ada4a6c8c14b3ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function verifies the signature of a firmware OTA.  <br /></td></tr>
+<tr class="separator:a21893f2ec743ed762ada4a6c8c14b3ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a09dcdfd8dadc0a78befbf23f5e88543a" id="r_a09dcdfd8dadc0a78befbf23f5e88543a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#a09dcdfd8dadc0a78befbf23f5e88543a">setOtaVerificationKey</a> (const uint8_t *firmware_key, size_t length)</td></tr>
+<tr class="memdesc:a09dcdfd8dadc0a78befbf23f5e88543a"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function sets the OTA verification key for a firmware update.  <br /></td></tr>
+<tr class="separator:a09dcdfd8dadc0a78befbf23f5e88543a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6045e10b730f1c443651f5209bd9e913" id="r_a6045e10b730f1c443651f5209bd9e913"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#a6045e10b730f1c443651f5209bd9e913">connect</a> ()</td></tr>
 <tr class="memdesc:a6045e10b730f1c443651f5209bd9e913"><td class="mdescLeft">&#160;</td><td class="mdescRight">It initializes the protocol, sets the connection status to connecting, and calls the connectCb callback.  <br /></td></tr>
 <tr class="separator:a6045e10b730f1c443651f5209bd9e913"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2148,6 +2154,43 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a09dcdfd8dadc0a78befbf23f5e88543a" name="a09dcdfd8dadc0a78befbf23f5e88543a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a09dcdfd8dadc0a78befbf23f5e88543a">&#9670;&#160;</a></span>setOtaVerificationKey()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool setOtaVerificationKey </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>firmware_key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>length</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This function sets the OTA verification key for a firmware update. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">firmware_key</td><td>The public key for the verification of the firmware update. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true if the operation is successful, false otherwise. </dd></dl>
+
+</div>
+</div>
 <a id="a9d5c75733d1125183c007980d4c869ac" name="a9d5c75733d1125183c007980d4c869ac"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9d5c75733d1125183c007980d4c869ac">&#9670;&#160;</a></span>setPincodeCallback()</h2>
 
@@ -2927,6 +2970,44 @@ Private Member Functions</h2></td></tr>
 
 <p>This function returns if there are firmware updates pending. </p>
 <dl class="section return"><dt>Returns</dt><dd>updates_pending </dd></dl>
+
+</div>
+</div>
+<a id="a21893f2ec743ed762ada4a6c8c14b3ec" name="a21893f2ec743ed762ada4a6c8c14b3ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a21893f2ec743ed762ada4a6c8c14b3ec">&#9670;&#160;</a></span>verifyOtaSignature()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int verifyOtaSignature </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>firmware_hash</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>length</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This function verifies the signature of a firmware OTA. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">firmware_hash</td><td>The hash of the message to be verified. </td></tr>
+    <tr><td class="paramname">length</td><td>The length of the hash message. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>1 on success, 0 if verification is skipped, -1 on error. </dd></dl>
 
 </div>
 </div>

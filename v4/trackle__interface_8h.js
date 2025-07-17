@@ -49,6 +49,7 @@ var trackle__interface_8h =
     [ "trackleSetOtaMethod", "trackle__interface_8h.html#a59be0cd52445433a2a69514510fb591e", null ],
     [ "trackleSetOtaUpdateCallback", "trackle__interface_8h.html#ad1bd54e9a037c9690f07a80b8abf806e", null ],
     [ "trackleSetOtaUpdateDone", "trackle__interface_8h.html#a260f795a3d5dbed88f307372b6964755", null ],
+    [ "trackleSetOtaVerificationKey", "trackle__interface_8h.html#af2e1e2f958c362b664ac76a535dfe8e5", null ],
     [ "trackleSetPincodeCallback", "trackle__interface_8h.html#a75b6944237cc4e3f6293016120b26fc0", null ],
     [ "trackleSetPingInterval", "trackle__interface_8h.html#a387a1f3d6a964a4bee9db44edfffdce0", null ],
     [ "trackleSetPrepareForFirmwareUpdateCallback", "trackle__interface_8h.html#a6397edcfa9473028e8c6f585a6138ac5", null ],
@@ -71,5 +72,6 @@ var trackle__interface_8h =
     [ "trackleUnsubscribe", "trackle__interface_8h.html#a5018e4679e74cbf8c806d546197901b9", null ],
     [ "trackleUpdatesEnabled", "trackle__interface_8h.html#a55cdcb1d1b7d4fe4a58e5a1d4aed71bd", null ],
     [ "trackleUpdatesForced", "trackle__interface_8h.html#a489bc72eebc9ce27d2f2a2e0ed86b64e", null ],
-    [ "trackleUpdatesPending", "trackle__interface_8h.html#a4e4e902c2247f277a355d6d06fc0af7d", null ]
+    [ "trackleUpdatesPending", "trackle__interface_8h.html#a4e4e902c2247f277a355d6d06fc0af7d", null ],
+    [ "trackleVerifyOtaSignature", "trackle__interface_8h.html#ae61f37ce8f77e0b4058b0222ea2c56f7", null ]
 ];

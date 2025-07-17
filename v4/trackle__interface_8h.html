@@ -298,6 +298,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a489bc72eebc9ce27d2f2a2e0ed86b64e" id="r_a489bc72eebc9ce27d2f2a2e0ed86b64e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8h.html#a489bc72eebc9ce27d2f2a2e0ed86b64e">trackleUpdatesForced</a> (<a class="el" href="class_trackle.html">Trackle</a> *v) <a class="el" href="trackle__interface_8h.html#ae4ad8e0eba8e8694399616b10b5f06df">DYNLIB</a></td></tr>
 <tr class="memdesc:a489bc72eebc9ce27d2f2a2e0ed86b64e"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function returns true if the updates are forced, and false if they are not.    <br /></td></tr>
 <tr class="separator:a489bc72eebc9ce27d2f2a2e0ed86b64e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae61f37ce8f77e0b4058b0222ea2c56f7" id="r_ae61f37ce8f77e0b4058b0222ea2c56f7"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8h.html#ae61f37ce8f77e0b4058b0222ea2c56f7">trackleVerifyOtaSignature</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, const uint8_t *firmware_hash, size_t length)</td></tr>
+<tr class="memdesc:ae61f37ce8f77e0b4058b0222ea2c56f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function verifies the signature of a firmware OTA.    <br /></td></tr>
+<tr class="separator:ae61f37ce8f77e0b4058b0222ea2c56f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2e1e2f958c362b664ac76a535dfe8e5" id="r_af2e1e2f958c362b664ac76a535dfe8e5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8h.html#af2e1e2f958c362b664ac76a535dfe8e5">trackleSetOtaVerificationKey</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, const uint8_t *firmware_key, size_t length)</td></tr>
+<tr class="memdesc:af2e1e2f958c362b664ac76a535dfe8e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function sets the OTA verification key for a firmware update.    <br /></td></tr>
+<tr class="separator:af2e1e2f958c362b664ac76a535dfe8e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac061d145bf0e1ff4acadc07fbecfd644" id="r_ac061d145bf0e1ff4acadc07fbecfd644"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8h.html#ac061d145bf0e1ff4acadc07fbecfd644">trackleConnect</a> (<a class="el" href="class_trackle.html">Trackle</a> *v) <a class="el" href="trackle__interface_8h.html#ae4ad8e0eba8e8694399616b10b5f06df">DYNLIB</a></td></tr>
 <tr class="memdesc:ac061d145bf0e1ff4acadc07fbecfd644"><td class="mdescLeft">&#160;</td><td class="mdescRight">It initializes the protocol, sets the connection status to connecting, and calls the connectCb callback.    <br /></td></tr>
 <tr class="separator:ac061d145bf0e1ff4acadc07fbecfd644"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1980,6 +1986,50 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="af2e1e2f958c362b664ac76a535dfe8e5" name="af2e1e2f958c362b664ac76a535dfe8e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af2e1e2f958c362b664ac76a535dfe8e5">&#9670;&#160;</a></span>trackleSetOtaVerificationKey()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool trackleSetOtaVerificationKey </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_trackle.html">Trackle</a> *&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>firmware_key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>length</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This function sets the OTA verification key for a firmware update.   </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">v</td><td>The <a class="el" href="class_trackle.html">Trackle</a> struct.</td></tr>
+    <tr><td class="paramname">firmware_key</td><td>The public key for the verification of the firmware update. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true if the operation is successful, false otherwise.   </dd></dl>
+
+</div>
+</div>
 <a id="a75b6944237cc4e3f6293016120b26fc0" name="a75b6944237cc4e3f6293016120b26fc0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a75b6944237cc4e3f6293016120b26fc0">&#9670;&#160;</a></span>trackleSetPincodeCallback()</h2>
 
@@ -2809,6 +2859,51 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>updates_pending   </dd></dl>
+
+</div>
+</div>
+<a id="ae61f37ce8f77e0b4058b0222ea2c56f7" name="ae61f37ce8f77e0b4058b0222ea2c56f7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae61f37ce8f77e0b4058b0222ea2c56f7">&#9670;&#160;</a></span>trackleVerifyOtaSignature()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int trackleVerifyOtaSignature </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_trackle.html">Trackle</a> *&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>firmware_hash</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>length</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This function verifies the signature of a firmware OTA.   </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">v</td><td>The <a class="el" href="class_trackle.html">Trackle</a> struct.</td></tr>
+    <tr><td class="paramname">firmware_hash</td><td>The hash of the message to be verified. </td></tr>
+    <tr><td class="paramname">length</td><td>The length of the hash message. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>1 on success, 0 if verification is skipped, -1 on error.   </dd></dl>
 
 </div>
 </div>

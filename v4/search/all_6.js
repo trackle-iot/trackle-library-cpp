@@ -5,7 +5,9 @@ var searchData=
   ['find_5ffunc_5fby_5fkey_2',['find_func_by_key',['../trackle_8cpp.html#a0097c9f0c71ef0019affba290838a375',1,'trackle.cpp']]],
   ['find_5fvar_5fby_5fkey_3',['find_var_by_key',['../trackle_8cpp.html#a9b7d7483c6ef551335cf2b1609d37ff9',1,'trackle.cpp']]],
   ['finishupdatecb_4',['finishUpdateCb',['../trackle_8cpp.html#a909ce05e2d979fbd7560ac1260cd3822',1,'trackle.cpp']]],
-  ['firmwarechunkcb_5',['firmwareChunkCb',['../trackle_8cpp.html#a6e60ac29fdab8b5df355ced13325d1b1',1,'trackle.cpp']]],
-  ['funcs_6',['funcs',['../trackle_8cpp.html#a3ec629319e81f0a5a840c68da7582feb',1,'trackle.cpp']]],
-  ['funct_7',['funct',['../struct_cloud_variable_type_base.html#a157aa3e2e5dbc93eeefdd85e5d6d44bc',1,'CloudVariableTypeBase']]]
+  ['firmware_5fsignature_5',['firmware_signature',['../struct__ota__data.html#a47ce354889225f034a5b840b81a5f237',1,'_ota_data']]],
+  ['firmware_5fsignature_5fkey_6',['firmware_signature_key',['../struct__ota__data.html#a5c6a797a894439ff519ae86b95a70a9d',1,'_ota_data']]],
+  ['firmwarechunkcb_7',['firmwareChunkCb',['../trackle_8cpp.html#a6e60ac29fdab8b5df355ced13325d1b1',1,'trackle.cpp']]],
+  ['funcs_8',['funcs',['../trackle_8cpp.html#a3ec629319e81f0a5a840c68da7582feb',1,'trackle.cpp']]],
+  ['funct_9',['funct',['../struct_cloud_variable_type_base.html#a157aa3e2e5dbc93eeefdd85e5d6d44bc',1,'CloudVariableTypeBase']]]
 ];

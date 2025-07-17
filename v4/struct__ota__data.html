@@ -101,7 +101,7 @@ Collaboration diagram for _ota_data:</div>
 <div class="dyncontent">
 <div class="center"><img src="struct__ota__data__coll__graph.png" border="0" usemap="#a__ota__data_coll__map" alt="Collaboration graph"/></div>
 <map name="a__ota__data_coll__map" id="a__ota__data_coll__map">
-<area shape="rect" title=" " alt="" coords="5,5,101,91"/>
+<area shape="rect" title=" " alt="" coords="5,5,191,171"/>
 </map>
 </div>
 <table class="memberdecls">
@@ -109,10 +109,74 @@ Collaboration diagram for _ota_data:</div>
 Data Fields</h2></td></tr>
 <tr class="memitem:a36f7b6be7108281af77939ceaec42fd6" id="r_a36f7b6be7108281af77939ceaec42fd6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__ota__data.html#a36f7b6be7108281af77939ceaec42fd6">running</a></td></tr>
 <tr class="separator:a36f7b6be7108281af77939ceaec42fd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43f57e74a765bb5a116264d93f02ec74" id="r_a43f57e74a765bb5a116264d93f02ec74"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__ota__data.html#a43f57e74a765bb5a116264d93f02ec74">has_signature</a></td></tr>
+<tr class="separator:a43f57e74a765bb5a116264d93f02ec74"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a4af461d25ae0c69439c8ca9f3cca83" id="r_a8a4af461d25ae0c69439c8ca9f3cca83"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__ota__data.html#a8a4af461d25ae0c69439c8ca9f3cca83">has_firmware_key</a></td></tr>
+<tr class="separator:a8a4af461d25ae0c69439c8ca9f3cca83"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a32f21d2566ec41ad622760ca166b7884" id="r_a32f21d2566ec41ad622760ca166b7884"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__ota__data.html#a32f21d2566ec41ad622760ca166b7884">ota_job_id</a> [64]</td></tr>
 <tr class="separator:a32f21d2566ec41ad622760ca166b7884"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a47ce354889225f034a5b840b81a5f237" id="r_a47ce354889225f034a5b840b81a5f237"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__ota__data.html#a47ce354889225f034a5b840b81a5f237">firmware_signature</a> [64]</td></tr>
+<tr class="separator:a47ce354889225f034a5b840b81a5f237"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c6a797a894439ff519ae86b95a70a9d" id="r_a5c6a797a894439ff519ae86b95a70a9d"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__ota__data.html#a5c6a797a894439ff519ae86b95a70a9d">firmware_signature_key</a> [<a class="el" href="trackle_8cpp.html#a1af0b2438cc3ef10000e68b59ae18c96">PUB_KEY_XY_SIZE</a>]</td></tr>
+<tr class="separator:a5c6a797a894439ff519ae86b95a70a9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Field Documentation</h2>
+<a id="a47ce354889225f034a5b840b81a5f237" name="a47ce354889225f034a5b840b81a5f237"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a47ce354889225f034a5b840b81a5f237">&#9670;&#160;</a></span>firmware_signature</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t firmware_signature[64]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5c6a797a894439ff519ae86b95a70a9d" name="a5c6a797a894439ff519ae86b95a70a9d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5c6a797a894439ff519ae86b95a70a9d">&#9670;&#160;</a></span>firmware_signature_key</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t firmware_signature_key[<a class="el" href="trackle_8cpp.html#a1af0b2438cc3ef10000e68b59ae18c96">PUB_KEY_XY_SIZE</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8a4af461d25ae0c69439c8ca9f3cca83" name="a8a4af461d25ae0c69439c8ca9f3cca83"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a4af461d25ae0c69439c8ca9f3cca83">&#9670;&#160;</a></span>has_firmware_key</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool has_firmware_key</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a43f57e74a765bb5a116264d93f02ec74" name="a43f57e74a765bb5a116264d93f02ec74"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a43f57e74a765bb5a116264d93f02ec74">&#9670;&#160;</a></span>has_signature</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool has_signature</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a32f21d2566ec41ad622760ca166b7884" name="a32f21d2566ec41ad622760ca166b7884"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a32f21d2566ec41ad622760ca166b7884">&#9670;&#160;</a></span>ota_job_id</h2>
 
