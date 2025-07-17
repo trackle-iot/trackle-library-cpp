@@ -1884,8 +1884,7 @@ dtls_asn1_len(uint8 **data, size_t *data_len)
   return len;
 }
 
-static int
-dtls_asn1_integer_to_ec_key(uint8 *data, size_t data_len, uint8 *key,
+int dtls_asn1_integer_to_ec_key(uint8 *data, size_t data_len, uint8 *key,
                          size_t key_len)
 {
   size_t length;

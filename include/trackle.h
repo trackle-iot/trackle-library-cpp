@@ -649,6 +649,23 @@ public:
         bool updatesForced();
 
         /**
+         * @brief This function verifies the signature of a firmware OTA.
+         *
+         * @param firmware_hash The hash of the message to be verified.
+         * @param length The length of the hash message.
+         * @return 1 on success, 0 if verification is skipped, -1 on error.
+         */
+        int verifyOtaSignature(const uint8_t *firmware_hash, size_t length);
+
+        /**
+         * @brief This function sets the OTA verification key for a firmware update.
+         *
+         * @param firmware_key The public key for the verification of the firmware update.
+         * @return true if the operation is successful, false otherwise.
+         */
+        bool setOtaVerificationKey(const uint8_t *firmware_key, size_t length);
+
+        /**
          * @brief It initializes the protocol, sets the connection status to connecting, and calls the connectCb
          * callback
          *

@@ -406,6 +406,20 @@ extern "C"
     bool trackleUpdatesForced(Trackle *v) DYNLIB;
 
     /*!
+     * @copybrief Trackle::verifyOtaSignature()
+     * @trackle
+     * @copydetails Trackle::verifyOtaSignature()
+     */
+    int trackleVerifyOtaSignature(Trackle *v, const uint8_t *firmware_hash, size_t length);
+
+    /*!
+     * @copybrief Trackle::setOtaVerificationKey()
+     * @trackle
+     * @copydetails Trackle::setOtaVerificationKey()
+     */
+    bool trackleSetOtaVerificationKey(Trackle *v, const uint8_t *firmware_key, size_t length);
+
+    /*!
      * @copybrief Trackle::connect()
      * @trackle
      * @copydetails Trackle::connect()

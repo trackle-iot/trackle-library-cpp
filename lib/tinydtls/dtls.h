@@ -719,3 +719,5 @@ int handle_event(struct dtls_context_t *ctx, session_t *session,
  * it can send data over the DTLS channel.
  *
  */
+
+int dtls_asn1_integer_to_ec_key(uint8 *data, size_t data_len, uint8 *key, size_t key_len);

@@ -323,6 +323,16 @@ bool trackleUpdatesForced(Trackle *v)
     return v->updatesForced();
 }
 
+int trackleVerifyOtaSignature(Trackle *v, const uint8_t *firmware_hash, size_t length)
+{
+    return v->verifyOtaSignature(firmware_hash, length);
+}
+
+bool trackleSetOtaVerificationKey(Trackle *v, const uint8_t *firmware_key, size_t length)
+{
+    return v->setOtaVerificationKey(firmware_key, length);
+}
+
 void trackleConnectionCompleted(Trackle *v)
 {
     v->connectionCompleted();
