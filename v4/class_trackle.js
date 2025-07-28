@@ -39,6 +39,7 @@ var class_trackle =
     [ "setConnectCallback", "class_trackle.html#a7430c176525ff17b71dae7d3e7191bbc", null ],
     [ "setConnectionStatusCallback", "class_trackle.html#a5cd633f645526699c86e4da8dc96607b", null ],
     [ "setConnectionType", "class_trackle.html#acc11c47b1b33aeda8d75bb79930ad915", null ],
+    [ "setDeviceClaimedCallback", "class_trackle.html#a27b217c73d13d80ba2caf82ffcb17d30", null ],
     [ "setDeviceId", "class_trackle.html#a13904e8fc1bc69e394357d752b586263", null ],
     [ "setDisconnectCallback", "class_trackle.html#a79c7c3ff14e2f8c0798fd46bc2fd8af5", null ],
     [ "setEnabled", "class_trackle.html#ad0dfcaf75dde1e5f9c47c4e370aae888", null ],

@@ -28,6 +28,7 @@ var trackle__interface_8cpp =
     [ "trackleSetConnectCallback", "trackle__interface_8cpp.html#ab215bac0779b56dc7fbc74b684c5befa", null ],
     [ "trackleSetConnectionStatusCallback", "trackle__interface_8cpp.html#a0ee059721d5f1f19473a922e5de0a14c", null ],
     [ "trackleSetConnectionType", "trackle__interface_8cpp.html#a08bceff282b81f80fc8cbd4036916cbc", null ],
+    [ "trackleSetDeviceClaimedCallback", "trackle__interface_8cpp.html#ac85909f5473b142f24785c085b8e451c", null ],
     [ "trackleSetDeviceId", "trackle__interface_8cpp.html#ac6ecb4dfbe66e27e8d471e32cbd43515", null ],
     [ "trackleSetDisconnectCallback", "trackle__interface_8cpp.html#ae578b6785e9491442ac67b9b585b0673", null ],
     [ "trackleSetEnabled", "trackle__interface_8cpp.html#a9f808a978f946b212641978335fd58b0", null ],

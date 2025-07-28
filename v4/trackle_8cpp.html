@@ -342,6 +342,8 @@ Variables</h2></td></tr>
 <tr class="separator:a1a7df48d9f52cfee46e2265973df1c0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a86e28ce7fa6a1c769e8dc9cfe5c8683f" id="r_a86e28ce7fa6a1c769e8dc9cfe5c8683f"><td class="memItemLeft" align="right" valign="top">otaUpdateCallback *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a86e28ce7fa6a1c769e8dc9cfe5c8683f">otaUpdateCb</a> = NULL</td></tr>
 <tr class="separator:a86e28ce7fa6a1c769e8dc9cfe5c8683f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0fb9f0ad589dd7d8fe14082f821ff248" id="r_a0fb9f0ad589dd7d8fe14082f821ff248"><td class="memItemLeft" align="right" valign="top">deviceClaimedCallback *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a0fb9f0ad589dd7d8fe14082f821ff248">deviceClaimedCb</a> = NULL</td></tr>
+<tr class="separator:a0fb9f0ad589dd7d8fe14082f821ff248"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a73c4830908138bf5ec37b0a991811ac7" id="r_a73c4830908138bf5ec37b0a991811ac7"><td class="memItemLeft" align="right" valign="top">pincodeCallback *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a73c4830908138bf5ec37b0a991811ac7">pincodeCb</a> = NULL</td></tr>
 <tr class="separator:a73c4830908138bf5ec37b0a991811ac7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2af2be170fe810f15a7370ce0dd8c4b8" id="r_a2af2be170fe810f15a7370ce0dd8c4b8"><td class="memItemLeft" align="right" valign="top">connectionStatusCallback *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a2af2be170fe810f15a7370ce0dd8c4b8">connectionStatusCb</a> = NULL</td></tr>
@@ -392,8 +394,8 @@ Variables</h2></td></tr>
 <tr class="separator:a569d1b53f9ae006bf8f47be8a1955994"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a24b9436c487048daeff95f9a08664a82" id="r_a24b9436c487048daeff95f9a08664a82"><td class="memItemLeft" align="right" valign="top">string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a24b9436c487048daeff95f9a08664a82">string_device_id</a></td></tr>
 <tr class="separator:a24b9436c487048daeff95f9a08664a82"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a58a31d90c1941bbb9a76909aced62514" id="r_a58a31d90c1941bbb9a76909aced62514"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a58a31d90c1941bbb9a76909aced62514">device_id</a> [DEVICE_ID_LENGTH]</td></tr>
-<tr class="separator:a58a31d90c1941bbb9a76909aced62514"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c7339aa003bd6f7a596c5879077b555" id="r_a8c7339aa003bd6f7a596c5879077b555"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a8c7339aa003bd6f7a596c5879077b555">t_device_id</a> [DEVICE_ID_LENGTH]</td></tr>
+<tr class="separator:a8c7339aa003bd6f7a596c5879077b555"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afb15a99ba5ecd81d7f2ae3bc4ca8f2e4" id="r_afb15a99ba5ecd81d7f2ae3bc4ca8f2e4"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#afb15a99ba5ecd81d7f2ae3bc4ca8f2e4">server_public_key</a> [PUBLIC_KEY_LENGTH] = {0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x02, 0x01, 0x06, 0x08, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00, 0x04, 0x2B, 0x19, 0x9D, 0xC9, 0xF2, 0xB0, 0x2D, 0xD1, 0xF1, 0x7D, 0xF0, 0x2B, 0xD1, 0xEC, 0xD1, 0x57, 0xD6, 0x74, 0x51, 0xD7, 0x9C, 0x09, 0xE1, 0x70, 0x43, 0x4A, 0x5B, 0xC2, 0x40, 0xC0, 0x49, 0x67, 0x34, 0xC8, 0xA4, 0xF8, 0xB4, 0xF7, 0xFB, 0xB4, 0xD0, 0x3F, 0xCC, 0xAF, 0x1F, 0xAA, 0x2E, 0x1D, 0x76, 0x82, 0xCF, 0x3A, 0x1A, 0x0B, 0x42, 0x38, 0x14, 0x6D, 0x54, 0x42, 0x05, 0xDC, 0x4D, 0x27}</td></tr>
 <tr class="separator:afb15a99ba5ecd81d7f2ae3bc4ca8f2e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a113c4aecf56e415789e6261996190514" id="r_a113c4aecf56e415789e6261996190514"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a113c4aecf56e415789e6261996190514">client_private_key</a> [PRIVATE_KEY_LENGTH]</td></tr>
@@ -2296,14 +2298,14 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a58a31d90c1941bbb9a76909aced62514" name="a58a31d90c1941bbb9a76909aced62514"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a58a31d90c1941bbb9a76909aced62514">&#9670;&#160;</a></span>device_id</h2>
+<a id="a0fb9f0ad589dd7d8fe14082f821ff248" name="a0fb9f0ad589dd7d8fe14082f821ff248"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0fb9f0ad589dd7d8fe14082f821ff248">&#9670;&#160;</a></span>deviceClaimedCb</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">char device_id[DEVICE_ID_LENGTH]</td>
+          <td class="memname">deviceClaimedCallback* deviceClaimedCb = NULL</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -2768,6 +2770,20 @@ Variables</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">rebootCallback* systemRebootCb = NULL</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8c7339aa003bd6f7a596c5879077b555" name="a8c7339aa003bd6f7a596c5879077b555"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c7339aa003bd6f7a596c5879077b555">&#9670;&#160;</a></span>t_device_id</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char t_device_id[DEVICE_ID_LENGTH]</td>
         </tr>
       </table>
 </div><div class="memdoc">

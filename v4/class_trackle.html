@@ -308,6 +308,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a09dcdfd8dadc0a78befbf23f5e88543a" id="r_a09dcdfd8dadc0a78befbf23f5e88543a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#a09dcdfd8dadc0a78befbf23f5e88543a">setOtaVerificationKey</a> (const uint8_t *firmware_key, size_t length)</td></tr>
 <tr class="memdesc:a09dcdfd8dadc0a78befbf23f5e88543a"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function sets the OTA verification key for a firmware update.  <br /></td></tr>
 <tr class="separator:a09dcdfd8dadc0a78befbf23f5e88543a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27b217c73d13d80ba2caf82ffcb17d30" id="r_a27b217c73d13d80ba2caf82ffcb17d30"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#a27b217c73d13d80ba2caf82ffcb17d30">setDeviceClaimedCallback</a> (deviceClaimedCallback *claimedCb)</td></tr>
+<tr class="memdesc:a27b217c73d13d80ba2caf82ffcb17d30"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the callback function for device claimed status.  <br /></td></tr>
+<tr class="separator:a27b217c73d13d80ba2caf82ffcb17d30"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6045e10b730f1c443651f5209bd9e913" id="r_a6045e10b730f1c443651f5209bd9e913"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#a6045e10b730f1c443651f5209bd9e913">connect</a> ()</td></tr>
 <tr class="memdesc:a6045e10b730f1c443651f5209bd9e913"><td class="mdescLeft">&#160;</td><td class="mdescRight">It initializes the protocol, sets the connection status to connecting, and calls the connectCb callback.  <br /></td></tr>
 <tr class="separator:a6045e10b730f1c443651f5209bd9e913"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1720,6 +1723,32 @@ Private Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">conn</td><td>The connection type. This can be UNDEFINED, WIFI, ETHERNET, CELLULAR or LPWA </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a27b217c73d13d80ba2caf82ffcb17d30" name="a27b217c73d13d80ba2caf82ffcb17d30"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27b217c73d13d80ba2caf82ffcb17d30">&#9670;&#160;</a></span>setDeviceClaimedCallback()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void setDeviceClaimedCallback </td>
+          <td>(</td>
+          <td class="paramtype">deviceClaimedCallback *&#160;</td>
+          <td class="paramname"><em>claimedCb</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets the callback function for device claimed status. </p>
+<p>This function sets the callback function that will be called when the device's claimed status changes. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">claimedCb</td><td>The callback function to be set. </td></tr>
   </table>
   </dd>
 </dl>

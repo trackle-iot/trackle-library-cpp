@@ -16,7 +16,7 @@ var searchData=
   ['describe_5fimei_13',['describe_imei',['../trackle_8cpp.html#a41c819f37613235c174751ea4fc65976',1,'trackle.cpp']]],
   ['descriptor_14',['descriptor',['../trackle_8cpp.html#aae62c290bd18517402f5bd416d3df709',1,'trackle.cpp']]],
   ['device_20id_20and_20a_20private_20key_15',['Get a Device ID and a private key',['../md__r_e_a_d_m_e.html#autotoc_md8',1,'']]],
-  ['device_5fid_16',['device_id',['../trackle_8cpp.html#a58a31d90c1941bbb9a76909aced62514',1,'trackle.cpp']]],
+  ['deviceclaimedcb_16',['deviceClaimedCb',['../trackle_8cpp.html#a0fb9f0ad589dd7d8fe14082f821ff248',1,'trackle.cpp']]],
   ['diagnostic_17',['Diagnostic',['../trackle__interface_8h.html#acbcabcf6f150dadd930e2c31eb08ae3d',1,'trackle_interface.h']]],
   ['diagnosticcloud_18',['diagnosticCloud',['../class_trackle.html#a80b204c04df108d67d4d089c4fdfefdb',1,'Trackle']]],
   ['diagnosticnetwork_19',['diagnosticNetwork',['../class_trackle.html#ae1d84844979503be977fb5a05bd6616b',1,'Trackle']]],
