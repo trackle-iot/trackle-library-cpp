@@ -96,6 +96,7 @@ finishFirmwareUpdateCallback *finishUpdateCb = NULL;
 randomNumberCallback *getRandomCb = NULL;
 rebootCallback *systemRebootCb = NULL;
 otaUpdateCallback *otaUpdateCb = NULL;
+deviceClaimedCallback *deviceClaimedCb = NULL;
 pincodeCallback *pincodeCb = NULL;
 connectionStatusCallback *connectionStatusCb = NULL;
 updateStateCallback *updateStateCb = NULL;
@@ -888,6 +889,13 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
                 string substr;
                 getline(ss, substr, ',');
                 owners.push_back(substr.c_str());
+            }
+
+            // if ownars > 0, device is claimed
+            if (owners.size() > 0)
+            {
+                LOG(INFO, "Device is claimed by one owner.");
+                (*deviceClaimedCb)();
             }
         }
     }
@@ -1836,6 +1844,11 @@ bool Trackle::updatesPending()
 bool Trackle::updatesForced()
 {
     return updates_forced;
+}
+
+void Trackle::setDeviceClaimedCallback(deviceClaimedCallback *claimedCb)
+{
+    deviceClaimedCb = claimedCb;
 }
 
 bool Trackle::setOtaVerificationKey(const uint8_t *firmware_key, size_t length)

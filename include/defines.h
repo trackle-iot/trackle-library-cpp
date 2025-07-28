@@ -237,6 +237,7 @@ typedef void(prepareFirmwareUpdateCallback)(struct Chunk data, uint32_t flags, v
 typedef void(firmwareChunkCallback)(struct Chunk data, const unsigned char *chunk, void *);
 typedef void(finishFirmwareUpdateCallback)(char *data, uint32_t fileSize);
 typedef int(otaUpdateCallback)(const char *url, uint32_t crc);
+typedef void(deviceClaimedCallback)(void);
 typedef void(connectionStatusCallback)(Connection_Status_Type status);
 typedef int(updateStateCallback)(const char *function_key, const char *arg, ...);
 typedef void(signalCallback)(bool on, unsigned int param, void *reserved);

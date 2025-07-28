@@ -333,6 +333,11 @@ bool trackleSetOtaVerificationKey(Trackle *v, const uint8_t *firmware_key, size_
     return v->setOtaVerificationKey(firmware_key, length);
 }
 
+void trackleSetDeviceClaimedCallback(Trackle *v, deviceClaimedCallback *claimedCb)
+{
+    v->setDeviceClaimedCallback(claimedCb);
+}
+
 void trackleConnectionCompleted(Trackle *v)
 {
     v->connectionCompleted();

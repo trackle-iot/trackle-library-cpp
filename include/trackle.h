@@ -666,6 +666,14 @@ public:
         bool setOtaVerificationKey(const uint8_t *firmware_key, size_t length);
 
         /**
+         * @brief Sets the callback function for device claimed status.
+         *
+         * This function sets the callback function that will be called when the device's claimed status changes.
+         * @param claimedCb The callback function to be set.
+         */
+        void setDeviceClaimedCallback(deviceClaimedCallback *claimedCb);
+
+        /**
          * @brief It initializes the protocol, sets the connection status to connecting, and calls the connectCb
          * callback
          *

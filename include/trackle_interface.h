@@ -420,6 +420,13 @@ extern "C"
     bool trackleSetOtaVerificationKey(Trackle *v, const uint8_t *firmware_key, size_t length);
 
     /*!
+     * @copybrief Trackle::setDeviceClaimedCallback()
+     * @trackle
+     * @copydetails Trackle::setDeviceClaimedCallback()
+     */
+    void trackleSetDeviceClaimedCallback(Trackle *v, deviceClaimedCallback *claimedCb);
+
+    /*!
      * @copybrief Trackle::connect()
      * @trackle
      * @copydetails Trackle::connect()
