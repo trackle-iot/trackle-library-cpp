@@ -895,7 +895,10 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
             if (owners.size() > 0)
             {
                 LOG(INFO, "Device is claimed by one owner.");
-                (*deviceClaimedCb)();
+                if (deviceClaimedCb)
+                {
+                    (*deviceClaimedCb)();
+                }
             }
         }
     }
