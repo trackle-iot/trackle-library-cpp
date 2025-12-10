@@ -20,6 +20,7 @@ import numbers
 import contextlib
 import sys
 import argparse
+import threading
 
 import requests as req
 import requests.auth as req_auth
@@ -43,6 +44,29 @@ SERVER_ADDRESS = f"{cred.TRACKLE_ID_STRING}.udp.device.trackle.io"
 SERVER_PORT = 5684
 
 log.basicConfig(level=LOG_LEVEL, format="[%(levelname)s] %(processName)s : %(msg)s")
+
+def print_http_response(resp, method="HTTP", url=""):
+    """Stampa le informazioni della risposta HTTP per il debugging"""
+    print(f"\n{'='*80}")
+    print(f"HTTP Response - {method} {url}")
+    print(f"{'='*80}")
+    print(f"Status Code: {resp.status_code}")
+    print(f"Status Reason: {resp.reason}")
+    print(f"\nHeaders:")
+    for key, value in resp.headers.items():
+        print(f"  {key}: {value}")
+    print(f"\nBody:")
+    try:
+        if resp.headers.get('content-type', '').startswith('application/json'):
+            print(json.dumps(resp.json(), indent=2))
+        else:
+            print(resp.text[:1000])  # Limita a 1000 caratteri per evitare output troppo lungo
+            if len(resp.text) > 1000:
+                print(f"... (troncato, lunghezza totale: {len(resp.text)} caratteri)")
+    except Exception as e:
+        print(f"Errore nel parsing della risposta: {e}")
+        print(f"Raw content: {resp.content[:1000]}")
+    print(f"{'='*80}\n")
 
 def wait_queue_message(evt_queue: mp.Queue, expect_msg: msgs.QueueMessage,
                        test_class: ut.TestCase = None, timeout: int = 10) -> dict:
@@ -116,6 +140,7 @@ class TrackleLibraryTest(ut.TestCase):
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         json_body = {"development": mode}
         resp = req.put(url, headers=cls.headers, json=json_body, timeout=15)
+        # print_http_response(resp, "PUT", url)
         if resp.json().get("development") != mode:
             raise Exception("Failed putting in development mode. Can't continue test case.")
         
@@ -125,6 +150,7 @@ class TrackleLibraryTest(ut.TestCase):
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         json_body = {"desired_firmware_version": str(version) if version else None, "flash":intelligent}
         resp = req.put(url, headers=cls.headers, json=json_body, timeout=15)
+        # print_http_response(resp, "PUT", url)
         if resp.status_code != 200:
             raise Exception(f"Failed publishing version: {resp.status_code} {resp.content}")
 
@@ -146,6 +172,7 @@ class TrackleLibraryTest(ut.TestCase):
         oauth_data = {"grant_type": "client_credentials"}
         oauth_basic = req_auth.HTTPBasicAuth(cred.TRACKLE_CLIENT_ID, cred.TRACKLE_CLIENT_SECRET)
         resp = req.post(oauth_url, oauth_data, headers=oauth_headers, auth=oauth_basic, timeout=15)
+        # print_http_response(resp, "POST", oauth_url)
         if resp.status_code != 200:
             raise req.HTTPError(f"auth return code {resp.status_code}")
         if "access_token" not in resp.json():
@@ -295,6 +322,7 @@ class TrackleLibraryTest(ut.TestCase):
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
         params = {"args" : "1"}
         resp = req.get(url, headers=self.headers, params=params, timeout=15)
+        # print_http_response(resp, "GET", url)
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
         self.assertEqual(resp.json().get("name"), "getEchoBool", "unexpected method name")
         self.assertIsInstance(resp.json().get("result"), bool)
@@ -322,6 +350,7 @@ class TrackleLibraryTest(ut.TestCase):
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
         params = {"args" : "0"}
         resp = req.get(url, headers=self.headers, params=params, timeout=15)
+        # print_http_response(resp, "GET", url)
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
         self.assertEqual(resp.json().get("name"), "getEchoBool", "unexpected method name")
         self.assertIsInstance(resp.json().get("result"), bool)
@@ -348,6 +377,7 @@ class TrackleLibraryTest(ut.TestCase):
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
         params = {"args" : "14"}
         resp = req.get(url, headers=self.headers, params=params, timeout=15)
+        # print_http_response(resp, "GET", url)
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
         self.assertEqual(resp.json().get("name"), "getEchoInt", "unexpected method name")
         self.assertIsInstance(resp.json().get("result"), numbers.Number)
@@ -374,6 +404,7 @@ class TrackleLibraryTest(ut.TestCase):
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
         params = {"args" : "1.23456"}
         resp = req.get(url, headers=self.headers, params=params, timeout=15)
+        # print_http_response(resp, "GET", url)
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
         self.assertEqual(resp.json().get("name"), "getEchoDouble", "unexpected method name")
         self.assertIsInstance(resp.json().get("result"), numbers.Number)
@@ -401,6 +432,7 @@ class TrackleLibraryTest(ut.TestCase):
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
         params = {"args" : quick_brown_fox}
         resp = req.get(url, headers=self.headers, params=params, timeout=15)
+        # print_http_response(resp, "GET", url)
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
         self.assertEqual(resp.json().get("name"), "getEchoString", "unexpected method name")
         self.assertIsInstance(resp.json().get("result"), str)
@@ -429,10 +461,137 @@ class TrackleLibraryTest(ut.TestCase):
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
         params = {"args" : test_json}
         resp = req.get(url, headers=self.headers, params=params, timeout=15)
+        # print_http_response(resp, "GET", url)
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
         self.assertEqual(resp.json().get("name"), "getEchoJson", "unexpected method name")
         self.assertIsInstance(resp.json().get("result"), dict)
         self.assertDictEqual(resp.json().get("result"), test_json_dict, "unexpected res")
+
+    def test_10_get_6_long(self):
+        """
+        get di una variabile stringa lunga (blockwise)
+        il valore di ritorno della GET corrisponde al valore impostato alla variabile
+        la stringa è abbastanza lunga da richiedere blockwise transfer
+        """
+        # Connection
+        params = device.DeviceStartupParams(
+            cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
+            True
+        )
+        self.spawn_device(params)
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
+        self.assertTrue(res["return"])
+        wait_queue_message(self.from_device, msgs.CONNECTED)
+        # Send GET with long string (3800 characters)
+        method = "getLongString"
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
+        params = {"args" : "3800"}
+        resp = req.get(url, headers=self.headers, params=params, timeout=30)
+        # print_http_response(resp, "GET", url)
+        self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
+        self.assertEqual(resp.json().get("name"), "getLongString", "unexpected method name")
+        self.assertIsInstance(resp.json().get("result"), str)
+        result_str = resp.json().get("result")
+        self.assertEqual(len(result_str), 3800, "unexpected result length")
+        # Verify pattern (should be A-Z repeating)
+        self.assertEqual(result_str[0], 'A', "unexpected first character")
+        self.assertEqual(result_str[25], 'Z', "unexpected character at position 25")
+
+    def test_10_get_7_too_long(self):
+        """
+        get di una variabile stringa troppo lunga
+        la richiesta dovrebbe fallire o essere troncata perché supera i limiti
+        """
+        # Connection
+        params = device.DeviceStartupParams(
+            cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
+            True
+        )
+        self.spawn_device(params)
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
+        self.assertTrue(res["return"])
+        wait_queue_message(self.from_device, msgs.CONNECTED)
+        # Send GET with too long string (50000 characters)
+        method = "getTooLongString"
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
+        params = {"args" : "50000"}
+        resp = req.get(url, headers=self.headers, params=params, timeout=60)
+        # print_http_response(resp, "GET", url)
+        # The request might succeed but be truncated, or fail
+        # We check that either it fails or returns a truncated result
+        if resp.status_code == 200:
+            result = resp.json().get("result")
+            if isinstance(result, str):
+                # If it returns a string, it should be truncated (not 50000 chars)
+                self.assertLess(len(result), 50000, "result should be truncated")
+        else:
+            # If it fails, that's also acceptable
+            self.assertGreaterEqual(resp.status_code, 400, "expected error for too long string")
+
+    def test_10_get_8_long_with_interruption(self):
+        """
+        get di una variabile stringa lunga con interruzione (proxy off/on)
+        verifica che transmissionRunning venga liberato correttamente dopo l'interruzione
+        """
+        # Connection
+        params = device.DeviceStartupParams(
+            cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
+            True
+        )
+        self.spawn_device(params)
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
+        self.assertTrue(res["return"])
+        wait_queue_message(self.from_device, msgs.CONNECTED)
+        # Send GET with long string
+        method = "getLongString"
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
+        params = {"args" : "3800"}
+        # Start the GET request
+        get_result = {"resp": None, "error": None}
+        def do_get():
+            try:
+                get_result["resp"] = req.get(url, headers=self.headers, params=params, timeout=60)
+            except Exception as e:
+                get_result["error"] = e
+        get_thread = threading.Thread(target=do_get)
+        get_thread.start()
+        # Wait a bit for the transfer to start
+        time.sleep(2)
+        # Switch off proxy to interrupt
+        self.to_device.put({"msg" : msgs.PROXY_OFF})
+        wait_queue_message(self.from_device, msgs.PROXY_SWITCHED_OFF)
+        # Wait a bit with proxy off
+        time.sleep(5)
+        # Switch on proxy again
+        self.to_device.put({"msg" : msgs.PROXY_ON})
+        wait_queue_message(self.from_device, msgs.PROXY_SWITCHED_ON)
+        # Wait for GET to complete
+        get_thread.join(timeout=60)
+        # Check result - should either complete successfully or timeout/error
+        if get_result["resp"] is not None:
+            resp = get_result["resp"]
+            # print_http_response(resp, "GET", url)
+            if resp.status_code == 200:
+                result = resp.json().get("result")
+                if isinstance(result, str):
+                    # Should have received the full or partial result
+                    self.assertGreater(len(result), 0, "result should not be empty")
+        # After interruption, transmissionRunning should be false
+        # We verify this by doing another GET that should work
+        time.sleep(2)
+        method2 = "getEchoString"
+        url2 = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method2}"
+        params2 = {"args" : "test_after_interruption"}
+        resp2 = req.get(url2, headers=self.headers, params=params2, timeout=15)
+        # print_http_response(resp2, "GET", url2)
+        self.assertEqual(resp2.status_code, 200, "subsequent GET should work after interruption")
+        self.assertEqual(resp2.json().get("result"), "test_after_interruption", "subsequent GET should return correct value")
 
     def test_11_post_1(self):
         """
@@ -455,6 +614,7 @@ class TrackleLibraryTest(ut.TestCase):
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
         json_body = {"args": ""}
         resp = req.post(url, headers=self.headers, data=json_body, timeout=15)
+        # print_http_response(resp, "POST", url)
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
         self.assertEqual(resp.json().get("name"), "postSuccess", "unexpected method name")
         self.assertEqual(resp.json().get("return_value"), 10, "unexpected return value")
@@ -480,6 +640,7 @@ class TrackleLibraryTest(ut.TestCase):
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
         json_body = {"args": ""}
         resp = req.post(url, headers=self.headers, data=json_body, timeout=15)
+        # print_http_response(resp, "POST", url)
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
         self.assertEqual(resp.json().get("name"), "postFailing", "unexpected method name")
         self.assertEqual(resp.json().get("return_value"), -10, "unexpected return value")
@@ -505,6 +666,7 @@ class TrackleLibraryTest(ut.TestCase):
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
         json_body = {"args": ""}
         resp = req.post(url, headers=self.headers, data=json_body, timeout=15)
+        # print_http_response(resp, "POST", url)
         self.to_device.put({"msg":msgs.WAS_PRIVATE_POST_EXECUTED})
         res = wait_queue_message(self.from_device, msgs.PRIVATE_POST_EXEC_STATUS, self)
         self.assertFalse(res["executed"])
@@ -528,6 +690,7 @@ class TrackleLibraryTest(ut.TestCase):
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
+        time.sleep(1)
         # Publish event
         self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "testing/test_publish_1",
@@ -563,6 +726,7 @@ class TrackleLibraryTest(ut.TestCase):
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
+        time.sleep(1)
         # Publish event
         self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "testing/test_publish_2",
@@ -598,6 +762,7 @@ class TrackleLibraryTest(ut.TestCase):
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
+        time.sleep(1)
         # Publish event
         self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "testing/test_publish_3",
@@ -633,6 +798,7 @@ class TrackleLibraryTest(ut.TestCase):
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
+        time.sleep(1)
         # Publish event
         self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "testing/test_publish_4",
@@ -667,6 +833,7 @@ class TrackleLibraryTest(ut.TestCase):
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
+        time.sleep(1)
         # Publish event
         self.to_device.put({"msg" : msgs.MULTIPUBLISH,
                             "event" : "testing/test_publish_5",
@@ -699,6 +866,7 @@ class TrackleLibraryTest(ut.TestCase):
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
+        time.sleep(1)
         # Publish event
         self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "trackle/test_publish_6",
@@ -732,6 +900,7 @@ class TrackleLibraryTest(ut.TestCase):
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
+        time.sleep(1)
         # Publish event
         self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "iotready/test_publish_7",
@@ -768,6 +937,7 @@ class TrackleLibraryTest(ut.TestCase):
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
+        time.sleep(1)
         # Switch off proxy
         self.to_device.put({"msg" : msgs.PROXY_OFF})
         wait_queue_message(self.from_device, msgs.PROXY_SWITCHED_OFF)
@@ -815,6 +985,7 @@ class TrackleLibraryTest(ut.TestCase):
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
+        time.sleep(1)
         # Switch off proxy
         self.to_device.put({"msg" : msgs.PROXY_OFF})
         wait_queue_message(self.from_device, msgs.PROXY_SWITCHED_OFF)
@@ -859,6 +1030,7 @@ class TrackleLibraryTest(ut.TestCase):
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
+        time.sleep(1)
         # Publish event
         self.to_device.put({"msg" : msgs.MULTIPUBLISH_LONG,
                             "event" : ["testing/test_publish_10_" + str(i) for i in range(1,6)],
@@ -912,6 +1084,7 @@ class TrackleLibraryTest(ut.TestCase):
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
+        time.sleep(1)
         # Switch off proxy
         self.to_device.put({"msg" : msgs.PROXY_OFF})
         wait_queue_message(self.from_device, msgs.PROXY_SWITCHED_OFF)
@@ -962,6 +1135,7 @@ class TrackleLibraryTest(ut.TestCase):
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
+        time.sleep(1)
         # Switch off proxy
         self.to_device.put({"msg" : msgs.PROXY_OFF})
         wait_queue_message(self.from_device, msgs.PROXY_SWITCHED_OFF)
@@ -1019,6 +1193,7 @@ class TrackleLibraryTest(ut.TestCase):
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         json_body = {"signal": "1"}
         resp = req.put(url, headers=self.headers, data=json_body, timeout=15)
+        # print_http_response(resp, "PUT", url)
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
         self.assertTrue(resp.json().get("ok"), "unexpected method name")
         self.assertTrue(resp.json().get("signaling"), "unexpected return value")
@@ -1043,6 +1218,7 @@ class TrackleLibraryTest(ut.TestCase):
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/ping"
         json_body = {}
         resp = req.put(url, headers=self.headers, data=json_body, timeout=15)
+        # print_http_response(resp, "PUT", url)
         self.assertTrue(resp.json().get("online"), "unexpected return value")
 
     def test_28_reboot_1(self):
@@ -1064,6 +1240,7 @@ class TrackleLibraryTest(ut.TestCase):
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         json_body = {"reset": "reboot"}
         resp = req.put(url, headers=self.headers, data=json_body, timeout=15)
+        # print_http_response(resp, "PUT", url)
         self.assertTrue(resp.json().get("ok"), "unexpected method name")
         wait_queue_message(self.from_device, msgs.REBOOT_CALLED, self)
 
@@ -1130,6 +1307,7 @@ class TrackleLibraryTest(ut.TestCase):
         time.sleep(1)
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         resp = req.get(url, headers=self.headers, timeout=15)
+        # print_http_response(resp, "GET", url)
         self.assertEqual(resp.json().get("firmware_components_list"), components_list, "wrong list")
 
     def test_32_imei_iccid_1(self):
@@ -1157,6 +1335,7 @@ class TrackleLibraryTest(ut.TestCase):
         time.sleep(1)
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         resp = req.get(url, headers=self.headers, timeout=15)
+        # print_http_response(resp, "GET", url)
         self.assertEqual(resp.json().get("imei"), imei, "wrong imei")
         self.assertEqual(resp.json().get("iccid"), iccid, "wrong iccid")
 
@@ -1181,6 +1360,7 @@ class TrackleLibraryTest(ut.TestCase):
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         json_body = {"firmware_url": "https://iotready.fra1.cdn.digitaloceanspaces.com/Iotready/firmware_test_suite_22.bin"}
         resp = req.put(url, headers=self.headers, json=json_body, timeout=15)
+        # print_http_response(resp, "PUT", url)
         self.assertEqual(resp.status_code, 200, "request failed")
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
         self.assertEqual(resp.json().get("status"), "Update sent", "unexpected method name")
@@ -1213,6 +1393,7 @@ class TrackleLibraryTest(ut.TestCase):
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         json_body = {"firmware_url": "https://iotready.fra1.cdn.digitaloceanspaces.com/Iotready/firmware_test_suite_22.bin"}
         resp = req.put(url, headers=self.headers, json=json_body, timeout=15)
+        # print_http_response(resp, "PUT", url)
         self.assertEqual(resp.status_code, 200, "request failed")
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
         self.assertEqual(resp.json().get("status"), "Update sent", "unexpected method name")
@@ -1365,6 +1546,7 @@ class TrackleLibraryTest(ut.TestCase):
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         json_body = {"firmware_url": "https://iotready.fra1.cdn.digitaloceanspaces.com/Iotready/firmware_test_suite_22.bin"}
         resp = req.put(url, headers=self.headers, json=json_body, timeout=15)
+        # print_http_response(resp, "PUT", url)
         self.assertEqual(resp.status_code, 200, "request failed")
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
         self.assertEqual(resp.json().get("status"), "Update sent", "unexpected method name")
@@ -1377,6 +1559,7 @@ class TrackleLibraryTest(ut.TestCase):
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         json_body = {"firmware_url": "https://iotready.fra1.cdn.digitaloceanspaces.com/Iotready/firmware_test_suite_22.bin"}
         resp = req.put(url, headers=self.headers, json=json_body, timeout=15)
+        # print_http_response(resp, "PUT", url)
         self.assertEqual(resp.status_code, 200, "request failed")
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
         self.assertEqual(resp.json().get("status"), "Update sent", "unexpected method name")

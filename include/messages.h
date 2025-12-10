@@ -87,6 +87,7 @@ namespace trackle
             int ttl;
             uint32_t flags;
             publishCompletionCallback *completionCb; // Callback called on last block
+            system_tick_t lastBlockSentTime; // Timestamp when last block was sent (for timeout cleanup)
         } block_messages_data;
 
 #ifdef TRACKLE_USE_EXTERNAL_BUFFER
@@ -96,6 +97,8 @@ namespace trackle
         block_messages_data *trackle_get_free_block();
         block_messages_data *trackle_get_block_by_token(uint8_t token);
         uint8_t trackle_get_blocks_number();
+        void trackle_update_block_sent_time(uint8_t token, system_tick_t current_time);
+        void trackle_cleanup_block_timeouts(system_tick_t current_time, system_tick_t timeout_ms);
 
 #define RESPONSE_CODE(x, y) (x << 5 | y)
 

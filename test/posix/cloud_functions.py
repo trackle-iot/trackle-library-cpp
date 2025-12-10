@@ -34,6 +34,14 @@ get_echo_json = __lib.CloudFun_getEchoJson
 get_echo_json.argtypes = (ctypes.c_char_p, ctypes.c_char_p,)
 get_echo_json.restype = ctypes.c_char_p
 
+get_long_string = __lib.CloudFun_getLongString
+get_long_string.argtypes = (ctypes.c_char_p, ctypes.c_char_p,)
+get_long_string.restype = ctypes.c_char_p
+
+get_too_long_string = __lib.CloudFun_getTooLongString
+get_too_long_string.argtypes = (ctypes.c_char_p, ctypes.c_char_p,)
+get_too_long_string.restype = ctypes.c_char_p
+
 post_failing = __lib.CloudFun_failingPost
 post_failing.argtypes = (ctypes.c_char_p, ctypes.c_char_p,)
 post_failing.restype = ctypes.c_int

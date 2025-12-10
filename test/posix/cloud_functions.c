@@ -40,6 +40,46 @@ char *CloudFun_getEchoJson(const char *args, const char *key)
     return jsonVal;
 }
 
+// GET long string function - returns a string that requires blockwise transfer (over 1024 bytes)
+static char longStringVal[4000];
+char *CloudFun_getLongString(const char *args, const char *key)
+{
+    // Generate a long string (around 3800 characters to ensure blockwise transfer)
+    int size = atoi(args);
+    if (size <= 0 || size > 3800)
+    {
+        size = 3800; // Default to 3800 characters
+    }
+    
+    // Fill with pattern based on args
+    for (int i = 0; i < size && i < 3999; i++)
+    {
+        longStringVal[i] = 'A' + (i % 26);
+    }
+    longStringVal[size < 3999 ? size : 3999] = '\0';
+    return longStringVal;
+}
+
+// GET too long string function - returns a string that exceeds maximum allowed size
+static char tooLongStringVal[50000];
+char *CloudFun_getTooLongString(const char *args, const char *key)
+{
+    // Generate a very long string (over 50000 characters to exceed limits)
+    int size = atoi(args);
+    if (size <= 0 || size > 49999)
+    {
+        size = 49999; // Default to 49999 characters
+    }
+    
+    // Fill with pattern
+    for (int i = 0; i < size && i < 49999; i++)
+    {
+        tooLongStringVal[i] = 'B' + (i % 26);
+    }
+    tooLongStringVal[size < 49999 ? size : 49999] = '\0';
+    return tooLongStringVal;
+}
+
 // POST functions
 
 int CloudFun_failingPost(const char *args, const char *key)

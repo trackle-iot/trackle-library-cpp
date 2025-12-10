@@ -44,6 +44,8 @@ static int incrementCloudNumber(const char *args, bool isOwner, const char *funN
 // Cloud GET functions
 static void *getCloudNumberMessage(const char *args, const char *varName);
 static void *getHalfCloudNumber(const char *args, const char *varName);
+static void *getLargeVariable(const char *args, const char *varName);
+const char *get_large_properties_callback(const char *args);
 
 // Cloud GET variables
 static int cloudNumber = 0;
@@ -87,6 +89,7 @@ int main()
     trackleSetSystemRebootCallback(trackle_s, Callbacks_reboot_cb);
     trackleSetPublishHealthCheckInterval(trackle_s, 60 * 60 * 1000);
     trackleSetCompletedPublishCallback(trackle_s, Callbacks_complete_publish);
+    // trackleSetGetPropertyCallback(trackle_s, get_large_properties_callback);
 
     // Registering POST functions callable from cloud
     tracklePost(trackle_s, "funSuccess", funSuccess, ALL_USERS);
@@ -96,9 +99,11 @@ int main()
     // Registering values GETtable from cloud as result of a function call
     trackleGet(trackle_s, "getCloudNumberMessage", getCloudNumberMessage, VAR_STRING);
     trackleGet(trackle_s, "getHalfCloudNumber", getHalfCloudNumber, VAR_JSON);
+    trackleGet(trackle_s, "longVar", getLargeVariable, VAR_JSON);
 
     printf("Startup completed. Running.\n");
 
+    Callbacks_setConnectionOverride(true, "192.168.1.177", 5684);
     trackleConnect(trackle_s);
 
     uint32_t msg_key = 0;
@@ -108,9 +113,10 @@ int main()
     {
         trackleLoop(trackle_s);
         Callbacks_sleep_ms_cb(MAIN_LOOP_PERIOD_MS);
-        if (Callbacks_get_millis_cb() - prevPubMillis > 5000)
+        if (Callbacks_get_millis_cb() - prevPubMillis > 10000)
         {
-            tracklePublish(trackle_s, "greetings", "Hello world!", 30, PRIVATE, WITH_ACK, msg_key);
+            // tracklePublish(trackle_s, "greetings", "Hello world!", 30, PRIVATE, WITH_ACK, msg_key);
+            // tracklePublish(trackle_s, "greetings", get_large_properties_callback(""), 30, PRIVATE, WITH_ACK, msg_key);
             prevPubMillis = Callbacks_get_millis_cb();
             msg_key++;
         }
@@ -140,6 +146,33 @@ static int incrementCloudNumber(const char *args, bool isOwner, const char *funN
     return 1;
 }
 
+// Esempio di callback per valori molto lunghi (usa block2 automaticamente)
+const char *get_large_properties_callback(const char *args)
+{
+    // Questo esempio restituisce un JSON molto grande
+    // La libreria userà automaticamente block2 per inviarlo in blocchi
+    static char large_json[10000];
+
+    large_json[0] = '{';
+    int pos = 1;
+
+    // Genera un JSON con molti dati
+    // for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 40; i++)
+    {
+        if (i > 0)
+            large_json[pos++] = ',';
+        pos += snprintf(large_json + pos, sizeof(large_json) - pos,
+                        "\"sensor_%d\":{\"value\":%d,\"timestamp\":%lu}",
+                        i, i * 10, (unsigned long)time(NULL));
+    }
+
+    large_json[pos++] = '}';
+    large_json[pos] = '\0';
+
+    return large_json;
+}
+
 // END -- Cloud POST functions ----------------------------------------------------------------------------------------------------------------------
 
 // BEGIN -- Cloud GET functions --------------------------------------------------------------------------------------------------------------------
@@ -157,6 +190,11 @@ static void *getHalfCloudNumber(const char *args, const char *varName)
     buffer[0] = '\0';
     sprintf(buffer, "{\"halfCloudNumber\":%d}", cloudNumber / 2);
     return buffer;
+}
+
+static void *getLargeVariable(const char *args, const char *varName)
+{
+    return get_large_properties_callback(args);
 }
 
 // END -- Cloud GET functions ----------------------------------------------------------------------------------------------------------------------
