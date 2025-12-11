@@ -30,6 +30,9 @@ class DeviceStartupParams:
     iccid: str = ""
     fw_version: int = 1
     reason_for_ota_failure: OtaError | None = None
+    ota_verification_key: bytes | None = None
+    calculate_wrong_sha256: bool = False
+    ota_correct_sha256: bytes | None = None
 
 class ConnectionStatus:
 
@@ -103,8 +106,16 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
     trackle.setOtaMethod(trackle_s, trackle.OTAMethod.SEND_URL)
 
     trackle_lock = threading.Lock()
-    ota_callback = callbacks.make_ota_callback(trackle, trackle_s, to_tester, startup_params.reason_for_ota_failure, trackle_lock)
+    # Verifica firma solo se è stata fornita la chiave di verifica
+    verify_signature = startup_params.ota_verification_key is not None
+    ota_callback = callbacks.make_ota_callback(trackle, trackle_s, to_tester, startup_params.reason_for_ota_failure, trackle_lock, startup_params.calculate_wrong_sha256, verify_signature, startup_params.ota_correct_sha256)
     trackle.setOtaUpdateCallback(trackle_s, ota_callback)
+    
+    # Imposta la chiave di verifica OTA se fornita
+    if startup_params.ota_verification_key:
+        verification_key_array = (ctypes.c_uint8 * len(startup_params.ota_verification_key)).from_buffer_copy(startup_params.ota_verification_key)
+        res = trackle.setOtaVerificationKey(trackle_s, verification_key_array, len(startup_params.ota_verification_key))
+        log.info(f"trackleSetOtaVerificationKey {res}")
     
     trackle.setConnectionType(trackle_s, trackle.ConnectionType.UNDEFINED)
     if startup_params.claim_code:

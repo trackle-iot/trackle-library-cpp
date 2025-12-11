@@ -47,6 +47,9 @@ CRC32_NOT_CHECKED = QueueMessage("crc32_not_checked", "Couldn't receive confirma
 CRC32_CORRECT = QueueMessage("crc32_correct", "Couldn't receive confirmation that device simulation process finished OTA process with correct CRC32 within %d seconds.")
 CRC32_MISMATCH = QueueMessage("crc32_mismatch", "Couldn't receive confirmation that device simulation process finished OTA process with CRC32 mismatch within %d seconds.")
 DOWNLOAD_INTERRUPTED = QueueMessage("download_interrupted", "Couldn't receive confirmation that device simulation process finished OTA process with a download interrupted error within %d seconds.")
+SIGNATURE_VERIFIED = QueueMessage("signature_verified", "Couldn't receive confirmation that device simulation process verified OTA signature successfully within %d seconds.")
+SIGNATURE_FAILED = QueueMessage("signature_failed", "Couldn't receive confirmation that device simulation process failed OTA signature verification within %d seconds.")
+SIGNATURE_SKIPPED = QueueMessage("signature_skipped", "Couldn't receive confirmation that device simulation process skipped OTA signature verification within %d seconds.")
 
 TESTS_COMPLETED = QueueMessage("tests_completed")
 PROXY_ON = QueueMessage("proxy_on")
