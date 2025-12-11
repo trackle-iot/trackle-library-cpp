@@ -502,7 +502,7 @@ class TrackleLibraryTest(ut.TestCase):
     def test_12_get_7_too_long(self):
         """
         get di una variabile stringa troppo lunga
-        la richiesta dovrebbe fallire o essere troncata perché supera i limiti
+        la richiesta deve sempre fallire con status code 413 (Payload Too Large)
         """
         # Connection
         params = device.DeviceStartupParams(
@@ -521,16 +521,8 @@ class TrackleLibraryTest(ut.TestCase):
         params = {"args" : "50000"}
         resp = req.get(url, headers=self.headers, params=params, timeout=60)
         # print_http_response(resp, "GET", url)
-        # The request might succeed but be truncated, or fail
-        # We check that either it fails or returns a truncated result
-        if resp.status_code == 200:
-            result = resp.json().get("result")
-            if isinstance(result, str):
-                # If it returns a string, it should be truncated (not 50000 chars)
-                self.assertLess(len(result), 50000, "result should be truncated")
-        else:
-            # If it fails, that's also acceptable
-            self.assertGreaterEqual(resp.status_code, 400, "expected error for too long string")
+        # The request must always fail with 413 (Payload Too Large)
+        self.assertEqual(resp.status_code, 413, "expected 413 Payload Too Large for too long string")
 
     def test_13_get_8_long_with_interruption(self):
         """
