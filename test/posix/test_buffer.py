@@ -20,6 +20,7 @@ import numbers
 import contextlib
 import sys
 import argparse
+import threading
 
 import requests as req
 import requests.auth as req_auth
@@ -43,6 +44,29 @@ SERVER_ADDRESS = f"{cred.TRACKLE_ID_STRING}.udp.device.trackle.io"
 SERVER_PORT = 5684
 
 log.basicConfig(level=LOG_LEVEL, format="[%(levelname)s] %(processName)s : %(msg)s")
+
+def print_http_response(resp, method="HTTP", url=""):
+    """Stampa le informazioni della risposta HTTP per il debugging"""
+    print(f"\n{'='*80}")
+    print(f"HTTP Response - {method} {url}")
+    print(f"{'='*80}")
+    print(f"Status Code: {resp.status_code}")
+    print(f"Status Reason: {resp.reason}")
+    print(f"\nHeaders:")
+    for key, value in resp.headers.items():
+        print(f"  {key}: {value}")
+    print(f"\nBody:")
+    try:
+        if resp.headers.get('content-type', '').startswith('application/json'):
+            print(json.dumps(resp.json(), indent=2))
+        else:
+            print(resp.text[:1000])  # Limita a 1000 caratteri per evitare output troppo lungo
+            if len(resp.text) > 1000:
+                print(f"... (troncato, lunghezza totale: {len(resp.text)} caratteri)")
+    except Exception as e:
+        print(f"Errore nel parsing della risposta: {e}")
+        print(f"Raw content: {resp.content[:1000]}")
+    print(f"{'='*80}\n")
 
 def wait_queue_message(evt_queue: mp.Queue, expect_msg: msgs.QueueMessage,
                        test_class: ut.TestCase = None, timeout: int = 10) -> dict:
@@ -116,6 +140,7 @@ class TrackleLibraryTest(ut.TestCase):
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         json_body = {"development": mode}
         resp = req.put(url, headers=cls.headers, json=json_body, timeout=15)
+        # print_http_response(resp, "PUT", url)
         if resp.json().get("development") != mode:
             raise Exception("Failed putting in development mode. Can't continue test case.")
         
@@ -125,6 +150,7 @@ class TrackleLibraryTest(ut.TestCase):
         url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}"
         json_body = {"desired_firmware_version": str(version) if version else None, "flash":intelligent}
         resp = req.put(url, headers=cls.headers, json=json_body, timeout=15)
+        # print_http_response(resp, "PUT", url)
         if resp.status_code != 200:
             raise Exception(f"Failed publishing version: {resp.status_code} {resp.content}")
 
@@ -146,6 +172,7 @@ class TrackleLibraryTest(ut.TestCase):
         oauth_data = {"grant_type": "client_credentials"}
         oauth_basic = req_auth.HTTPBasicAuth(cred.TRACKLE_CLIENT_ID, cred.TRACKLE_CLIENT_SECRET)
         resp = req.post(oauth_url, oauth_data, headers=oauth_headers, auth=oauth_basic, timeout=15)
+        # print_http_response(resp, "POST", oauth_url)
         if resp.status_code != 200:
             raise req.HTTPError(f"auth return code {resp.status_code}")
         if "access_token" not in resp.json():
@@ -199,6 +226,7 @@ class TrackleLibraryTest(ut.TestCase):
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
+        time.sleep(1)
         # Publish event
         self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "testing/test_publish_3",
@@ -234,6 +262,7 @@ class TrackleLibraryTest(ut.TestCase):
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
+        time.sleep(1)
         # Publish event
         self.to_device.put({"msg" : msgs.PUBLISH,
                             "event" : "testing/test_publish_4",
@@ -268,6 +297,7 @@ class TrackleLibraryTest(ut.TestCase):
         res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT)
         self.assertTrue(res["return"])
         wait_queue_message(self.from_device, msgs.CONNECTED)
+        time.sleep(1)
         # Publish event
         self.to_device.put({"msg" : msgs.MULTIPUBLISH_LONG,
                             "event" : ["testing/test_publish_10_" + str(i) for i in range(1,6)],
