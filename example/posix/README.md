@@ -7,7 +7,7 @@ These examples were tested on:
  - Ubuntu 22.04 (GCC 11.3.0 targeting x86_64);
  - macOS Monterey 12.2 (clang 13.1.6 targeting x86_64).
 
-The version of the library the examples were linked against, at the time of writing, is *trackle_library_cpp v2.3.0* .
+The version of the library the examples were linked against, at the time of writing, is *trackle_library_cpp v4.4.0* .
 
 ## Examples
 
