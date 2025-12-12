@@ -1088,7 +1088,14 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
     }
 
     if (replyWithPublish)
-        ((Trackle *)handler)->publish(event_name, data, PRIVATE);
+    {
+        char event_copy[64], data_copy[16];
+        strncpy(event_copy, event_name, sizeof(event_copy) - 1);
+        strncpy(data_copy, data ? data : "", sizeof(data_copy) - 1);
+        event_copy[sizeof(event_copy) - 1] = '\0';
+        data_copy[sizeof(data_copy) - 1] = '\0';
+        ((Trackle *)handler)->publish(event_copy, data_copy, PRIVATE);
+    }
 }
 
 // TRACKLE.CALLBACK ------------------------------------------------------------

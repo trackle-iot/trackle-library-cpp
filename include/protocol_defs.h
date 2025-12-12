@@ -74,7 +74,23 @@ namespace trackle
         // is system event if start with trackle but not equal to trackle/p
         inline bool is_system(const char *event_name)
         {
-            return !strncmp(event_name, "iotready", 8) || (!strncmp(event_name, "trackle", 7) && strcmp(event_name, "trackle/p") && strncmp(event_name, "trackle/device/update", 21));
+            // Not a system event if it doesn't start with "iotready" or "trackle"
+            if (strncmp(event_name, "iotready", 8) != 0 &&
+                strncmp(event_name, "trackle", 7) != 0)
+            {
+                return false;
+            }
+
+            // Excluded system prefixes
+            if (strncmp(event_name, "trackle/p", 9) == 0 ||
+                strncmp(event_name, "trackle/device/update", 21) == 0 ||
+                strncmp(event_name, "trackle/pin_code", 16) == 0)
+            {
+                return false;
+            }
+
+            // System event for all other "iotready" or "trackle" prefixes
+            return true;
         }
 
         typedef uint16_t chunk_index_t;
