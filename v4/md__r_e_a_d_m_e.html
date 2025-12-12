@@ -114,13 +114,10 @@ Table of contents</h1>
 <li>Download</li>
 <li>Usage and API<ul>
 <li>Get a Device ID and a private key</li>
-<li>Generating Public/Private Key Pair for OTA Verification</li>
-</ul>
-</li>
-<li>Steps to generate keys and configure OTA verification<ul>
 <li>Getting started in C++</li>
 <li>Getting started in C</li>
 <li>Trackle client</li>
+<li>Generating Public/Private Key Pair for OTA Verification</li>
 </ul>
 </li>
 </ul>
@@ -155,22 +152,6 @@ Get a Device ID and a private key</h3>
 <li>The Device Id will be shown on the screen and the private key file will be download with name &lt;device_id&gt;.der where &lt;device_id&gt; is Device ID taken from <a class="el" href="class_trackle.html">Trackle</a>.</li>
 </ul>
 <h3><a class="anchor" id="autotoc_md9"></a>
-Generating Public/Private Key Pair for OTA Verification</h3>
-<p><a class="el" href="class_trackle.html">Trackle</a> OTA verification uses an <b>ECC P-256 (secp256r1)</b> public/private key pair. The <b>private key</b> is used to sign the firmware, while the <b>public key</b> is embedded in your firmware to verify the signature.</p>
-<h2><a class="anchor" id="autotoc_md10"></a>
-Steps to generate keys and configure OTA verification</h2>
-<div class="fragment"><div class="line"># 1) Generate the private key</div>
-<div class="line">openssl ecparam -name prime256v1 -genkey -noout -out private.pem</div>
-<div class="line"> </div>
-<div class="line"># 2) Generate the public key (PEM format)</div>
-<div class="line">openssl ec -in private.pem -pubout -out public.pem</div>
-<div class="line"> </div>
-<div class="line"># 3) Export the public key in DER format</div>
-<div class="line">openssl ec -in private.pem -pubout -outform DER -out public.der</div>
-<div class="line"> </div>
-<div class="line"># 4) Convert the DER public key into a C array</div>
-<div class="line">xxd -i public.der &gt; firmware_key.c</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md11"></a>
 Getting started in C++</h3>
 <p>Here is a very simple C++ example that create a client and connect it to <a class="el" href="class_trackle.html">Trackle</a> cloud</p>
 <div class="fragment"><div class="line">#include &quot;trackle.h&quot;</div>
@@ -309,7 +290,7 @@ Getting started in C++</h3>
 <div class="line"> </div>
 <div class="line">    return 0;</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md12"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md10"></a>
 Getting started in C</h3>
 <p>Here is a very simple C example that create a client and connect it to <a class="el" href="class_trackle.html">Trackle</a> cloud</p>
 <div class="fragment"><div class="line">#include &quot;trackle_interface.h&quot;</div>
@@ -451,7 +432,7 @@ Getting started in C</h3>
 <div class="line"> </div>
 <div class="line">    return 0;</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md13"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md11"></a>
 Trackle client</h3>
 <p>The minimal usage flow for <a class="el" href="class_trackle.html">Trackle</a> client is as follows (C++ and C):</p>
 <ul>
@@ -465,7 +446,27 @@ Trackle client</h3>
 <li><b>trackle.setConnectCallback(connect_cb_udp) - trackleSetConnectCallback(trackle_s, connect_cb_udp)</b>: configure a callback to connect the udp cloud socket</li>
 <li><b>trackle.setDisconnectCallback(disconnect_cb) - trackleSetDisconnectCallback(trackle_s, disconnect_cb)</b>: configure a callback to disconnect the udp cloud socket</li>
 <li><b>trackle.connect() - trackleConnect(trackle_s)</b>: start the cloud connection flow</li>
-<li><b>trackle.loop() - trackleLoop(trackle_s)</b>: loop function, to keep the device connected to the cloud. Must be called as soon as possible </li>
+<li><b>trackle.loop() - trackleLoop(trackle_s)</b>: loop function, to keep the device connected to the cloud. Must be called as soon as possible</li>
+</ul>
+<h3><a class="anchor" id="autotoc_md12"></a>
+Generating Public/Private Key Pair for OTA Verification</h3>
+<p><a class="el" href="class_trackle.html">Trackle</a> OTA verification uses an <b>ECC P-256 (secp256r1)</b> public/private key pair. The <b>private key</b> is used to sign the firmware, while the <b>public key</b> is embedded in your firmware to verify the signature.</p>
+<p>To generate the keys and configure OTA verification, follow these steps:</p>
+<div class="fragment"><div class="line"># 1) Generate the private key</div>
+<div class="line">openssl ecparam -name prime256v1 -genkey -noout -out private.pem</div>
+<div class="line"> </div>
+<div class="line"># 2) Generate the public key (PEM format)</div>
+<div class="line">openssl ec -in private.pem -pubout -out public.pem</div>
+<div class="line"> </div>
+<div class="line"># 3) Export the public key in DER format</div>
+<div class="line">openssl ec -in private.pem -pubout -outform DER -out public.der</div>
+<div class="line"> </div>
+<div class="line"># 4) Convert the DER public key into a C array</div>
+<div class="line">xxd -i public.der &gt; firmware_key.c</div>
+</div><!-- fragment --><p>To use OTA verification in your code, you need to configure the following functions (C++ and C):</p>
+<ul>
+<li><b>trackle.setOtaVerificationKey(firmware_key, length) - trackleSetOtaVerificationKey(trackle_s, firmware_key, length)</b>: set the public key for OTA firmware verification. The firmware_key should be the DER-encoded public key generated following the steps above. This is required if you want to enable OTA updates with signature verification.</li>
+<li><b>trackle.verifyOtaSignature(firmware_hash, length) - trackleVerifyOtaSignature(trackle_s, firmware_hash, length)</b>: verify the signature of a firmware OTA. This function should be called during the OTA update process after calculating the SHA256 hash of the downloaded firmware. Returns 1 on success, 0 if verification is skipped (no key set), -1 on error. </li>
 </ul>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->

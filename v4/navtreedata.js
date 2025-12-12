@@ -34,12 +34,10 @@ var NAVTREE =
         [ "Download", "md__r_e_a_d_m_e.html#autotoc_md6", null ],
         [ "Usage and API", "md__r_e_a_d_m_e.html#autotoc_md7", [
           [ "Get a Device ID and a private key", "md__r_e_a_d_m_e.html#autotoc_md8", null ],
-          [ "Generating Public/Private Key Pair for OTA Verification", "md__r_e_a_d_m_e.html#autotoc_md9", null ]
-        ] ],
-        [ "Steps to generate keys and configure OTA verification", "md__r_e_a_d_m_e.html#autotoc_md10", [
-          [ "Getting started in C++", "md__r_e_a_d_m_e.html#autotoc_md11", null ],
-          [ "Getting started in C", "md__r_e_a_d_m_e.html#autotoc_md12", null ],
-          [ "Trackle client", "md__r_e_a_d_m_e.html#autotoc_md13", null ]
+          [ "Getting started in C++", "md__r_e_a_d_m_e.html#autotoc_md9", null ],
+          [ "Getting started in C", "md__r_e_a_d_m_e.html#autotoc_md10", null ],
+          [ "Trackle client", "md__r_e_a_d_m_e.html#autotoc_md11", null ],
+          [ "Generating Public/Private Key Pair for OTA Verification", "md__r_e_a_d_m_e.html#autotoc_md12", null ]
         ] ]
       ] ]
     ] ],
@@ -76,7 +74,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"trackle_8cpp.html#aae62c290bd18517402f5bd416d3df709"
+"trackle_8cpp.html#aaff657926ec5c5b87ec57230c8995dbf"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
