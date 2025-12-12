@@ -44,7 +44,7 @@ class ConnectionType(enum.IntEnum):
 
 class OtaError(enum.IntEnum):
     """ States of OTA process """
-    OTA_ERR_OK = 0,             #  No error
+    OTA_ERR_OK = 0              #  No error
     OTA_ERR_ALREADY_RUNNING = 1 #  OTA already in progress
     OTA_ERR_PARTITION = 2       #  partition error (not found, invalid, conflict, etc..)
     OTA_ERR_MEMORY = 3          #  not enough free memory
@@ -52,3 +52,6 @@ class OtaError(enum.IntEnum):
     OTA_ERR_INCOMPLETE = 5      #  download interrupter
     OTA_ERR_COMPLETING = 6      #  download completed but image not validated
     OTA_ERR_GENERIC = 7         #  all other errors
+    OTA_ERR_VALIDATE_CA_FAILED = 8  #  error validating https server root CA
+    OTA_ERR_SIGNATURE_FAILED = 9     #  error validating firmware signature
+    OTA_ERR_HTTP_CONNECTION = 10     #  error in HTTP or HTTPS connection

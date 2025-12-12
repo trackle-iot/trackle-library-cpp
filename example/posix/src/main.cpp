@@ -36,6 +36,7 @@
 #define MAIN_LOOP_PERIOD_MS 20 // Main loop period in milliseconds
 
 #define SOFTWARE_VERSION 1
+#define SOFTWARE_BUILD 2
 
 // Cloud POST functions
 static int funSuccess(const char *args, bool isOwner, const char *funName);
@@ -65,6 +66,9 @@ int main()
 
     // Create Trackle instance
     Trackle trackleInst;
+    
+    // Note: If you enable OTA callback, uncomment the global pointer in firmware_ota_callback
+    // and set it here: g_trackleInst = &trackleInst;
 
     trackleInst.setDeviceId(HARDCODED_DEVICE_ID);
 
@@ -77,8 +81,17 @@ int main()
     // Set cloud credentials
     trackleInst.setKeys(HARDCODED_PRIVATE_KEY);
     trackleInst.setFirmwareVersion(SOFTWARE_VERSION);
+    trackleInst.setFirmwareBuild(SOFTWARE_BUILD);
     trackleInst.setOtaMethod(NO_OTA);
     trackleInst.setConnectionType(CONNECTION_TYPE_WIFI);
+    
+    // Optional: configure OTA verification key (required for OTA with signature verification)
+    // Uncomment and define HARDCODED_FIRMWARE_KEY if you want to enable OTA verification
+    // trackleInst.setOtaVerificationKey(HARDCODED_FIRMWARE_KEY, sizeof(HARDCODED_FIRMWARE_KEY));
+    
+    // Optional: configure OTA update callback (required for OTA updates)
+    // Uncomment and implement firmware_ota_callback function if you want to enable OTA
+    // trackleInst.setOtaUpdateCallback(firmware_ota_callback);
 
     // Registering internal callbacks
     trackleInst.setMillis(Callbacks_get_millis_cb);
@@ -193,3 +206,74 @@ double getDoubleFn(const char *args, const char *varKey)
 }
 
 // END -- Cloud GET functions ----------------------------------------------------------------------------------------------------------------------
+
+// BEGIN -- OTA callback example --------------------------------------------------------------------------------------------------------------------
+
+/*
+ * Example OTA callback implementation
+ * This callback is called when the cloud requests a firmware update
+ * 
+ * Note: To access the Trackle instance from this callback, you can use a global pointer:
+ *   Trackle* g_trackleInst = nullptr;
+ *   Then set it in main(): g_trackleInst = &trackleInst;
+ * 
+ * @param url The URL of the firmware to download
+ * @param crc The expected CRC32 of the firmware
+ * @return 0 on success, error code on failure
+ */
+/*
+// Global pointer to Trackle instance (set in main())
+static Trackle* g_trackleInst = nullptr;
+
+static int firmware_ota_callback(const char *url, uint32_t crc)
+{
+    std::cout << "OTA update requested: URL=" << url << ", CRC=0x" << std::hex << crc << std::dec << std::endl;
+    
+    if (g_trackleInst == nullptr)
+    {
+        std::cerr << "Error: Trackle instance not available" << std::endl;
+        return -1;
+    }
+    
+    // TODO: Implement firmware download logic here
+    // 1. Download firmware from URL
+    // 2. Calculate SHA256 hash during download
+    // 3. Verify signature using verifyOtaSignature
+    // 4. Validate CRC if provided
+    // 5. Save firmware to flash/storage
+    // 6. Call setOtaUpdateDone with result
+    
+    // Example implementation flow:
+    // uint8_t firmware_hash[32];  // SHA256 hash
+    // 
+    // // Download firmware and calculate hash...
+    // // (implementation depends on your platform)
+    // 
+    // // Verify signature (returns 1 on success, 0 if skipped, -1 on error)
+    // int verify_result = g_trackleInst->verifyOtaSignature(firmware_hash, sizeof(firmware_hash));
+    // if (verify_result == 1)
+    // {
+    //     // Signature verified successfully
+    //     // Save firmware and prepare for update...
+    //     g_trackleInst->setOtaUpdateDone(0);  // 0 = success
+    //     return 0;
+    // }
+    // else if (verify_result == -1)
+    // {
+    //     // Signature verification failed
+    //     g_trackleInst->setOtaUpdateDone(-1);  // error code
+    //     return -1;
+    // }
+    // else
+    // {
+    //     // Verification skipped (no key set)
+    //     // Continue with update anyway...
+    //     g_trackleInst->setOtaUpdateDone(0);
+    //     return 0;
+    // }
+    
+    return 0;
+}
+*/
+
+// END -- OTA callback example ----------------------------------------------------------------------------------------------------------------------

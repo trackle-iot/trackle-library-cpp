@@ -26,6 +26,7 @@ Complete documentation can be found [here](https://trackle-iot.github.io/trackle
       - [Getting started in C++](#getting-started-in-c)
       - [Getting started in C](#getting-started-in-c-1)
       - [Trackle client](#trackle-client)
+      - [Generating Public/Private Key Pair for OTA Verification](#generating-publicprivate-key-pair-for-ota-verification)
 
 ## What is Trackle
 Trackle is an IoT platform that offers all the software and services needed to develop an IoT solution from Device to Cloud. [Trackle website](https://www.trackle.io)
@@ -60,6 +61,13 @@ Here is a very simple C++ example that create a client and connect it to Trackle
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <unistd.h>
+#include <errno.h>
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
 ...
 
 unsigned char private_key[PRIVATE_KEY_LENGTH] = { ... };
@@ -107,16 +115,17 @@ int connect_cb_udp(const char *address, int port)
     cloud_addr.sin_port = htons(port);
     addr_family = AF_INET;
     ip_protocol = IPPROTO_IP;
-    inet_ntoa_r(cloud_addr.sin_addr, addr_str, sizeof(addr_str) - 1);
+    inet_ntop(AF_INET, &cloud_addr.sin_addr, addr_str, sizeof(addr_str));
 
     cloud_socket = socket(addr_family, SOCK_DGRAM, ip_protocol);
     if (cloud_socket < 0)
     {
         printf("Unable to create socket: errno %d", errno);
+        return -1;
     }
-    printf("Socket created, sending to %s:%d", address, port);
+    printf("Socket created, sending to %s:%d", addr_str, port);
 
-    // setto i timeout di lettura/scrittura del socket
+    // set socket read/write timeouts
     struct timeval socket_timeout;
     socket_timeout.tv_sec = 0;
     socket_timeout.tv_usec = 1000; // 1ms
@@ -166,7 +175,7 @@ int main(int argc, char *argv[]) {
 	trackle.setDeviceId(device_id);
     trackle.setKeys(private_key);
 
-    // configurazione delle callback
+    // configure callbacks
     trackle.setMillis(getMillis);
     trackle.setSendCallback(send_cb_udp);
     trackle.setReceiveCallback(receive_cb_udp);
@@ -195,6 +204,13 @@ Here is a very simple C example that create a client and connect it to Trackle c
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <unistd.h>
+#include <errno.h>
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
 ...
 
 unsigned char private_key[PRIVATE_KEY_LENGTH] = { ... };
@@ -242,16 +258,17 @@ int connect_cb_udp(const char *address, int port)
     cloud_addr.sin_port = htons(port);
     addr_family = AF_INET;
     ip_protocol = IPPROTO_IP;
-    inet_ntoa_r(cloud_addr.sin_addr, addr_str, sizeof(addr_str) - 1);
+    inet_ntop(AF_INET, &cloud_addr.sin_addr, addr_str, sizeof(addr_str));
 
     cloud_socket = socket(addr_family, SOCK_DGRAM, ip_protocol);
     if (cloud_socket < 0)
     {
         printf("Unable to create socket: errno %d", errno);
+        return -1;
     }
-    printf("Socket created, sending to %s:%d", address, port);
+    printf("Socket created, sending to %s:%d", addr_str, port);
 
-    // setto i timeout di lettura/scrittura del socket
+    // set socket read/write timeouts
     struct timeval socket_timeout;
     socket_timeout.tv_sec = 0;
     socket_timeout.tv_usec = 1000; // 1ms
@@ -298,13 +315,13 @@ int receive_cb_udp(unsigned char *buf, uint32_t buflen, void *tmp)
 
 int main(int argc, char *argv[]) {
 
-    // dichiarazione della libreria
+    // initialize the library
     trackle_s = newTrackle();
 
 	trackleSetDeviceId(trackle_s, device_id);
     trackleSetKeys(trackle_s, private_key);
 
-    // configurazione delle callback
+    // configure callbacks
     trackleSetMillis(trackle_s, getMillis);
     trackleSetSendCallback(trackle_s, send_cb_udp);
     trackleSetReceiveCallback(trackle_s, receive_cb_udp);
@@ -334,7 +351,7 @@ The minimal usage flow for Trackle client is as follows (C++ and C):
 	set a private key to the client. Follow [Get a Device ID and a private key](#get-a-device-id-and-a-private-key) instructions.
 
 - **trackle.setMillis(getMillis) - trackleSetMillis(trackle_s, getMillis)**:
-	configure a callback that return the number of milliseconds at the time, the esp32 begins running the current program
+	configure a callback that returns the number of milliseconds since the device started running the current program
     
     **CRITICAL! This callback is mandatory and must be declared at the onset of library usage, preceding all others, as both the library's working and logs hinge on this callback.**
 
@@ -355,3 +372,31 @@ The minimal usage flow for Trackle client is as follows (C++ and C):
 
 - **trackle.loop() - trackleLoop(trackle_s)**:
 	loop function, to keep the device connected to the cloud. Must be called as soon as possible
+
+#### Generating Public/Private Key Pair for OTA Verification
+
+Trackle OTA verification uses an **ECC P-256 (secp256r1)** public/private key pair. The **private key** is used to sign the firmware, while the **public key** is embedded in your firmware to verify the signature.
+
+To generate the keys and configure OTA verification, follow these steps:
+
+```bash
+# 1) Generate the private key
+openssl ecparam -name prime256v1 -genkey -noout -out private.pem
+
+# 2) Generate the public key (PEM format)
+openssl ec -in private.pem -pubout -out public.pem
+
+# 3) Export the public key in DER format
+openssl ec -in private.pem -pubout -outform DER -out public.der
+
+# 4) Convert the DER public key into a C array
+xxd -i public.der > firmware_key.c
+```
+
+To use OTA verification in your code, you need to configure the following functions (C++ and C):
+
+- **trackle.setOtaVerificationKey(firmware_key, length) - trackleSetOtaVerificationKey(trackle_s, firmware_key, length)**:
+	set the public key for OTA firmware verification. The firmware_key should be the DER-encoded public key generated following the steps above. This is required if you want to enable OTA updates with signature verification.
+
+- **trackle.verifyOtaSignature(firmware_hash, length) - trackleVerifyOtaSignature(trackle_s, firmware_hash, length)**:
+	verify the signature of a firmware OTA. This function should be called during the OTA update process after calculating the SHA256 hash of the downloaded firmware. Returns 1 on success, 0 if verification is skipped (no key set), -1 on error.

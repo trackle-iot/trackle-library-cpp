@@ -6,6 +6,7 @@ LOG_SOURCE_CATEGORY("comm.protocol")
 #include "chunked_transfer.h"
 #include "subscriptions.h"
 #include "functions.h"
+#include "messages.h"
 const int HANDSHAKE_TIMEOUT = 4000;
 
 namespace trackle
@@ -83,10 +84,16 @@ namespace trackle
             {
                 char variable_key[MAX_VARIABLE_KEY_LENGTH + 1];
                 char variable_args[MAX_FUNCTION_ARG_LENGTH + 1];
-                return variables.handle_variable_request(variable_key, variable_args, message,
-                                                         channel, token, msg_id,
-                                                         descriptor.variable_type,
-                                                         descriptor.get_variable);
+                ProtocolError result = variables.handle_variable_request(variable_key, variable_args, message,
+                                                                        channel, token, msg_id,
+                                                                        descriptor.variable_type,
+                                                                        descriptor.get_variable);
+                // Update timestamp for block if transmission is running (for timeout cleanup)
+                if (result == NO_ERROR)
+                {
+                    trackle_update_block_sent_time(token, callbacks.millis());
+                }
+                return result;
             }
             case CoAPMessageType::SAVE_BEGIN:
                 // fall through
@@ -161,8 +168,8 @@ namespace trackle
             if (block == NULL)
                 return;
 
-            LOG(WARN, "block->currBlockIndex %d", block->currBlockIndex);
-            LOG(WARN, "%d %d", block->currBlockIndex * MAX_BLOCK_SIZE, block->totBytesNumber);
+            LOG(INFO, "block->currBlockIndex %d", block->currBlockIndex);
+            LOG(INFO, "%d %d", block->currBlockIndex * MAX_BLOCK_SIZE, block->totBytesNumber);
 
             // Remember: totBytesNumber starts from 2nd block
             if ((error != SYSTEM_ERROR_NONE) || ((block->currBlockIndex) * MAX_BLOCK_SIZE >= block->totBytesNumber))
@@ -595,6 +602,9 @@ namespace trackle
             const system_tick_t t = callbacks.millis();
             ack_handlers.update(t - last_ack_handlers_update);
             last_ack_handlers_update = t;
+
+            // Cleanup block timeouts (30 seconds timeout, same as SEND_EVENT_ACK_TIMEOUT)
+            trackle_cleanup_block_timeouts(t, SEND_EVENT_ACK_TIMEOUT);
 
             Message message;
             message_type = CoAPMessageType::NONE;

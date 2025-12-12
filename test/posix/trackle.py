@@ -98,6 +98,18 @@ setOtaUpdateDone = __lib.trackleSetOtaUpdateDone
 setOtaUpdateDone.argtypes = [ctypes.c_void_p, ctypes.c_int]
 setOtaUpdateDone.restype = None
 
+verifyOtaSignature = __lib.trackleVerifyOtaSignature
+verifyOtaSignature.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint8), ctypes.c_size_t]
+verifyOtaSignature.restype = ctypes.c_int
+
+setOtaVerificationKey = __lib.trackleSetOtaVerificationKey
+setOtaVerificationKey.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint8), ctypes.c_size_t]
+setOtaVerificationKey.restype = ctypes.c_bool
+
+updatesForced = __lib.trackleUpdatesForced
+updatesForced.argtypes = [ctypes.c_void_p]
+updatesForced.restype = ctypes.c_bool
+
 setConnectionType = __lib.trackleSetConnectionType
 setConnectionType.argtypes = [ctypes.c_int]
 setConnectionType.restype = None

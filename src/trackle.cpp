@@ -660,6 +660,13 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
             LOG(TRACE, "sendPublish %s: %s ", eventName, data);
 
             res = trackle_protocol_send_event(protocol, block->token, block->eventName.c_str(), data, currBlockLength, ttl, block->currBlockIndex, block->totBlockNumber, flags, &d);
+            if (!res)
+            {
+                // If send fails, free the block so it can be reused
+                LOG(WARN, "trackle_protocol_send_event failed, freeing block for token 0x%02x", block->token);
+                block->transmissionRunning = false;
+                block->lastBlockSentTime = 0;
+            }
         }
         else // without ACK
         {

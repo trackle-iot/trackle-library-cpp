@@ -495,5 +495,33 @@ namespace trackle
 			return BLOCKS_NUMBER;
 		}
 
+		// Helper function to update timestamp when block is sent
+		void trackle_update_block_sent_time(uint8_t token, system_tick_t current_time)
+		{
+			block_messages_data *block = trackle_get_block_by_token(token);
+			if (block != NULL && block->transmissionRunning)
+			{
+				block->lastBlockSentTime = current_time;
+			}
+		}
+
+		// Cleanup function to reset transmissionRunning for blocks that timed out
+		// Timeout: 30 seconds (same as SEND_EVENT_ACK_TIMEOUT)
+		void trackle_cleanup_block_timeouts(system_tick_t current_time, system_tick_t timeout_ms)
+		{
+			for (uint8_t i = 0; i < CONCURRENT_MESSAGES; i++)
+			{
+				if (block_messages[i].transmissionRunning && block_messages[i].lastBlockSentTime > 0)
+				{
+					if ((current_time - block_messages[i].lastBlockSentTime) >= timeout_ms)
+					{
+						LOG(WARN, "Block transmission timeout for token 0x%02x, resetting transmissionRunning", block_messages[i].token);
+						block_messages[i].transmissionRunning = false;
+						block_messages[i].lastBlockSentTime = 0;
+					}
+				}
+			}
+		}
+
 	}
 }
