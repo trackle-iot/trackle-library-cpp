@@ -42,13 +42,13 @@ typedef enum
     CON_ERROR_RECONNECTION = 4,
 } Cloud_Connection_Error;
 
-typedef int(*user_function_int_char_t)(const char *paramString, bool isOwner, const char* funKey);
+typedef int (*user_function_int_char_t)(const char *paramString, bool isOwner, const char *funKey);
 
-typedef bool (*user_variable_bool_cb_t)(const char *paramString, const char* varKey);
-typedef int (*user_variable_int32_cb_t)(const char *paramString, const char* varKey);
-typedef double (*user_variable_double_cb_t)(const char *paramString, const char* varKey);
-typedef const char *(*user_variable_char_cb_t)(const char *paramString, const char* varKey);
-typedef void *(*user_variable_pointer_t)(const char *paramString, const char* varKey);
+typedef bool (*user_variable_bool_cb_t)(const char *paramString, const char *varKey);
+typedef int (*user_variable_int32_cb_t)(const char *paramString, const char *varKey);
+typedef double (*user_variable_double_cb_t)(const char *paramString, const char *varKey);
+typedef const char *(*user_variable_char_cb_t)(const char *paramString, const char *varKey);
+typedef void *(*user_variable_pointer_t)(const char *paramString, const char *varKey);
 
 typedef void (*EventHandler)(const char *name, const char *data);
 
@@ -237,6 +237,7 @@ typedef void(prepareFirmwareUpdateCallback)(struct Chunk data, uint32_t flags, v
 typedef void(firmwareChunkCallback)(struct Chunk data, const unsigned char *chunk, void *);
 typedef void(finishFirmwareUpdateCallback)(char *data, uint32_t fileSize);
 typedef int(otaUpdateCallback)(const char *url, uint32_t crc);
+typedef void(deviceClaimedCallback)(void);
 typedef void(connectionStatusCallback)(Connection_Status_Type status);
 typedef int(updateStateCallback)(const char *function_key, const char *arg, ...);
 typedef void(signalCallback)(bool on, unsigned int param, void *reserved);

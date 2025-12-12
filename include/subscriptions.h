@@ -138,16 +138,24 @@ namespace trackle
 					next_src += next_len;
 				}
 
-				unsigned char *data = NULL;
-				if (next_src < end && 0xff == *next_src)
-				{
-					// payload is next
-					data = next_src + 1;
-					// null terminate data string
-					*end = 0;
-				}
 				// null terminate event name string
 				event_name[event_name_length] = 0;
+
+				// calculate data
+				char data[MAX_EVENT_DATA_LENGTH] = {0};
+				size_t data_length = 0;
+
+				if (next_src < end && *next_src == 0xff)
+				{
+					unsigned char *payload = next_src + 1;
+					data_length = end - payload;
+
+					if (data_length >= MAX_EVENT_DATA_LENGTH)
+						return MALFORMED_MESSAGE;
+
+					memcpy(data, payload, data_length);
+					data[data_length] = 0;
+				}
 
 				const int NUM_HANDLERS = sizeof(event_handlers) / sizeof(FilteringEventHandler);
 				for (int i = 0; i < NUM_HANDLERS; i++)

@@ -1884,8 +1884,7 @@ dtls_asn1_len(uint8 **data, size_t *data_len)
   return len;
 }
 
-static int
-dtls_asn1_integer_to_ec_key(uint8 *data, size_t data_len, uint8 *key,
+int dtls_asn1_integer_to_ec_key(uint8 *data, size_t data_len, uint8 *key,
                          size_t key_len)
 {
   size_t length;
@@ -2032,7 +2031,7 @@ check_client_certificate_verify(dtls_context_t *ctx,
 			    sha256hash, sizeof(sha256hash),
 			    result_r, result_s);
 
-  if (ret < 0) {
+  if (ret <= 0) {
     dtls_alert("wrong signature err: %i\n", ret);
     return dtls_alert_fatal_create(DTLS_ALERT_HANDSHAKE_FAILURE);
   }

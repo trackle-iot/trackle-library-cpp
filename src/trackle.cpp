@@ -22,6 +22,7 @@
 
 #include "dtls_protocol.h"
 #include "tinydtls.h"
+#include "uECC.h"
 #include "tinydtls_set_rand.h"
 #include "tinydtls_set_get_millis.h"
 #include "messages.h"
@@ -35,6 +36,10 @@ using namespace trackle::protocol;
 // remove 2 from total (2 are commas for last funct and var)
 // TOTAL LEN = 50 + 20 * (MAX_VARIABLE_KEY_LENGTH + 3) + 20 * (MAX_FUNCTION_KEY_LENGTH + 5) + (MAX_COMPONENTS_LIST_LENGTH + 7) - 2 = 1015
 
+#define PUB_KEY_OFFSET 26 // position of 0x04 marker
+#define PUB_KEY_MARKER 0x04
+#define PUB_KEY_XY_SIZE 64
+
 #define DEFAULT_CONNECTION_TIMEOUT 1000
 #define RECONNECTION_TIMEOUT 3750
 #define MAX_RECONNECTION_RETRY_INCREMENT 4 // 2^4 * 3750 = 60 seconds
@@ -47,7 +52,11 @@ static const char *OTA_EVENT_NAME = "trackle/device/update/status";
 struct _ota_data
 {
     bool running;
+    bool has_signature;
+    bool has_firmware_key;
     char ota_job_id[64];
+    uint8_t firmware_signature[64];
+    uint8_t firmware_signature_key[PUB_KEY_XY_SIZE];
 } ota_data;
 
 #define MAX_COUNTER 9999999
@@ -87,6 +96,7 @@ finishFirmwareUpdateCallback *finishUpdateCb = NULL;
 randomNumberCallback *getRandomCb = NULL;
 rebootCallback *systemRebootCb = NULL;
 otaUpdateCallback *otaUpdateCb = NULL;
+deviceClaimedCallback *deviceClaimedCb = NULL;
 pincodeCallback *pincodeCb = NULL;
 connectionStatusCallback *connectionStatusCb = NULL;
 updateStateCallback *updateStateCb = NULL;
@@ -236,7 +246,7 @@ system_tick_t health_check_interval = 0;
 // ------------------------------------------------------------
 
 string string_device_id;
-char device_id[DEVICE_ID_LENGTH];
+char t_device_id[DEVICE_ID_LENGTH];
 // 294byte + 1 byte (len n server address) + n byte server address + 2 byte server port
 // byte aggiuntivi dopo chiave: \x10\x74\x65\x73\x74\x2e\x69\x6f\x74\x72\x65\x61\x64\x79\x2e\x69\x74\x16\x33
 unsigned char server_public_key[PUBLIC_KEY_LENGTH] = {0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x02, 0x01, 0x06, 0x08, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00, 0x04, 0x2B, 0x19, 0x9D, 0xC9, 0xF2, 0xB0, 0x2D, 0xD1, 0xF1, 0x7D, 0xF0, 0x2B, 0xD1, 0xEC, 0xD1, 0x57, 0xD6, 0x74, 0x51, 0xD7, 0x9C, 0x09, 0xE1, 0x70, 0x43, 0x4A, 0x5B, 0xC2, 0x40, 0xC0, 0x49, 0x67, 0x34, 0xC8, 0xA4, 0xF8, 0xB4, 0xF7, 0xFB, 0xB4, 0xD0, 0x3F, 0xCC, 0xAF, 0x1F, 0xAA, 0x2E, 0x1D, 0x76, 0x82, 0xCF, 0x3A, 0x1A, 0x0B, 0x42, 0x38, 0x14, 0x6D, 0x54, 0x42, 0x05, 0xDC, 0x4D, 0x27};
@@ -880,6 +890,16 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
                 getline(ss, substr, ',');
                 owners.push_back(substr.c_str());
             }
+
+            // if ownars > 0, device is claimed
+            if (owners.size() > 0)
+            {
+                LOG(INFO, "Device is claimed by one owner.");
+                if (deviceClaimedCb)
+                {
+                    (*deviceClaimedCb)();
+                }
+            }
         }
     }
     else if (strcmp(event_name, "trackle/device/reset") == 0)
@@ -905,16 +925,22 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
                 return;
             }
             char *saveptr = copy;
+            char *url = strtok_r(copy, ",", &saveptr);
+            char *crc32 = strtok_r(NULL, ",", &saveptr);
+            char *job_id = strtok_r(NULL, ",", &saveptr);
+            char *signature = strtok_r(NULL, ",", &saveptr);
 
-            if (ota_data.running)
+            if (!updates_enabled && !updates_forced)
+            {
+                LOG(WARN, "Ota upgrade refused: enabled %d, forced: %d", updates_enabled, updates_forced);
+                char ota_cloud_message[256];
+                sprintf(ota_cloud_message, "disabled,%s", job_id);
+                ((Trackle *)handler)->publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
+            }
+            else if (ota_data.running)
             {
                 LOG(ERROR, "Ota already in progress...");
                 char ota_cloud_message[256];
-
-                char *url = strtok_r(copy, ",", &saveptr);
-                char *crc32 = strtok_r(NULL, ",", &saveptr);
-                char *job_id = strtok_r(NULL, ",", &saveptr);
-
                 sprintf(ota_cloud_message, "busy,%s", job_id);
                 ((Trackle *)handler)->publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
             }
@@ -922,24 +948,90 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
             {
                 LOG(INFO, "otaUpdateCb %s", data);
                 memset(ota_data.ota_job_id, 0, 64);
+                memset(ota_data.firmware_signature, 0, 64);
 
                 // set default value to 0 number
                 ota_data.ota_job_id[0] = '0';
 
-                char *url = strtok_r(copy, ",", &saveptr);
                 uint32_t crc = 0;
                 uint32_t ota_type = 0; // 0 undefined, 1 product, 2 developer
 
                 if (url != NULL)
                 {
-                    char *crc32 = strtok_r(NULL, ",", &saveptr);
-                    char *job_id = strtok_r(NULL, ",", &saveptr);
-
                     if (crc32 != NULL && job_id != NULL)
                     {
                         // product firmware update
                         sscanf(crc32, "%" PRIx32 "", &crc);
                         strcpy(ota_data.ota_job_id, job_id);
+
+                        ota_data.has_signature = true;
+                        if (signature != NULL && strlen(signature) >= 136) // 68*2 = 136 hex chars minimo
+                        {
+                            uint8_t raw_signature[80]; // Buffer fisso, max teorico è 72 bytes
+                            uint8_t result_r[DTLS_EC_KEY_SIZE];
+                            uint8_t result_s[DTLS_EC_KEY_SIZE];
+
+                            size_t sig_len = strlen(signature) / 2;
+
+                            // Verifica che non superi il buffer
+                            if (sig_len > sizeof(raw_signature))
+                            {
+                                LOG(ERROR, "Signature too long: %zu bytes", sig_len);
+                                ota_data.has_signature = false;
+                            }
+                            else
+                            {
+                                // Converti hex string in bytes
+                                for (int i = 0; i < sig_len; i++)
+                                {
+                                    sscanf(signature + 2 * i, "%2hhx", &raw_signature[i]);
+                                }
+
+                                // Parsing DER: salta SEQUENCE header (30 XX)
+                                uint8_t *data = raw_signature + 2;
+                                size_t data_len = sig_len - 2;
+
+                                // Estrai r
+                                int r_consumed = dtls_asn1_integer_to_ec_key(data, data_len, result_r, DTLS_EC_KEY_SIZE);
+                                if (r_consumed <= 0)
+                                {
+                                    LOG(ERROR, "Failed to parse r from signature");
+                                    ota_data.has_signature = false;
+                                }
+                                else
+                                {
+                                    // Estrai s
+                                    data += r_consumed;
+                                    data_len -= r_consumed;
+                                    int s_consumed = dtls_asn1_integer_to_ec_key(data, data_len, result_s, DTLS_EC_KEY_SIZE);
+                                    if (s_consumed <= 0)
+                                    {
+                                        LOG(ERROR, "Failed to parse s from signature");
+                                        ota_data.has_signature = false;
+                                    }
+                                    else
+                                    {
+                                        // Copia r e s nel tuo buffer
+                                        memcpy(ota_data.firmware_signature, result_r, DTLS_EC_KEY_SIZE);
+                                        memcpy(ota_data.firmware_signature + DTLS_EC_KEY_SIZE, result_s, DTLS_EC_KEY_SIZE);
+                                        ota_data.has_signature = true;
+
+                                        char signature_hex[2 * DTLS_EC_KEY_SIZE * 2 + 1]; // Buffer per la rappresentazione esadecimale
+                                        for (int i = 0; i < DTLS_EC_KEY_SIZE * 2; i++)
+                                        {
+                                            sprintf(signature_hex + 2 * i, "%02x", ota_data.firmware_signature[i]);
+                                        }
+                                        LOG(INFO, "Firmware signature in hex: %s", signature_hex);
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            LOG(WARN, "No firmware signature");
+                            ota_data.has_signature = false;
+                        }
+
                         ota_type = 1;
                     }
                     else
@@ -1757,6 +1849,83 @@ bool Trackle::updatesForced()
     return updates_forced;
 }
 
+void Trackle::setDeviceClaimedCallback(deviceClaimedCallback *claimedCb)
+{
+    deviceClaimedCb = claimedCb;
+}
+
+bool Trackle::setOtaVerificationKey(const uint8_t *firmware_key, size_t length)
+{
+    if (length < PUB_KEY_OFFSET + PUB_KEY_XY_SIZE)
+    {
+        LOG(ERROR, "Firmware key is too short! Length: %d", length);
+        return false;
+    }
+
+    // Check marker 0x04 is present
+    if (firmware_key[PUB_KEY_OFFSET] != PUB_KEY_MARKER)
+    {
+        LOG(ERROR, "Public key EC point marker not found!");
+        return false;
+    }
+
+    memcpy(ota_data.firmware_signature_key, &firmware_key[PUB_KEY_OFFSET + 1], PUB_KEY_XY_SIZE);
+    ota_data.has_firmware_key = true;
+    return true;
+}
+
+int Trackle::verifyOtaSignature(const uint8_t *firmware_hash, size_t length)
+{
+    if (!ota_data.has_firmware_key)
+    {
+        LOG(WARN, "Public key not exits, insecure OTA, skipping validation");
+        return 1;
+    }
+
+    if (!ota_data.has_signature)
+    {
+        LOG(WARN, "Signature not received, skipping validation");
+        return 0;
+    }
+
+    if (length != 32)
+    {
+        LOG(ERROR, "The hash message must be 32 bytes long!");
+        return -1;
+    }
+
+    // Verify signature
+    uECC_Curve curve = uECC_secp256r1();
+
+    char firmware_signature_key_hex[PUB_KEY_XY_SIZE * 2 + 1];
+    char firmware_hash_hex[32 * 2 + 1];
+    char firmware_signature_hex[PUB_KEY_XY_SIZE * 2 + 1];
+    for (int i = 0; i < PUB_KEY_XY_SIZE; i++)
+    {
+        sprintf(firmware_signature_key_hex + i * 2, "%02X", ota_data.firmware_signature_key[i]);
+    }
+    for (int i = 0; i < 32; i++)
+    {
+        sprintf(firmware_hash_hex + i * 2, "%02X", firmware_hash[i]);
+    }
+    for (int i = 0; i < PUB_KEY_XY_SIZE; i++)
+    {
+        sprintf(firmware_signature_hex + i * 2, "%02X", ota_data.firmware_signature[i]);
+    }
+    LOG(INFO, "Firmware signature key: %s", firmware_signature_key_hex);
+    LOG(INFO, "Firmware hash: %s", firmware_hash_hex);
+    LOG(INFO, "Firmware signature: %s", firmware_signature_hex);
+
+    int res = uECC_verify(ota_data.firmware_signature_key, firmware_hash, 32, ota_data.firmware_signature, curve);
+    LOG(INFO, "uECC_verify result: %d", res);
+
+    // verification failed
+    if (res <= 0)
+        return -1;
+
+    return 1;
+}
+
 void Trackle::setPublishHealthCheckInterval(uint32_t interval)
 {
     health_check_interval = interval;
@@ -1875,7 +2044,7 @@ int Trackle::connect()
             connectionPropType.ping_interval = connectionPropTypeList[connectionType].ping_interval;
         }
 
-        trackle_protocol_init(protocol, (const char *)device_id, keys, callbacks, descriptor, connectionPropType);
+        trackle_protocol_init(protocol, (const char *)t_device_id, keys, callbacks, descriptor, connectionPropType);
 
         void *t = this;
 
@@ -2028,12 +2197,12 @@ void Trackle::setProductId(int productid)
 void Trackle::setDeviceId(const uint8_t deviceid[DEVICE_ID_LENGTH])
 {
     // clear all bytes (including the termination one)
-    memset(device_id, 0x00, sizeof(device_id));
+    memset(t_device_id, 0x00, sizeof(t_device_id));
     if (deviceid)
     { // else (if NULL), just leave the all-0 bytes
-        memcpy(device_id, deviceid, DEVICE_ID_LENGTH);
+        memcpy(t_device_id, deviceid, DEVICE_ID_LENGTH);
     }
-    string_device_id = hexStr(device_id, DEVICE_ID_LENGTH);
+    string_device_id = hexStr(t_device_id, DEVICE_ID_LENGTH);
     LOG(INFO, "device_id %s", string_device_id.c_str());
 }
 
