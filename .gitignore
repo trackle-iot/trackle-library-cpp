@@ -9,3 +9,4 @@ setup_credentials.sh
 *.o
 /local_test
 /test/posix/env.sh
+/test/posix/.env

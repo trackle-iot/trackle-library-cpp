@@ -35,6 +35,38 @@ namespace trackle::protocol
         void genericBlockCompletionCallback(int error, const void *data, void *callbackData, void *reserved);
 }
 
+#ifdef _DOXYGEN_
+/**
+ * @def TRACKLE_USE_EXTERNAL_BUFFER
+ * @brief Enables the use of an external buffer for message storage.
+ *
+ * When defined via `-D TRACKLE_USE_EXTERNAL_BUFFER`, the message buffer must be provided using
+ * `trackleSetExternalBuffer()`. If this flag is set and the function is not called, the program
+ * will trigger an error.
+ *
+ */
+#define TRACKLE_USE_EXTERNAL_BUFFER
+
+/**
+ * @def TRACKLE_BLOCKS_NUMBER
+ * @brief Defines the number of blocks per message.
+ *
+ * This value must be greater than 1 and should not exceed `MAX_BLOCKS_NUMBER` (default: 32).
+ * It can be overridden at compile time using `-D TRACKLE_BLOCKS_NUMBER=<value>`.
+ */
+#define TRACKLE_BLOCKS_NUMBER 32
+
+/**
+ * @def TRACKLE_CONCURRENT_MESSAGES
+ * @brief Defines the number of concurrent messages that can be handled simultaneously.
+ *
+ * This value should not exceed `MAX_CONCURRENT_MESSAGES` (default: 4).
+ * It can be overridden at compile time using `-D TRACKLE_CONCURRENT_MESSAGES=<value>`.
+ */
+
+#define TRACKLE_CONCURRENT_MESSAGES 4
+#endif
+
 class Trackle
 {
 
@@ -394,6 +426,16 @@ public:
          */
         void setSendPublishCallback(publishSendCallback *publish);
 
+#ifdef TRACKLE_USE_EXTERNAL_BUFFER
+        /**
+         * @brief Sets an external buffer for message blocks storage.
+         *
+         * @param extBuffer Pointer to the external buffer.
+         * @param size Size of the externl buffer.
+         * @return true if the buffer was successfully set, false otherwise.
+         */
+        bool setExternalBuffer(uint8_t *extBuffer, size_t size);
+#endif
         /**
          * @brief This function sets the callback function that will be called when it's ready to start a firmware update.
          *
@@ -674,7 +716,7 @@ public:
          * @param firmwarebuild The firmware build of the product.
          */
         void setFirmwareBuild(int firmwarebuild);
-        
+
         /**
          * @brief This sets the product id of Trackle.
          *

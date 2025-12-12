@@ -26,9 +26,28 @@
 #include "events.h"
 #include "defines.h"
 
-#define MAX_BLOCK_SIZE 1024
-#define MAX_BLOCKS_NUMBER 4
-#define MAX_CONCURRENT_MESSAGES 4
+// Maximum allowed values
+#define MAX_CONCURRENT_MESSAGES 4 // Maximum number of concurrent messages
+#define MAX_BLOCK_SIZE 1024       // Maximum block size
+#define MAX_BLOCKS_NUMBER 32      // Maximum number of blocks per packet
+
+// Default values (used if not overridden at compile time)
+#define DEFAULT_BLOCK_NUMBER 4        // Default number of blocks per packet
+#define DEFAULT_CONCURRENT_MESSAGES 4 // Default number of concurrent messages
+
+// If TRACKLE_BLOCKS_NUMBER is defined at compile time and is valid, use it; otherwise, use the default
+#if defined(TRACKLE_BLOCKS_NUMBER) && (TRACKLE_BLOCKS_NUMBER > 0) && (TRACKLE_BLOCKS_NUMBER <= MAX_BLOCKS_NUMBER)
+#define BLOCKS_NUMBER TRACKLE_BLOCKS_NUMBER
+#else
+#define BLOCKS_NUMBER DEFAULT_BLOCK_NUMBER
+#endif
+
+// If TRACKLE_CONCURRENT_MESSAGES is defined at compile time and is valid, use it; otherwise, use the default
+#if defined(TRACKLE_CONCURRENT_MESSAGES) && (TRACKLE_CONCURRENT_MESSAGES > 0) && (TRACKLE_CONCURRENT_MESSAGES <= MAX_CONCURRENT_MESSAGES)
+#define CONCURRENT_MESSAGES TRACKLE_CONCURRENT_MESSAGES
+#else
+#define CONCURRENT_MESSAGES DEFAULT_CONCURRENT_MESSAGES
+#endif
 
 namespace trackle
 {
@@ -50,10 +69,14 @@ namespace trackle
             return buf[0];
         }
 
-        // Publish messages cache
+        // Struttura per la gestione dei messaggi
         typedef struct
         {
-            uint8_t buffer[(MAX_BLOCK_SIZE - 1) * MAX_BLOCKS_NUMBER];
+#ifdef TRACKLE_USE_EXTERNAL_BUFFER
+            uint8_t *buffer; // Puntatore a un buffer esterno
+#else
+            uint8_t buffer[MAX_BLOCK_SIZE * (BLOCKS_NUMBER - 1)]; // Buffer interno
+#endif
             bool transmissionRunning;
             size_t totBytesNumber;
             size_t totBlockNumber;
@@ -63,18 +86,22 @@ namespace trackle
             std::string eventName;
             int ttl;
             uint32_t flags;
-            publishCompletionCallback* completionCb; // Callback called on last block
+            publishCompletionCallback *completionCb; // Callback called on last block
         } block_messages_data;
+
+#ifdef TRACKLE_USE_EXTERNAL_BUFFER
+        bool trackle_set_external_buffer(uint8_t *extBuffer, size_t blocksNumber);
+#endif
 
         block_messages_data *trackle_get_free_block();
         block_messages_data *trackle_get_block_by_token(uint8_t token);
+        uint8_t trackle_get_blocks_number();
 
 #define RESPONSE_CODE(x, y) (x << 5 | y)
 
         class Messages
         {
         public:
-
             static CoAPMessageType::Enum decodeType(const uint8_t *buf, size_t length);
             static size_t describe_post_header(uint8_t buf[], size_t buffer_size, uint16_t message_id, uint8_t desc_flags);
             static size_t hello(uint8_t *buf, message_id_t message_id, uint8_t flags,
@@ -114,9 +141,9 @@ namespace trackle
                                                          unsigned char token, unsigned char code, unsigned char *payload,
                                                          unsigned payload_len, bool confirmable);
 
-            static size_t event(uint8_t buf[], uint16_t message_id, uint8_t token, const char *event_name, 
-										  const char *data, uint16_t length, int ttl, uint8_t block_id, 
-										  uint8_t block_num, EventType::Enum event_type, bool confirmable);
+            static size_t event(uint8_t buf[], uint16_t message_id, uint8_t token, const char *event_name,
+                                const char *data, uint16_t length, int ttl, uint8_t block_id,
+                                uint8_t block_num, EventType::Enum event_type, bool confirmable);
 
             static inline size_t empty_ack(unsigned char *buf,
                                            unsigned char message_id_msb,

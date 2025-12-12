@@ -1,10 +1,10 @@
 #include "messages.h"
+#include "logging.h"
 
 namespace trackle
 {
 	namespace protocol
 	{
-
 		CoAPMessageType::Enum Messages::decodeType(const uint8_t *buf, size_t length)
 		{
 			if (length < 4)
@@ -349,7 +349,14 @@ namespace trackle
 			p += event_name_uri_path(p, event_name, name_data_len);
 
 			// Block1 option if no TTL option
-			uint8_t block1_opt_delta[2] = {0xd1, 0x03};
+			uint8_t block1_opt_delta[2] = {0xd2, 0x03};
+			// block1 is first option, so delta 27. 0xXY, Y is length
+			// second byte is delta extension if different from previous option is > 12
+
+			//   0   1   2   3   4   5   6   7
+			// +---------------+---------------+
+			// |  Option Delta | Option Length |   1 byte
+			// +---------------+---------------+
 
 			if (60 != ttl)
 			{
@@ -359,8 +366,11 @@ namespace trackle
 				*p++ = ttl & 0xff;
 
 				// Block1 option if TTL option before
-				block1_opt_delta[0] = 0xd1;
+				block1_opt_delta[0] = 0xd2;
 				block1_opt_delta[1] = 0x00;
+
+				// different from previous option (max-age) is 13
+				// so 1 byte extra
 			}
 
 			// Specify block1 option value
@@ -369,13 +379,14 @@ namespace trackle
 				*p++ = block1_opt_delta[0];
 				*p++ = block1_opt_delta[1];
 
-				uint8_t blockOptByte = 0x06;	// 1024 bytes block size
-				blockOptByte |= block_id << 4;	// put actual block sequence number in first 4 bits
-				if ((block_id + 1) < block_num) // block_id starts from 0
+				uint16_t blockOptByte = 0x0006;			  // 1024 bytes block size
+				blockOptByte |= (block_id & 0x0FFF) << 4; // put actual block sequence number in first 4 bits
+				if ((block_id + 1) < block_num)			  // block_id starts from 0
 				{
-					blockOptByte |= 0x08; // if NOT last block, set 4th bit to 1 ("MORE blocks follow")
+					blockOptByte |= 0x0008; // if NOT last block, set 4th bit to 1 ("MORE blocks follow")
 				}
-				*p++ = blockOptByte;
+				*p++ = (blockOptByte >> 8) & 0xFF;
+				*p++ = blockOptByte & 0xFF;
 			}
 
 			// Copy payload block in packet
@@ -404,11 +415,58 @@ namespace trackle
 			return sz;
 		}
 
-		block_messages_data block_messages[MAX_CONCURRENT_MESSAGES];
+		block_messages_data block_messages[CONCURRENT_MESSAGES]; // Static array
+
+#ifdef TRACKLE_USE_EXTERNAL_BUFFER
+
+		// Flag to check if the external buffer has been set
+		static bool externalBufferSet = false;
+
+		bool trackle_set_external_buffer(uint8_t *extBuffer, size_t size)
+		{
+			// Validate the provided buffer pointer
+			if (extBuffer == NULL)
+			{
+				LOG(ERROR, "extBuffer can't be NULL");
+				return false; // Invalid buffer
+			}
+
+			// Calculate the required buffer size
+			size_t requiredSize = CONCURRENT_MESSAGES * MAX_BLOCK_SIZE * (BLOCKS_NUMBER - 1);
+
+			// Validate blocksNumber (must be greater than 1 and within limits)
+			if (size < requiredSize)
+			{
+				LOG(ERROR, "External buffer size must be between at least %d bytes", requiredSize);
+				return false; // Invalid size
+			}
+
+			// Assign external buffer to each concurrent message
+			for (size_t i = 0; i < CONCURRENT_MESSAGES; i++)
+			{
+				block_messages[i].buffer = extBuffer + (i * MAX_BLOCK_SIZE * (BLOCKS_NUMBER - 1));
+			}
+
+			// Mark the external buffer as set
+			externalBufferSet = true;
+
+			return true; // Successfully set the buffer
+		}
+
+#endif
 
 		block_messages_data *trackle_get_free_block()
 		{
-			for (uint8_t i = 0; i < MAX_CONCURRENT_MESSAGES; i++)
+
+#ifdef TRACKLE_USE_EXTERNAL_BUFFER
+			if (!externalBufferSet)
+			{
+				LOG(ERROR, "setExternalBuffer must be called before using block_messages!");
+				return NULL;
+			}
+#endif
+
+			for (uint8_t i = 0; i < CONCURRENT_MESSAGES; i++)
 			{
 				if (block_messages[i].transmissionRunning == false)
 				{
@@ -421,7 +479,7 @@ namespace trackle
 
 		block_messages_data *trackle_get_block_by_token(uint8_t token)
 		{
-			for (uint8_t i = 0; i < MAX_CONCURRENT_MESSAGES; i++)
+			for (uint8_t i = 0; i < CONCURRENT_MESSAGES; i++)
 			{
 				if (block_messages[i].token == token)
 				{
@@ -430,6 +488,11 @@ namespace trackle
 			}
 
 			return NULL;
+		}
+
+		uint8_t trackle_get_blocks_number()
+		{
+			return BLOCKS_NUMBER;
 		}
 
 	}

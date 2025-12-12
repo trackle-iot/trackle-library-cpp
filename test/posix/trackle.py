@@ -182,6 +182,9 @@ register_get_json = __lib.TestAuxFun_trackleGetJson
 register_get_json.argtypes = (ctypes.c_void_p, ctypes.c_char_p, GET_JSON_CB)
 register_get_json.restype = ctypes.c_bool
 
+register_set_external_buffer = __lib.TestAuxFun_tracklSetExternalBuffer
+register_set_external_buffer.argtypes = [ctypes.c_void_p]
+register_set_external_buffer.restype = ctypes.c_bool
 
 publish = __lib.tracklePublish
 publish.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int, ctypes.c_int,

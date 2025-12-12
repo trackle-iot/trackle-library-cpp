@@ -1,0 +1,60 @@
+name: Publish release to dedicated branch on tag
+on:
+    push:
+        tags: ["v*.*.*"]
+env:
+    DEVELOPMENT_BRANCH: v4
+    RELEASE_BRANCH: release/v4
+    VERSION_FILEPATH: include/version.h
+    SOFTWARE_NAME: Trackle Library
+jobs:
+    publish_to_release_branch:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Take release version string from tag
+              run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+            - name: Clone repository
+              run: git clone https://github.com/${GITHUB_REPOSITORY}.git working-tree
+            - name: Initialize mandatory git config
+              working-directory: working-tree
+              run: |
+                  git config user.name "GitHub Actions"
+                  git config user.email noreply@github.com
+            - name: Switch to development branch
+              working-directory: working-tree
+              run: git switch $DEVELOPMENT_BRANCH
+            - name: Switch to release branch
+              working-directory: working-tree
+              run: git switch $RELEASE_BRANCH
+            - name: Merge squash development branch into release branch
+              working-directory: working-tree
+              run: git merge -s recursive -Xtheirs --squash --allow-unrelated-histories $DEVELOPMENT_BRANCH
+            - name: Make version header file from tag
+              working-directory: working-tree
+              run: |
+                  echo -ne "// Version of the current ${SOFTWARE_NAME} release\n" > $VERSION_FILEPATH
+                  echo -ne "#define VERSION_MAJOR " >> $VERSION_FILEPATH
+                  echo -ne ${RELEASE_VERSION:1} | cut -d'.' -f1 >> $VERSION_FILEPATH
+                  echo -ne "#define VERSION_MINOR " >> $VERSION_FILEPATH
+                  echo -ne ${RELEASE_VERSION:1} | cut -d'.' -f2 >> $VERSION_FILEPATH
+                  echo -ne "#define VERSION_PATCH " >> $VERSION_FILEPATH
+                  echo -ne ${RELEASE_VERSION:1} | cut -d'.' -f3 >> $VERSION_FILEPATH
+            - name: Remove Github Workflows folder
+              working-directory: working-tree
+              run: rm -rf .github
+            - name: Add changes to stage
+              working-directory: working-tree
+              run: git add .
+            - name: Perform commit
+              working-directory: working-tree
+              run: git commit -m "${SOFTWARE_NAME} release ${RELEASE_VERSION}"
+            - name: Tag commit in releases branch
+              working-directory: working-tree
+              run: git tag "release-${RELEASE_VERSION}"
+            - name: Push changes
+              uses: ad-m/github-push-action@master
+              with:
+                github_token: ${{ secrets.GITHUB_TOKEN }}
+                branch: ${{ env.RELEASE_BRANCH }}
+                directory: working-tree
+                tags: true
