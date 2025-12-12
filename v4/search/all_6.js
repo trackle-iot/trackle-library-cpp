@@ -8,6 +8,7 @@ var searchData=
   ['firmware_5fsignature_5',['firmware_signature',['../struct__ota__data.html#a47ce354889225f034a5b840b81a5f237',1,'_ota_data']]],
   ['firmware_5fsignature_5fkey_6',['firmware_signature_key',['../struct__ota__data.html#a5c6a797a894439ff519ae86b95a70a9d',1,'_ota_data']]],
   ['firmwarechunkcb_7',['firmwareChunkCb',['../trackle_8cpp.html#a6e60ac29fdab8b5df355ced13325d1b1',1,'trackle.cpp']]],
-  ['funcs_8',['funcs',['../trackle_8cpp.html#a3ec629319e81f0a5a840c68da7582feb',1,'trackle.cpp']]],
-  ['funct_9',['funct',['../struct_cloud_variable_type_base.html#a157aa3e2e5dbc93eeefdd85e5d6d44bc',1,'CloudVariableTypeBase']]]
+  ['for_20ota_20verification_8',['Generating Public/Private Key Pair for OTA Verification',['../md__r_e_a_d_m_e.html#autotoc_md9',1,'']]],
+  ['funcs_9',['funcs',['../trackle_8cpp.html#a3ec629319e81f0a5a840c68da7582feb',1,'trackle.cpp']]],
+  ['funct_10',['funct',['../struct_cloud_variable_type_base.html#a157aa3e2e5dbc93eeefdd85e5d6d44bc',1,'CloudVariableTypeBase']]]
 ];

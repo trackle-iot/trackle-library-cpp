@@ -46,12 +46,13 @@ var searchData=
   ['setsystemrebootcallback_43',['setSystemRebootCallback',['../class_trackle.html#acd60b64a2a4200180c0f8e9fa9bfdbce',1,'Trackle']]],
   ['setsystemtimecallback_44',['setSystemTimeCallback',['../class_trackle.html#a1345a8053da5e10afb204f08126336ca',1,'Trackle']]],
   ['setupdatestatecallback_45',['setUpdateStateCallback',['../class_trackle.html#a2f7f0bddc9aaedc051df44adc8ee67d5',1,'Trackle']]],
-  ['started_20in_20c_46',['started in c',['../md__r_e_a_d_m_e.html#autotoc_md10',1,'Getting started in C'],['../md__r_e_a_d_m_e.html#autotoc_md9',1,'Getting started in C++']]],
-  ['string_5fdevice_5fid_47',['string_device_id',['../trackle_8cpp.html#a24b9436c487048daeff95f9a08664a82',1,'trackle.cpp']]],
-  ['stringvartype_48',['stringVarType',['../struct_cloud_variable_type_base.html#ac037aef01dc9ec294f68516a31baaba9',1,'CloudVariableTypeBase']]],
-  ['subscribe_49',['subscribe',['../class_trackle.html#ae0944b6362a5abfbdbb8b64aa79a6685',1,'Trackle::subscribe(const char *eventName, EventHandler handler, Subscription_Scope_Type scope, const char *deviceId)'],['../class_trackle.html#a239297875ba0d84276e5e81fb254ad93',1,'Trackle::subscribe(const char *eventName, EventHandler handler, const char *deviceID)'],['../class_trackle.html#ada40eded74c3c3b8416cd90417568afb',1,'Trackle::subscribe(const char *eventName, EventHandler handler, Subscription_Scope_Type scope)'],['../class_trackle.html#a289568e886c6c98f52a14ef764c57471',1,'Trackle::subscribe(const char *eventName, EventHandler handler)']]],
-  ['subscribe_5ftrackle_5fhandler_50',['subscribe_trackle_handler',['../trackle_8cpp.html#a80eabf860c7dcb199cf7596574e44fad',1,'trackle.cpp']]],
-  ['supported_20hardware_51',['Supported hardware',['../md__r_e_a_d_m_e.html#autotoc_md4',1,'']]],
-  ['syncstate_52',['syncstate',['../class_trackle.html#adc9f72fa41ec0c337ae2388893dee60d',1,'Trackle::syncState(const char *data)'],['../class_trackle.html#a5f2e80c6b40956607088d4cfead18d5f',1,'Trackle::syncState(string data)']]],
-  ['systemrebootcb_53',['systemRebootCb',['../trackle_8cpp.html#a1a7df48d9f52cfee46e2265973df1c0c',1,'trackle.cpp']]]
+  ['started_20in_20c_46',['started in c',['../md__r_e_a_d_m_e.html#autotoc_md12',1,'Getting started in C'],['../md__r_e_a_d_m_e.html#autotoc_md11',1,'Getting started in C++']]],
+  ['steps_20to_20generate_20keys_20and_20configure_20ota_20verification_47',['Steps to generate keys and configure OTA verification',['../md__r_e_a_d_m_e.html#autotoc_md10',1,'']]],
+  ['string_5fdevice_5fid_48',['string_device_id',['../trackle_8cpp.html#a24b9436c487048daeff95f9a08664a82',1,'trackle.cpp']]],
+  ['stringvartype_49',['stringVarType',['../struct_cloud_variable_type_base.html#ac037aef01dc9ec294f68516a31baaba9',1,'CloudVariableTypeBase']]],
+  ['subscribe_50',['subscribe',['../class_trackle.html#ae0944b6362a5abfbdbb8b64aa79a6685',1,'Trackle::subscribe(const char *eventName, EventHandler handler, Subscription_Scope_Type scope, const char *deviceId)'],['../class_trackle.html#a239297875ba0d84276e5e81fb254ad93',1,'Trackle::subscribe(const char *eventName, EventHandler handler, const char *deviceID)'],['../class_trackle.html#ada40eded74c3c3b8416cd90417568afb',1,'Trackle::subscribe(const char *eventName, EventHandler handler, Subscription_Scope_Type scope)'],['../class_trackle.html#a289568e886c6c98f52a14ef764c57471',1,'Trackle::subscribe(const char *eventName, EventHandler handler)']]],
+  ['subscribe_5ftrackle_5fhandler_51',['subscribe_trackle_handler',['../trackle_8cpp.html#a80eabf860c7dcb199cf7596574e44fad',1,'trackle.cpp']]],
+  ['supported_20hardware_52',['Supported hardware',['../md__r_e_a_d_m_e.html#autotoc_md4',1,'']]],
+  ['syncstate_53',['syncstate',['../class_trackle.html#adc9f72fa41ec0c337ae2388893dee60d',1,'Trackle::syncState(const char *data)'],['../class_trackle.html#a5f2e80c6b40956607088d4cfead18d5f',1,'Trackle::syncState(string data)']]],
+  ['systemrebootcb_54',['systemRebootCb',['../trackle_8cpp.html#a1a7df48d9f52cfee46e2265973df1c0c',1,'trackle.cpp']]]
 ];

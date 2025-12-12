@@ -114,6 +114,10 @@ Table of contents</h1>
 <li>Download</li>
 <li>Usage and API<ul>
 <li>Get a Device ID and a private key</li>
+<li>Generating Public/Private Key Pair for OTA Verification</li>
+</ul>
+</li>
+<li>Steps to generate keys and configure OTA verification<ul>
 <li>Getting started in C++</li>
 <li>Getting started in C</li>
 <li>Trackle client</li>
@@ -151,6 +155,22 @@ Get a Device ID and a private key</h3>
 <li>The Device Id will be shown on the screen and the private key file will be download with name &lt;device_id&gt;.der where &lt;device_id&gt; is Device ID taken from <a class="el" href="class_trackle.html">Trackle</a>.</li>
 </ul>
 <h3><a class="anchor" id="autotoc_md9"></a>
+Generating Public/Private Key Pair for OTA Verification</h3>
+<p><a class="el" href="class_trackle.html">Trackle</a> OTA verification uses an <b>ECC P-256 (secp256r1)</b> public/private key pair. The <b>private key</b> is used to sign the firmware, while the <b>public key</b> is embedded in your firmware to verify the signature.</p>
+<h2><a class="anchor" id="autotoc_md10"></a>
+Steps to generate keys and configure OTA verification</h2>
+<div class="fragment"><div class="line"># 1) Generate the private key</div>
+<div class="line">openssl ecparam -name prime256v1 -genkey -noout -out private.pem</div>
+<div class="line"> </div>
+<div class="line"># 2) Generate the public key (PEM format)</div>
+<div class="line">openssl ec -in private.pem -pubout -out public.pem</div>
+<div class="line"> </div>
+<div class="line"># 3) Export the public key in DER format</div>
+<div class="line">openssl ec -in private.pem -pubout -outform DER -out public.der</div>
+<div class="line"> </div>
+<div class="line"># 4) Convert the DER public key into a C array</div>
+<div class="line">xxd -i public.der &gt; firmware_key.c</div>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md11"></a>
 Getting started in C++</h3>
 <p>Here is a very simple C++ example that create a client and connect it to <a class="el" href="class_trackle.html">Trackle</a> cloud</p>
 <div class="fragment"><div class="line">#include &quot;trackle.h&quot;</div>
@@ -158,6 +178,13 @@ Getting started in C++</h3>
 <div class="line">#include &lt;sys/types.h&gt;</div>
 <div class="line">#include &lt;sys/socket.h&gt;</div>
 <div class="line">#include &lt;netinet/in.h&gt;</div>
+<div class="line">#include &lt;arpa/inet.h&gt;</div>
+<div class="line">#include &lt;netdb.h&gt;</div>
+<div class="line">#include &lt;unistd.h&gt;</div>
+<div class="line">#include &lt;errno.h&gt;</div>
+<div class="line">#include &lt;stdio.h&gt;</div>
+<div class="line">#include &lt;string.h&gt;</div>
+<div class="line">#include &lt;time.h&gt;</div>
 <div class="line">...</div>
 <div class="line"> </div>
 <div class="line">unsigned char private_key[PRIVATE_KEY_LENGTH] = { ... };</div>
@@ -205,16 +232,17 @@ Getting started in C++</h3>
 <div class="line">    cloud_addr.sin_port = htons(port);</div>
 <div class="line">    addr_family = AF_INET;</div>
 <div class="line">    ip_protocol = IPPROTO_IP;</div>
-<div class="line">    inet_ntoa_r(cloud_addr.sin_addr, addr_str, sizeof(addr_str) - 1);</div>
+<div class="line">    inet_ntop(AF_INET, &amp;cloud_addr.sin_addr, addr_str, sizeof(addr_str));</div>
 <div class="line"> </div>
 <div class="line">    cloud_socket = socket(addr_family, SOCK_DGRAM, ip_protocol);</div>
 <div class="line">    if (cloud_socket &lt; 0)</div>
 <div class="line">    {</div>
 <div class="line">        printf(&quot;Unable to create socket: errno %d&quot;, errno);</div>
+<div class="line">        return -1;</div>
 <div class="line">    }</div>
-<div class="line">    printf(&quot;Socket created, sending to %s:%d&quot;, address, port);</div>
+<div class="line">    printf(&quot;Socket created, sending to %s:%d&quot;, addr_str, port);</div>
 <div class="line"> </div>
-<div class="line">    // setto i timeout di lettura/scrittura del socket</div>
+<div class="line">    // set socket read/write timeouts</div>
 <div class="line">    struct timeval socket_timeout;</div>
 <div class="line">    socket_timeout.tv_sec = 0;</div>
 <div class="line">    socket_timeout.tv_usec = 1000; // 1ms</div>
@@ -264,7 +292,7 @@ Getting started in C++</h3>
 <div class="line">    trackle.setDeviceId(device_id);</div>
 <div class="line">    trackle.setKeys(private_key);</div>
 <div class="line"> </div>
-<div class="line">    // configurazione delle callback</div>
+<div class="line">    // configure callbacks</div>
 <div class="line">    trackle.setMillis(getMillis);</div>
 <div class="line">    trackle.setSendCallback(send_cb_udp);</div>
 <div class="line">    trackle.setReceiveCallback(receive_cb_udp);</div>
@@ -281,7 +309,7 @@ Getting started in C++</h3>
 <div class="line"> </div>
 <div class="line">    return 0;</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md10"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md12"></a>
 Getting started in C</h3>
 <p>Here is a very simple C example that create a client and connect it to <a class="el" href="class_trackle.html">Trackle</a> cloud</p>
 <div class="fragment"><div class="line">#include &quot;trackle_interface.h&quot;</div>
@@ -289,6 +317,13 @@ Getting started in C</h3>
 <div class="line">#include &lt;sys/types.h&gt;</div>
 <div class="line">#include &lt;sys/socket.h&gt;</div>
 <div class="line">#include &lt;netinet/in.h&gt;</div>
+<div class="line">#include &lt;arpa/inet.h&gt;</div>
+<div class="line">#include &lt;netdb.h&gt;</div>
+<div class="line">#include &lt;unistd.h&gt;</div>
+<div class="line">#include &lt;errno.h&gt;</div>
+<div class="line">#include &lt;stdio.h&gt;</div>
+<div class="line">#include &lt;string.h&gt;</div>
+<div class="line">#include &lt;time.h&gt;</div>
 <div class="line">...</div>
 <div class="line"> </div>
 <div class="line">unsigned char private_key[PRIVATE_KEY_LENGTH] = { ... };</div>
@@ -336,16 +371,17 @@ Getting started in C</h3>
 <div class="line">    cloud_addr.sin_port = htons(port);</div>
 <div class="line">    addr_family = AF_INET;</div>
 <div class="line">    ip_protocol = IPPROTO_IP;</div>
-<div class="line">    inet_ntoa_r(cloud_addr.sin_addr, addr_str, sizeof(addr_str) - 1);</div>
+<div class="line">    inet_ntop(AF_INET, &amp;cloud_addr.sin_addr, addr_str, sizeof(addr_str));</div>
 <div class="line"> </div>
 <div class="line">    cloud_socket = socket(addr_family, SOCK_DGRAM, ip_protocol);</div>
 <div class="line">    if (cloud_socket &lt; 0)</div>
 <div class="line">    {</div>
 <div class="line">        printf(&quot;Unable to create socket: errno %d&quot;, errno);</div>
+<div class="line">        return -1;</div>
 <div class="line">    }</div>
-<div class="line">    printf(&quot;Socket created, sending to %s:%d&quot;, address, port);</div>
+<div class="line">    printf(&quot;Socket created, sending to %s:%d&quot;, addr_str, port);</div>
 <div class="line"> </div>
-<div class="line">    // setto i timeout di lettura/scrittura del socket</div>
+<div class="line">    // set socket read/write timeouts</div>
 <div class="line">    struct timeval socket_timeout;</div>
 <div class="line">    socket_timeout.tv_sec = 0;</div>
 <div class="line">    socket_timeout.tv_usec = 1000; // 1ms</div>
@@ -392,13 +428,13 @@ Getting started in C</h3>
 <div class="line"> </div>
 <div class="line">int main(int argc, char *argv[]) {</div>
 <div class="line"> </div>
-<div class="line">    // dichiarazione della libreria</div>
+<div class="line">    // initialize the library</div>
 <div class="line">    trackle_s = newTrackle();</div>
 <div class="line"> </div>
 <div class="line">    trackleSetDeviceId(trackle_s, device_id);</div>
 <div class="line">    trackleSetKeys(trackle_s, private_key);</div>
 <div class="line"> </div>
-<div class="line">    // configurazione delle callback</div>
+<div class="line">    // configure callbacks</div>
 <div class="line">    trackleSetMillis(trackle_s, getMillis);</div>
 <div class="line">    trackleSetSendCallback(trackle_s, send_cb_udp);</div>
 <div class="line">    trackleSetReceiveCallback(trackle_s, receive_cb_udp);</div>
@@ -415,13 +451,13 @@ Getting started in C</h3>
 <div class="line"> </div>
 <div class="line">    return 0;</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md11"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md13"></a>
 Trackle client</h3>
 <p>The minimal usage flow for <a class="el" href="class_trackle.html">Trackle</a> client is as follows (C++ and C):</p>
 <ul>
 <li><b>trackle.setDeviceId(device_id) - trackleSetDeviceId(trackle_s, device_id)</b>: set a deviceId to the client. Follow Get a Device ID and a private key instructions.</li>
 <li><b>trackle.setKeys(private_key) - trackleSetKeys(trackle_s, private_key)</b>: set a private key to the client. Follow Get a Device ID and a private key instructions.</li>
-<li><p class="startli"><b>trackle.setMillis(getMillis) - trackleSetMillis(trackle_s, getMillis)</b>: configure a callback that return the number of milliseconds at the time, the esp32 begins running the current program</p>
+<li><p class="startli"><b>trackle.setMillis(getMillis) - trackleSetMillis(trackle_s, getMillis)</b>: configure a callback that returns the number of milliseconds since the device started running the current program</p>
 <p class="startli"><b>CRITICAL! This callback is mandatory and must be declared at the onset of library usage, preceding all others, as both the library's working and logs hinge on this callback.</b></p>
 </li>
 <li><b>trackle.setSendCallback(send_cb_udp) - trackleSetSendCallback(trackle_s, send_cb_udp)</b>: configure a callback to write on udp cloud socket</li>
