@@ -40,7 +40,7 @@ using namespace trackle::protocol;
 #define PUB_KEY_MARKER 0x04
 #define PUB_KEY_XY_SIZE 64
 
-#define DEFAULT_CONNECTION_TIMEOUT 1000
+#define DEFAULT_CONNECTION_TIMEOUT 5000
 #define RECONNECTION_TIMEOUT 3750
 #define MAX_RECONNECTION_RETRY_INCREMENT 4 // 2^4 * 3750 = 60 seconds
 uint16_t connection_retry = 0;
@@ -216,7 +216,7 @@ void increase_connection_timeout()
 }
 
 /**
- * Resets the connection timeout to 1000 milliseconds and the connection retry to 0.
+ * Resets the connection timeout to 5000 milliseconds and the connection retry to 0.
  */
 void reset_connection_timeout()
 {
@@ -1130,6 +1130,11 @@ void HAL_OTA_Flashed_ResetStatus(void) {}
 TrackleReturnType::Enum wrapVarTypeInEnum(const char *varKey)
 {
     CloudVariableTypeBase *item = find_var_by_key(varKey);
+    if (!item)
+    {
+        LOG(WARN, "wrapVarTypeInEnum: unknown variable \"%s\"", varKey ? varKey : "(null)");
+        return TrackleReturnType::INT;
+    }
     if (item->userVarType == VAR_BOOLEAN)
     {
         return TrackleReturnType::BOOLEAN;
@@ -1179,6 +1184,12 @@ int num_functions(void)
 const char *getUserFunctionKey(int function_index)
 {
     LOG(TRACE, "getUserFunctionKey");
+    if (function_index < 0 || function_index >= (int)funcs.size())
+    {
+        LOG(WARN, "getUserFunctionKey: index %d out of range (size %d)",
+            function_index, (int)funcs.size());
+        return "";
+    }
     return funcs[function_index].userFuncKey;
 }
 
@@ -1287,6 +1298,12 @@ int numUserVariables(void)
 const char *getUserVariableKey(int variable_index)
 {
     LOG(TRACE, "getUserVariableKey");
+    if (variable_index < 0 || variable_index >= (int)vars.size())
+    {
+        LOG(WARN, "getUserVariableKey: index %d out of range (size %d)",
+            variable_index, (int)vars.size());
+        return "";
+    }
     return vars[variable_index].userVarKey;
 }
 /**
@@ -1299,6 +1316,11 @@ const char *getUserVariableKey(int variable_index)
 const void *getUserVar(const char *varKey)
 {
     CloudVariableTypeBase *item = find_var_by_key(varKey);
+    if (!item)
+    {
+        LOG(WARN, "getUserVar: unknown variable \"%s\"", varKey ? varKey : "(null)");
+        return NULL;
+    }
     return (const void *)item->funct;
 }
 
@@ -1376,6 +1398,11 @@ void printType(const char *varKey)
 {
 
     CloudVariableTypeBase *item = find_var_by_key(varKey);
+    if (!item)
+    {
+        LOG(WARN, "printType: unknown variable \"%s\"", varKey ? varKey : "(null)");
+        return;
+    }
 
     if (item->userVarType == VAR_BOOLEAN)
     {
@@ -1513,6 +1540,8 @@ void connectionError(int error_type, bool force = false)
             LOG(ERROR, "Cloud connection error %d, %lu", error_type, millis_last_disconnection);
 
         setConnectionStatus(SOCKET_NOT_CONNECTED);
+        if (trackle_protocol_is_initialized(protocol))
+            trackle_protocol_command(protocol, ProtocolCommands::DISCONNECT);
         (*disconnectCb)();
     }
 }
@@ -2115,6 +2144,8 @@ void Trackle::disconnect()
 {
     connectToCloud = false;
     setConnectionStatus(SOCKET_NOT_CONNECTED);
+    if (trackle_protocol_is_initialized(protocol))
+        trackle_protocol_command(protocol, ProtocolCommands::DISCONNECT);
     (*disconnectCb)();
 }
 
