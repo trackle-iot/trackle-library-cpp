@@ -177,25 +177,36 @@ namespace trackle
 
             // get variable value according to type using the descriptor
             TrackleReturnType::Enum var_type = variable_type(variable_key);
+            const void *var_fn = get_variable(variable_key);
+            if (!var_fn)
+            {
+                LOG(WARN, "GET variable request failed: variable '%s' not found, returning 404 Not Found", variable_key);
+                Message response;
+                channel.response(message, response, 16);
+                size_t response_length = Messages::coded_ack(response.buf(), RESPONSE_CODE(4, 4), 0, 0); // NOT_FOUND
+                response.set_id(message_id);
+                response.set_length(response_length);
+                return channel.send(response);
+            }
 
             // Handle non-string types (BOOLEAN, INT, DOUBLE) - simple response
                 if (TrackleReturnType::BOOLEAN == var_type)
                 {
-                    const bool result = ((user_variable_bool_cb_t)(get_variable(variable_key)))(variable_arg, variable_key);
+                    const bool result = ((user_variable_bool_cb_t)(var_fn))(variable_arg, variable_key);
                     size_t response = Messages::variable_value(queue, message_id, token, result);
                     message.set_length(response);
                     return channel.send(message);
                 }
                 else if (TrackleReturnType::INT == var_type)
                 {
-                    const int32_t result = ((user_variable_int32_cb_t)(get_variable(variable_key)))(variable_arg, variable_key);
+                    const int32_t result = ((user_variable_int32_cb_t)(var_fn))(variable_arg, variable_key);
                     size_t response = Messages::variable_value(queue, message_id, token, result);
                     message.set_length(response);
                     return channel.send(message);
                 }
                 else if (TrackleReturnType::DOUBLE == var_type)
                 {
-                    const double result = ((user_variable_double_cb_t)(get_variable(variable_key)))(variable_arg, variable_key);
+                    const double result = ((user_variable_double_cb_t)(var_fn))(variable_arg, variable_key);
                     size_t response = Messages::variable_value(queue, message_id, token, result);
                     message.set_length(response);
                     return channel.send(message);
@@ -210,7 +221,7 @@ namespace trackle
                     if (is_first_request)
                     {
                         // First request - get variable value from callback
-                        str_val = ((user_variable_char_cb_t)(get_variable(variable_key)))(variable_arg, variable_key);
+                        str_val = ((user_variable_char_cb_t)(var_fn))(variable_arg, variable_key);
                         if (!str_val)
                         {
                             LOG(WARN, "GET variable request failed: variable '%s' callback returned NULL, returning 404 Not Found", variable_key);
