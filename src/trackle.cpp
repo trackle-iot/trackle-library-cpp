@@ -193,12 +193,12 @@ Connection_Status_Type connectionStatus = SOCKET_NOT_CONNECTED;
 int cloudStatus = -1;
 
 trackle::protocol::Connection_Properties_Type connectionPropTypeList[5] = {
-    {30, 10, 2},  // UNDEFINED
-    {30, 10, 2},  // WIFI
-    {30, 10, 2},  // ETHERNET
-    {30, 10, 2},  // CELLULAR
-    {150, 20, 5}, // LPWA
-}; // in seconds
+    {30, 2, 10, 2},  // UNDEFINED
+    {30, 2, 10, 2},  // WIFI
+    {30, 2, 10, 2},  // ETHERNET
+    {30, 10, 10, 2}, // CELLULAR
+    {150, 2, 20, 5}, // LPWA
+}; // dumb_ping_interval and timeouts in seconds; coap_ping_ratio = CoAP ping every N dumb pings
 
 /**
  * The function increases the connection timeout with each retry  by a factor of 2
@@ -225,6 +225,7 @@ void reset_connection_timeout()
 }
 
 uint32_t pingInterval = 0;
+uint8_t coapPingRatio = 0;
 Connection_Type connectionType = CONNECTION_TYPE_UNDEFINED;
 trackle::protocol::Connection_Properties_Type connectionPropType;
 
@@ -1316,7 +1317,7 @@ bool appendSystemInfo(appender_fn appender, void *append, void *reserved)
     product_details_t details;
     details.size = sizeof(details);
 
-    string json = "\"i\":" + int_to_string(connectionPropType.ping_interval) + "." + int_to_string(connectionType) + ",\"o\":" + int_to_string(otaMethod) + ",\"p\":" + int_to_string(PLATFORM_ID) + ",\"s\":\"" + int_to_string(VERSION_MAJOR) + "." + int_to_string(VERSION_MINOR) + "." + int_to_string(VERSION_PATCH) + VERSION_DEV + "\"" + components_list + describe_iccid + describe_imei;
+    string json = "\"i\":" + int_to_string(connectionPropType.dumb_ping_interval) + "." + int_to_string(connectionType) + ",\"o\":" + int_to_string(otaMethod) + ",\"p\":" + int_to_string(PLATFORM_ID) + ",\"s\":\"" + int_to_string(VERSION_MAJOR) + "." + int_to_string(VERSION_MINOR) + "." + int_to_string(VERSION_PATCH) + VERSION_DEV + "\"" + components_list + describe_iccid + describe_imei;
 
     LOG(TRACE, "%s", json.c_str());
     const char *result = json.c_str();
@@ -1818,15 +1819,16 @@ void Trackle::setConnectionType(Connection_Type conn)
     connectionType = conn;
 }
 
-void Trackle::setPingInterval(uint32_t interval)
+void Trackle::setPingInterval(uint32_t dumbInterval, uint8_t coapRatio)
 {
-    if (interval > MAX_PING_INTERVAL)
+    if (dumbInterval > MAX_PING_INTERVAL)
     {
         LOG(ERROR, "setPingInterval failed! interval too high (max %d seconds)!", MAX_PING_INTERVAL);
     }
     else
     {
-        pingInterval = interval;
+        pingInterval = dumbInterval;
+        coapPingRatio = coapRatio;
     }
 }
 
@@ -2052,11 +2054,20 @@ int Trackle::connect()
 
         if (pingInterval > 0) // ping interval overrided
         {
-            connectionPropType.ping_interval = pingInterval;
+            connectionPropType.dumb_ping_interval = pingInterval;
         }
         else
         {
-            connectionPropType.ping_interval = connectionPropTypeList[connectionType].ping_interval;
+            connectionPropType.dumb_ping_interval = connectionPropTypeList[connectionType].dumb_ping_interval;
+        }
+
+        if (coapPingRatio > 0) // coap ping ratio overrided
+        {
+            connectionPropType.coap_ping_ratio = coapPingRatio;
+        }
+        else
+        {
+            connectionPropType.coap_ping_ratio = connectionPropTypeList[connectionType].coap_ping_ratio;
         }
 
         trackle_protocol_init(protocol, (const char *)t_device_id, keys, callbacks, descriptor, connectionPropType);

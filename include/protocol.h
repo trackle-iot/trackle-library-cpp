@@ -266,11 +266,13 @@ namespace trackle
 				else
 				{
 					ProtocolError error = pinger.process(
-						callbacks.millis() - last_message_millis, [this]
+						callbacks.millis() - last_message_millis, [this](bool forceCoAP)
 						{
-							// ping is not ackable, so reset last msg millis to now
+							// Reset idle timer on send so we don't flood keepalives.
+							// Dumb ping: fire-and-forget. CoAP CON ping: ACK/retransmit
+							// handled by CoAPReliableChannel independently of this timer.
 							last_message_millis = callbacks.millis();
-							return ping(); });
+							return ping(forceCoAP); });
 					if (error)
 						return error;
 				}
@@ -358,9 +360,9 @@ namespace trackle
 							  const TrackleDescriptor &descriptor,
 							  const trackle::protocol::Connection_Properties_Type &conPropType) = 0;
 
-			void initialize_ping(system_tick_t interval, system_tick_t timeout)
+			void initialize_ping(system_tick_t interval, uint8_t coap_ratio = 0)
 			{
-				pinger.init(interval, timeout);
+				pinger.init(interval, coap_ratio);
 			}
 
 			void set_keepalive(system_tick_t interval, keepalive_source_t source)

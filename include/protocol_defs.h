@@ -180,7 +180,8 @@ namespace trackle
 
         typedef struct // in seconds
         {
-            uint16_t ping_interval;
+            uint16_t dumb_ping_interval;
+            uint8_t  coap_ping_ratio; // send a CoAP ping every N dumb pings
             uint16_t handshake_timeout;
             uint16_t ack_timeout;
         } Connection_Properties_Type;

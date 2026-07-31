@@ -96,7 +96,7 @@ namespace trackle
 				case ProtocolCommands::FORCE_PING:
 				{
 					LOG(INFO, "Forcing a cloud ping");
-					pinger.process(UINT32_MAX, [this]
+					pinger.process(UINT32_MAX, [this](bool)
 								   { return ping(true); });
 					break;
 				}

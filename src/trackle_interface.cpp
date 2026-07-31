@@ -227,10 +227,10 @@ void trackleSetIccid(Trackle *v, const char *iccid)
     v->setIccid(iccid);
 }
 
-void trackleSetPingInterval(Trackle *v, uint32_t pingInterval)
+void trackleSetPingInterval(Trackle *v, uint32_t dumbInterval, uint8_t coapRatio)
 {
     IF_NOT_INITIALIZED_WARNING();
-    v->setPingInterval(pingInterval);
+    v->setPingInterval(dumbInterval, coapRatio);
 }
 
 void trackleSetSaveSessionCallback(Trackle *v, saveSessionCallback *save)

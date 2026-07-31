@@ -606,9 +606,10 @@ public:
         /**
          * @brief This function sets the interval at which the Trackle will send a ping to the server
          *
-         * @param interval The interval in seconds between pings.
+         * @param dumbInterval The interval in seconds between dumb (keepalive) pings.
+         * @param coapRatio Send a CoAP ping every N dumb pings (0 = disabled).
          */
-        void setPingInterval(uint32_t pingInterval);
+        void setPingInterval(uint32_t dumbInterval, uint8_t coapRatio);
 
         /**
          * @brief It sets the OTA method to the method passed in.

@@ -361,7 +361,7 @@ extern "C"
      * @trackle
      * @copydetails Trackle::setPingInterval()
      */
-    void trackleSetPingInterval(Trackle *v, uint32_t pingInterval) DYNLIB;
+    void trackleSetPingInterval(Trackle *v, uint32_t dumbInterval, uint8_t coapRatio) DYNLIB;
 
     /*!
      * @copybrief Trackle::setOtaMethod()
