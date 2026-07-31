@@ -80,8 +80,10 @@ namespace trackle
 					result = wait_confirmable();
 					break;
 				case ProtocolCommands::DISCONNECT:
-					result = wait_confirmable();
 					ack_handlers.clear();
+					// Drop local DTLS peer so a new UDP socket cannot reuse CONNECTED state.
+					channel.command(MessageChannel::CLOSE);
+					result = NO_ERROR;
 					break;
 				case ProtocolCommands::WAKE:
 					wake();

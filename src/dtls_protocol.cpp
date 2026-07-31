@@ -37,7 +37,7 @@ namespace trackle
 
 			ProtocolError error = channel.init(keys.core_private, 121,
 											   keys.server_public, 91,
-											   (const uint8_t *)device_id, channelCallbacks, &channel.next_id_ref());
+											   channelCallbacks, &channel.next_id_ref());
 			if (error)
 			{
 				LOG(WARN, "error initializing DTLS channel: %d", error);

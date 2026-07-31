@@ -402,17 +402,17 @@ namespace trackle
                 }
                 else if (error == SESSION_RESUMED)
                 {
-
-                    // for now, unconditionally move the session on resumption
-                    channel.command(MessageChannel::MOVE_SESSION, nullptr);
-
                     if (channel.is_unreliable() && (channel_flags & SKIP_SESSION_RESUME_HELLO))
                     {
                         LOG(INFO, "resumed session - not sending HELLO message");
                         const auto r = ping(true);
                         if (r != NO_ERROR)
                         {
-                            error = r;
+                            // Socket may already be new; drop local DTLS peer so next
+                            // connect does a real handshake instead of SKIP_HELLO.
+                            channel.command(MessageChannel::CLOSE);
+                            this->status = CHANNEL_INIT;
+                            return r;
                         }
                         // Note: Make sure SESSION_RESUMED gets returned to the calling code
                         return error;
@@ -424,6 +424,7 @@ namespace trackle
                 {
 
                     LOG(ERROR, "handshake failed with code %d", error);
+                    channel.command(MessageChannel::CLOSE);
                     this->status = CHANNEL_INIT;
                     return error;
                 }
@@ -460,6 +461,7 @@ namespace trackle
                      * C'è stato un errore
                      */
                     LOG(ERROR, "Could not send HELLO message: %d", error);
+                    channel.command(MessageChannel::CLOSE);
                     this->status = CHANNEL_INIT;
                     return error;
                 }
@@ -484,6 +486,7 @@ namespace trackle
                         error = post_description(DescriptionType::DESCRIBE_DEFAULT);
                         if (error)
                         {
+                            channel.command(MessageChannel::CLOSE);
                             this->status = CHANNEL_INIT;
                             return error;
                         }
@@ -496,6 +499,7 @@ namespace trackle
                     else if (IO_ERROR_GENERIC_RECEIVE == error)
                     {
                         LOG(ERROR, "Handshake: received error on HELLO from server");
+                        channel.command(MessageChannel::CLOSE);
                         this->status = CHANNEL_INIT;
 
                         return IO_ERROR_GENERIC_RECEIVE;
@@ -504,6 +508,9 @@ namespace trackle
                 else
                 {
                     LOG(ERROR, "Handshake: could not receive HELLO ack");
+                    // Abbreviated/full handshake left the DTLS peer CONNECTED; clear it
+                    // so the next socket does not skip handshake (SKIP_SESSION_RESUME_HELLO).
+                    channel.command(MessageChannel::CLOSE);
                     this->status = CHANNEL_INIT;
                     return MESSAGE_TIMEOUT;
                 }

@@ -169,12 +169,6 @@ namespace trackle
 				DISCARD_SESSION = 1,
 
 				/**
-				 * Sends a special DTLS packet to the server that indicates
-				 * the session has moved.
-				 */
-				MOVE_SESSION = 2,
-
-				/**
 				 * Load session - load the session from persistent store.
 				 */
 				LOAD_SESSION = 3,

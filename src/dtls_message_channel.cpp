@@ -9,15 +9,12 @@ LOG_SOURCE_CATEGORY("comm.dtls")
 #include <string.h>
 
 #define ECDSA_KEY_LENGTH 32
-#define MALFORMED_PACKET_LEN 15
 
 unsigned char ecdsa_priv_key[ECDSA_KEY_LENGTH];
 unsigned char ecdsa_pub_key_x[ECDSA_KEY_LENGTH];
 unsigned char ecdsa_pub_key_y[ECDSA_KEY_LENGTH];
 unsigned char server_certificate[DTLS_PUBLIC_KEY_LENGTH];
 
-uint8_t malformed[MALFORMED_PACKET_LEN] = {0x16, 0xfe, 0xfd, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00};
-uint8_t malformed_counter = 0;
 bool valid_dtls_session = false;
 
 void extract_pub_priv_keys(const uint8_t *key)
@@ -138,14 +135,13 @@ namespace trackle
 		ProtocolError DTLSMessageChannel::init(
 			const uint8_t *core_private, size_t core_private_len,
 			const uint8_t *server_public, size_t server_public_len,
-			const uint8_t *device_id, Callbacks &callbacks,
+			Callbacks &callbacks,
 			message_id_t *coap_state)
 		{
 			init();
 
 			this->coap_state = coap_state;
 			this->callbacks = callbacks;
-			this->device_id = device_id;
 
 			getMillis = callbacks.millis;
 
@@ -160,8 +156,7 @@ namespace trackle
 				.write = send_to_peer,
 				.read = read_from_peer,
 				.event = dtls_event,
-				//.event = NULL,
-				.get_psk_info = NULL,
+				.get_user_parameters = NULL,
 				.get_server_certificate = get_server_certificate,
 				.get_ecdsa_key = get_ecdsa_key,
 				.verify_ecdsa_key = verify_ecdsa_key,
@@ -173,50 +168,57 @@ namespace trackle
 			dtls_context = dtls_new_context(&dtls_data);
 			if (!dtls_context)
 			{
-				LOG(TRACE, "Cannot create context");
-				exit(-1);
+				LOG(ERROR, "Cannot create DTLS context");
+				return UNKNOWN;
 			}
 
 			dtls_set_handler(dtls_context, &cb);
 			return NO_ERROR;
 		}
 
-		/*
-		 * Inspects the move session flag to amend the application data record to a move session record.
-		 * See: https://github.com/trackle-iot/knowledge/blob/8df146d88c4237e90553f3fd6d8465ab58ec79e0/services/dtls-ip-change.md
-		 */
 		inline int DTLSMessageChannel::send(const uint8_t *data, size_t len)
 		{
-			// if (move_session && len && data[0] == 0x70)
-			if (move_session && len && data[0] == 23)
-			{
-				LOG(TRACE, "DTLSMessageChannel -> move_session");
-				// buffer for a new packet that contains the device ID length and a byte for the length appended to the existing data.
-				uint8_t d[len + DEVICE_ID_LEN + 1];
-				memcpy(d, data, len);					   // original application data
-				d[0] = 254;								   // move session record type
-				memcpy(d + len, device_id, DEVICE_ID_LEN); // set the device ID
-				d[len + DEVICE_ID_LEN] = DEVICE_ID_LEN;	   // set the device ID length as the last byte in the packet
-				int result = callbacks.send(d, len + DEVICE_ID_LEN + 1, callbacks.tx_context);
-				// hide the increased length from DTLS
-				if (result == int(len + DEVICE_ID_LEN + 1))
-					result = len;
-				return result;
-			}
-			else
-				return callbacks.send(data, len, callbacks.tx_context);
+			return callbacks.send(data, len, callbacks.tx_context);
 		}
 
 		void DTLSMessageChannel::reset_session()
 		{
 			LOG(TRACE, "DTLSMessageChannel::reset_session");
-			cancel_move_session();
 
 			dtls_peer_t *peer = dtls_get_peer(dtls_context, &dst);
 			if (peer)
 			{
 				dtls_reset_peer(dtls_context, peer);
 			}
+		}
+
+		void DTLSMessageChannel::handshake_failed()
+		{
+#if DTLS_SESSION_TICKET
+			if (ticket_offered_for_handshake)
+			{
+				++ticket_handshake_failures;
+				LOG(WARN, "Session Ticket: handshake failure %u/%u",
+					(unsigned)ticket_handshake_failures,
+					(unsigned)TICKET_HANDSHAKE_FAILURE_LIMIT);
+
+				if (ticket_handshake_failures >= TICKET_HANDSHAKE_FAILURE_LIMIT)
+				{
+					LOG(WARN, "Session Ticket: discarding ticket after repeated failures");
+					memset(&dtls_context->session_ticket, 0,
+						   sizeof(dtls_context->session_ticket));
+					ticket_handshake_failures = 0;
+				}
+			}
+#endif
+			ticket_offered_for_handshake = false;
+			reset_session();
+		}
+
+		void DTLSMessageChannel::handshake_succeeded()
+		{
+			ticket_offered_for_handshake = false;
+			ticket_handshake_failures = 0;
 		}
 
 		inline int DTLSMessageChannel::recv(uint8_t *data, size_t len)
@@ -298,6 +300,7 @@ namespace trackle
 
 		ProtocolError DTLSMessageChannel::establish(uint32_t &flags, uint32_t app_state_crc)
 		{
+			(void)app_state_crc;
 			int ret = -1;
 
 #define MAX_READ_BUF 1000
@@ -307,7 +310,6 @@ namespace trackle
 			int8_t connection_status = -1;
 			int8_t timeout_status = 0;
 			int res = 0;
-			bool toConnect = false;
 
 			switch (this->status)
 			{
@@ -316,50 +318,45 @@ namespace trackle
 
 				dtls_timing_set_delay(&time_cb, this->handshake_timeout);
 
-				/* delete peer if not connected */
+				/*
+				 * Trackle invokes establish() after creating a new UDP socket.
+				 * A CONNECTED peer belongs to the previous socket/path and its
+				 * CID must not be reused. The session ticket is stored in the
+				 * context, so resetting the peer preserves ticket resumption.
+				 */
 				dtls_peer_t *peer = dtls_get_peer(dtls_context, &dst);
-
-				if (!peer)
+				if (peer)
 				{
-					LOG(TRACE, "peer not extists");
-					toConnect = true;
-				}
-				else if (peer && peer->state != DTLS_STATE_CONNECTED)
-				{
-					LOG(TRACE, "dtls_reset_peer");
+					LOG(TRACE, "Resetting DTLS peer before reconnect (state %d)",
+						peer->state);
 					peer->state = DTLS_STATE_CLOSING;
 					dtls_reset_peer(dtls_context, peer);
-					toConnect = true;
-				}
-				else
-				{
-					LOG(TRACE, "DTLS_STATE_CONNECTED");
-					toConnect = false;
 				}
 
-				if (toConnect)
-				{
-					res = dtls_connect(dtls_context, &dst);
-					LOG(TRACE, "dtls_connect: %d", res);
-				}
+				ticket_offered_for_handshake = false;
 
-				if (res < 0)
+				res = dtls_connect(dtls_context, &dst);
+#if DTLS_SESSION_TICKET
+				peer = dtls_get_peer(dtls_context, &dst);
+				ticket_offered_for_handshake =
+					peer && peer->handshake_params &&
+					peer->handshake_params->session_ticket_presented;
+#endif
+				LOG(TRACE, "dtls_connect: %d, ticket offered: %d",
+					res, (int)ticket_offered_for_handshake);
+
+				if (res <= 0)
 				{
 					LOG(TRACE, "dtls_connect error %d", res);
+					handshake_failed();
 					return IO_ERROR_GENERIC_ESTABLISH;
 				}
-				else if (res == 0)
-				{
-					// resume session
-					LOG(TRACE, "trying to restore session....");
-					flags |= Protocol::SKIP_SESSION_RESUME_HELLO;
-					return SESSION_RESUMED;
-				}
-				else
-				{
-					LOG(TRACE, "starting handshake");
-					this->status = HANDSHAKE;
-				}
+
+				if (!ticket_offered_for_handshake)
+					ticket_handshake_failures = 0;
+
+				LOG(TRACE, "starting handshake");
+				this->status = HANDSHAKE;
 
 				break;
 			}
@@ -372,7 +369,13 @@ namespace trackle
 
 				if (len > 0)
 				{
-					dtls_handle_message(dtls_context, &dst, buf, len);
+					int dtls_res = dtls_handle_message(dtls_context, &dst, buf, len);
+					if (dtls_res < 0)
+					{
+						LOG(WARN, "dtls_handle_message failed: %d", dtls_res);
+						handshake_failed();
+						return IO_ERROR_GENERIC_ESTABLISH;
+					}
 					memset(buf, 0, MAX_READ_BUF);
 					memcpy(buf, dtls_data.read_buf, dtls_data.read_len);
 				}
@@ -393,16 +396,26 @@ namespace trackle
 						if (connection_status == 1)
 						{
 							LOG(TRACE, "timeout\n");
+							handshake_failed();
 							return IO_ERROR_GENERIC_ESTABLISH;
 						}
 					}
 				}
 
-				/* new session created */
+				/* Full and abbreviated handshakes both create a fresh peer/CID. */
 				if (ret == 0)
 				{
 					LOG(TRACE, "valid session created");
 					valid_dtls_session = true;
+					handshake_succeeded();
+#if DTLS_SESSION_TICKET
+					if (peer->session_resumed)
+					{
+						LOG(INFO, "Session Ticket: abbreviated handshake completed");
+						flags |= Protocol::SKIP_SESSION_RESUME_HELLO;
+						return SESSION_RESUMED;
+					}
+#endif
 					return SESSION_CONNECTED;
 				}
 
@@ -435,57 +448,11 @@ namespace trackle
 
 			if (len > 0)
 			{
-				// reset dtls_data.read_len to avoid error
 				dtls_data.read_len = 0;
 				int dtls_res = dtls_handle_message(dtls_context, &dst, buf, len);
 				LOG(TRACE, "dtls_handle_message error %d, dtls_data.read_len %d", dtls_res, dtls_data.read_len);
-
-				// check malformed only if data received > 0
-				int res = -1;
-				if (dtls_data.read_len == 0)
-				{
-					res = memcmp(buf, malformed, MALFORMED_PACKET_LEN);
-					LOG(TRACE, "Check malformed packet: %d", (res == 0));
-				}
-
-				if (res == 0)
-				{
-					LOG(WARN, "Malformed dtls packet");
-					malformed_counter++;
-
-					// if already in move session, disconnect on malformed
-					if (move_session)
-					{
-						malformed_counter = 2;
-					}
-
-					// todo scrivere funzionamento
-					if (malformed_counter == 1)
-					{
-						LOG(INFO, "Handle ip change");
-						this->command(MessageChannel::MOVE_SESSION, nullptr);
-
-						// send ping
-						Message message;
-						create(message);
-						size_t len = Messages::ping(message.buf(), 0);
-						message.set_length(len);
-						send(message);
-
-						return NO_ERROR;
-					}
-					else
-					{
-						LOG(INFO, "Too much malformed packet, disconnecting.....");
-						this->command(MessageChannel::CLOSE, nullptr);
-
-						return IO_ERROR_GENERIC_RECEIVE;
-					}
-				}
-				else // packet ok
-				{
-					malformed_counter = 0;
-				}
+				if (dtls_res < 0)
+					return IO_ERROR_GENERIC_RECEIVE;
 			}
 
 			memset(buf, 0, buflen);
@@ -494,7 +461,6 @@ namespace trackle
 			message.set_length(dtls_data.read_len);
 			if (dtls_data.read_len > 0)
 			{
-				cancel_move_session();
 #if defined(DEBUG_BUILD) && 0
 				if (LOG_ENABLED(TRACE))
 				{
@@ -511,22 +477,6 @@ namespace trackle
 #endif
 			}
 			return NO_ERROR;
-		}
-
-		/**
-		 * Once data has been successfully received we can stop
-		 * sending move-session messages.
-		 * This is also used to reset the expiration counter.
-		 */
-		void DTLSMessageChannel::cancel_move_session()
-		{
-			LOG(TRACE, "cancel_move_session");
-
-			if (move_session)
-			{
-				move_session = false;
-				command(SAVE_SESSION);
-			}
 		}
 
 		ProtocolError DTLSMessageChannel::send(Message &message)
@@ -570,10 +520,6 @@ namespace trackle
 			case DISCARD_SESSION:
 				reset_session();
 				return IO_ERROR_DISCARD_SESSION; // force re-establish
-
-			case MOVE_SESSION:
-				move_session = true;
-				break;
 
 			case LOAD_SESSION:
 				// sessionPersist.restore(callbacks.restore);

@@ -47,12 +47,6 @@ namespace trackle
 {
 	namespace protocol
 	{
-
-		/**
-		 * Please centralize this somewhere else!
-		 */
-		const size_t DEVICE_ID_LEN = 12;
-
 		/**
 		 * This implements the lightweight and RSA encrypted handshake, AES session encryption over a TCP Stream.
 		 *
@@ -104,8 +98,8 @@ namespace trackle
 			 * The next message ID for new messages over this channel.
 			 */
 			message_id_t *coap_state;
-			bool move_session;
-			const uint8_t *device_id;
+			uint8_t ticket_handshake_failures;
+			bool ticket_offered_for_handshake;
 
 			void init();
 			void dispose();
@@ -122,9 +116,11 @@ namespace trackle
 
 			ProtocolError setup_context();
 
-			void cancel_move_session();
-
 			void reset_session();
+			void handshake_failed();
+			void handshake_succeeded();
+
+			static const uint8_t TICKET_HANDSHAKE_FAILURE_LIMIT = 2;
 
 			enum StateEnum
 			{
@@ -135,12 +131,15 @@ namespace trackle
 			enum StateEnum status;
 
 		public:
-			DTLSMessageChannel() : coap_state(nullptr), move_session(false) {}
+			DTLSMessageChannel()
+				: coap_state(nullptr),
+				  ticket_handshake_failures(0),
+				  ticket_offered_for_handshake(false) {}
 
 			ProtocolError init(const uint8_t *core_private, size_t core_private_len,
 							   // const uint8_t *core_public, size_t core_public_len,
 							   const uint8_t *server_public, size_t server_public_len,
-							   const uint8_t *device_id, Callbacks &callbacks,
+							   Callbacks &callbacks,
 							   message_id_t *coap_state);
 
 			void set_handshake_timeout(uint32_t timeout)
