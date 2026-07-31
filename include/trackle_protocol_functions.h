@@ -165,7 +165,7 @@ extern "C"
 							   const trackle::protocol::Connection_Properties_Type &conPropType,
 							   void *reserved = NULL);
 	int trackle_protocol_handshake(ProtocolFacade *protocol, void *reserved = NULL);
-	bool trackle_protocol_event_loop(ProtocolFacade *protocol, void *reserved = NULL);
+	bool trackle_protocol_event_loop(ProtocolFacade *protocol, int *last_protocol_error, void *reserved = NULL);
 	bool trackle_protocol_is_initialized(ProtocolFacade *protocol);
 	int trackle_protocol_presence_announcement(ProtocolFacade *protocol, unsigned char *buf, const unsigned char *id, void *reserved = NULL);
 

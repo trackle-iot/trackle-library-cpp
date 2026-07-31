@@ -48,10 +48,17 @@ int trackle_protocol_handshake(ProtocolFacade *protocol, void *)
     return protocol->begin();
 }
 
-bool trackle_protocol_event_loop(ProtocolFacade *protocol, void *)
+bool trackle_protocol_event_loop(ProtocolFacade *protocol, int *last_protocol_error, void *)
 {
     ASSERT_ON_SYSTEM_THREAD();
-    return protocol->event_loop();
+    // Do not use the bool event_loop(): it drops ProtocolError (true==1 would be cast to PING_TIMEOUT).
+    trackle::protocol::CoAPMessageType::Enum message_type;
+    trackle::protocol::ProtocolError error = protocol->event_loop(message_type);
+    if (last_protocol_error)
+    {
+        *last_protocol_error = static_cast<int>(error);
+    }
+    return error == trackle::protocol::NO_ERROR;
 }
 
 bool trackle_protocol_is_initialized(ProtocolFacade *protocol)

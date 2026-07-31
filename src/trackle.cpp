@@ -116,8 +116,8 @@ uint32_t getNextPublishCounter()
 
     if (p == 0)
     {
-        // Inizializzazione
-        prefix = (HAL_RNG_GetRandomNumber() % 199) + 1; // Genera un numero da 1 a 199
+        // Initialization
+        prefix = (HAL_RNG_GetRandomNumber() % 199) + 1; // Generate a number from 1 to 199
         p = prefix;
     }
 
@@ -136,7 +136,7 @@ uint32_t getNextPublishCounter()
         counter = 0;
     }
 
-    // Calcola la base per il prefisso come MAX_COUNTER + 1
+    // Compute the prefix base as MAX_COUNTER + 1
     uint32_t base = MAX_COUNTER + 1;
 
     return (p * base) + counter;
@@ -249,7 +249,7 @@ system_tick_t health_check_interval = 0;
 string string_device_id;
 char t_device_id[DEVICE_ID_LENGTH];
 // 294byte + 1 byte (len n server address) + n byte server address + 2 byte server port
-// byte aggiuntivi dopo chiave: \x10\x74\x65\x73\x74\x2e\x69\x6f\x74\x72\x65\x61\x64\x79\x2e\x69\x74\x16\x33
+// Extra bytes after key: \x10\x74\x65\x73\x74\x2e\x69\x6f\x74\x72\x65\x61\x64\x79\x2e\x69\x74\x16\x33
 unsigned char server_public_key[PUBLIC_KEY_LENGTH] = {0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x02, 0x01, 0x06, 0x08, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00, 0x04, 0x2B, 0x19, 0x9D, 0xC9, 0xF2, 0xB0, 0x2D, 0xD1, 0xF1, 0x7D, 0xF0, 0x2B, 0xD1, 0xEC, 0xD1, 0x57, 0xD6, 0x74, 0x51, 0xD7, 0x9C, 0x09, 0xE1, 0x70, 0x43, 0x4A, 0x5B, 0xC2, 0x40, 0xC0, 0x49, 0x67, 0x34, 0xC8, 0xA4, 0xF8, 0xB4, 0xF7, 0xFB, 0xB4, 0xD0, 0x3F, 0xCC, 0xAF, 0x1F, 0xAA, 0x2E, 0x1D, 0x76, 0x82, 0xCF, 0x3A, 0x1A, 0x0B, 0x42, 0x38, 0x14, 0x6D, 0x54, 0x42, 0x05, 0xDC, 0x4D, 0x27};
 unsigned char client_private_key[PRIVATE_KEY_LENGTH];
 char claim_code[CLAIM_CODE_SIZE + 1];
@@ -594,7 +594,7 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
     // if packet size is ok, else return false
     if (strlen(data) <= MAX_BLOCK_SIZE * trackle::protocol::trackle_get_blocks_number())
     {
-        if (eventFlag & WITH_ACK) // se c'è il flag WITH_ACK
+        if (eventFlag & WITH_ACK) // if WITH_ACK flag is set
         {
 
             // calculate msg_key if argument = 0
@@ -973,15 +973,15 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
                         strcpy(ota_data.ota_job_id, job_id);
 
                         ota_data.has_signature = true;
-                        if (signature != NULL && strlen(signature) >= 136) // 68*2 = 136 hex chars minimo
+                        if (signature != NULL && strlen(signature) >= 136) // 68*2 = 136 hex chars minimum
                         {
-                            uint8_t raw_signature[80]; // Buffer fisso, max teorico è 72 bytes
+                            uint8_t raw_signature[80]; // Fixed buffer, theoretical max is 72 bytes
                             uint8_t result_r[DTLS_EC_KEY_SIZE];
                             uint8_t result_s[DTLS_EC_KEY_SIZE];
 
                             size_t sig_len = strlen(signature) / 2;
 
-                            // Verifica che non superi il buffer
+                            // Ensure it does not exceed the buffer
                             if (sig_len > sizeof(raw_signature))
                             {
                                 LOG(ERROR, "Signature too long: %zu bytes", sig_len);
@@ -989,17 +989,17 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
                             }
                             else
                             {
-                                // Converti hex string in bytes
+                                // Convert hex string to bytes
                                 for (int i = 0; i < sig_len; i++)
                                 {
                                     sscanf(signature + 2 * i, "%2hhx", &raw_signature[i]);
                                 }
 
-                                // Parsing DER: salta SEQUENCE header (30 XX)
+                                // DER parsing: skip SEQUENCE header (30 XX)
                                 uint8_t *data = raw_signature + 2;
                                 size_t data_len = sig_len - 2;
 
-                                // Estrai r
+                                // Extract r
                                 int r_consumed = dtls_asn1_integer_to_ec_key(data, data_len, result_r, DTLS_EC_KEY_SIZE);
                                 if (r_consumed <= 0)
                                 {
@@ -1008,7 +1008,7 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
                                 }
                                 else
                                 {
-                                    // Estrai s
+                                    // Extract s
                                     data += r_consumed;
                                     data_len -= r_consumed;
                                     int s_consumed = dtls_asn1_integer_to_ec_key(data, data_len, result_s, DTLS_EC_KEY_SIZE);
@@ -1019,12 +1019,12 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
                                     }
                                     else
                                     {
-                                        // Copia r e s nel tuo buffer
+                                        // Copy r and s into the signature buffer
                                         memcpy(ota_data.firmware_signature, result_r, DTLS_EC_KEY_SIZE);
                                         memcpy(ota_data.firmware_signature + DTLS_EC_KEY_SIZE, result_s, DTLS_EC_KEY_SIZE);
                                         ota_data.has_signature = true;
 
-                                        char signature_hex[2 * DTLS_EC_KEY_SIZE * 2 + 1]; // Buffer per la rappresentazione esadecimale
+                                        char signature_hex[2 * DTLS_EC_KEY_SIZE * 2 + 1]; // Buffer for hex representation
                                         for (int i = 0; i < DTLS_EC_KEY_SIZE * 2; i++)
                                         {
                                             sprintf(signature_hex + 2 * i, "%02x", ota_data.firmware_signature[i]);
@@ -1516,7 +1516,7 @@ void setConnectionStatus(Connection_Status_Type newStatus)
  * @param error_type The error type.
  * @param force If true, the connection will be closed even if it's not connected.
  */
-void connectionError(int error_type, bool force = false)
+void connectionError(int error_type, bool force = false, int protocol_error_code = 0)
 {
 
     // only if it was connected before (real disconnection)
@@ -1525,10 +1525,15 @@ void connectionError(int error_type, bool force = false)
         diagnostic::diagnosticCloud(CLOUD_DISCONNECTS, 1);
         diagnostic::diagnosticCloud(CLOUD_DISCONNECTION_REASON, error_type);
 
-        // reset connections attemps, unacked packets and error code for new cloud session
+        // reset connections attemps and unacked packets for new cloud session
         diagnostic::diagnosticCloud(CLOUD_CONNECTION_ATTEMPTS, 0);
         diagnostic::diagnosticCloud(CLOUD_UNACKNOWLEDGED_MESSAGES, 0);
-        diagnostic::diagnosticCloud(CLOUD_CONNECTION_ERROR_CODE, 0);
+    }
+
+    // ProtocolError detail: also on failed handshake (not yet SOCKET_READY)
+    if (protocol_error_code != 0)
+    {
+        diagnostic::diagnosticCloud(CLOUD_CONNECTION_ERROR_CODE, protocol_error_code);
     }
 
     // if connected or trying to connect
@@ -1536,7 +1541,7 @@ void connectionError(int error_type, bool force = false)
     {
         millis_last_disconnection = (*callbacks.millis)();
 
-        if (error_type != CON_ERROR_SOCKET)
+        if (error_type != CLOUD_DISCONNECT_REASON_SOCKET)
             LOG(ERROR, "Cloud connection error %d, %lu", error_type, millis_last_disconnection);
 
         setConnectionStatus(SOCKET_NOT_CONNECTED);
@@ -1562,7 +1567,7 @@ int wrapSend(const unsigned char *buf, uint32_t buflen, void *tmp)
     int bytes_sent = (*sendCb)(buf, buflen, tmp);
     if (bytes_sent < 0)
     { // if sending error
-        connectionError(CON_ERROR_SEND);
+        connectionError(CLOUD_DISCONNECT_REASON_SEND);
     }
     if (bytes_sent > 0)
     {
@@ -1591,7 +1596,7 @@ int wrapReceive(unsigned char *buf, uint32_t buflen, void *tmp)
     int bytes_received = (*receiveCb)(buf, buflen, tmp);
     if (bytes_received < 0)
     { // if receive error
-        connectionError(CON_ERROR_RECEIVE);
+        connectionError(CLOUD_DISCONNECT_REASON_RECEIVE);
         bytes_received = 0;
     }
     else if (bytes_received > 0)
@@ -2041,8 +2046,7 @@ int completeCloudConnection()
     else if (result != 0) /* Handshake error? */
     {
         LOG(ERROR, "Protocol beginning error: %d", result);
-        diagnostic::diagnosticCloud(CLOUD_CONNECTION_ERROR_CODE, 1);
-        connectionError(CON_ERROR_PROTOCOL, true);
+        connectionError(mapProtocolErrorToDisconnectionReason(result), true, result);
         return -1;
     }
     else
@@ -2123,7 +2127,7 @@ int Trackle::connect()
         // If it returns < 0, it's an immediate error
         if (res < 0)
         {
-            connectionError(CON_ERROR_SOCKET, true);
+            connectionError(CLOUD_DISCONNECT_REASON_SOCKET, true);
             return -1;
         }
 
@@ -2143,10 +2147,17 @@ int Trackle::connect()
 void Trackle::disconnect()
 {
     connectToCloud = false;
-    setConnectionStatus(SOCKET_NOT_CONNECTED);
-    if (trackle_protocol_is_initialized(protocol))
-        trackle_protocol_command(protocol, ProtocolCommands::DISCONNECT);
-    (*disconnectCb)();
+    if (connectionStatus == SOCKET_READY)
+    {
+        connectionError(CLOUD_DISCONNECT_REASON_USER);
+    }
+    else
+    {
+        setConnectionStatus(SOCKET_NOT_CONNECTED);
+        if (trackle_protocol_is_initialized(protocol))
+            trackle_protocol_command(protocol, ProtocolCommands::DISCONNECT);
+        (*disconnectCb)();
+    }
 }
 
 void Trackle::loop()
@@ -2158,9 +2169,15 @@ void Trackle::loop()
     // ready or disconnected
     if (connectionStatus == SOCKET_READY /* || connectionStatus == SOCKET_NOT_CONNECTED*/)
     {
-        int res = trackle_protocol_event_loop(protocol);
+        int protocol_error = 0;
+        int res = trackle_protocol_event_loop(protocol, &protocol_error);
         if (!res)
-            connectionError(CON_ERROR_LOOP);
+        {
+            // If wrapSend/Receive already closed, status != READY: do not overwrite the reason
+            int mapped_error = mapProtocolErrorToDisconnectionReason(protocol_error);
+            if (mapped_error != 0)
+                connectionError(mapped_error, false, protocol_error);
+        }
         if (!res && cloudStatus != res)
         {
             LOG(ERROR, "Event loop error");
@@ -2401,7 +2418,7 @@ void default_system_set_time_cb(time_t time, unsigned int param, void *)
 
 Trackle::Trackle(void)
 {
-    // CONFIGURO IL CLOUD
+    // Configure the cloud
     memset(&callbacks, 0, sizeof(callbacks));
     callbacks.size = sizeof(callbacks);
     callbacks.calculate_crc = calculateCrc;
