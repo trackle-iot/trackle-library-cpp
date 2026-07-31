@@ -20,13 +20,8 @@
 
 #include <stdint.h>
 
-#ifndef min2
-#define min2(A,B) ((A) <= (B) ? (A) : (B))
-#endif
-
-#ifndef max2
-#define max2(A,B) ((A) < (B) ? (B) : (A))
-#endif
+#define DTLS_MIN(A,B) ((A) <= (B) ? (A) : (B))
+#define DTLS_MAX(A,B) ((A) < (B) ? (B) : (A))
 
 /* this one is for consistency... */
 static inline int dtls_int_to_uint8(unsigned char *field, uint8_t value)

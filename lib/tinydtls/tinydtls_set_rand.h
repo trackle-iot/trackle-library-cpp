@@ -13,7 +13,7 @@ extern "C"
      *
      * @param newCustomRand New function to use as random generator (with same signature as rand)
      */
-    void TinyDtls_set_rand(uint32_t (*newCustomRand)());
+    void TinyDtls_set_rand(uint32_t (*newCustomRand)(void));
 
 #ifdef __cplusplus
 }

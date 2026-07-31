@@ -42,6 +42,8 @@ int TinyDtls_get_log_level()
  */
 static void discard_log_callback(unsigned int level, const char *format, ...)
 {
+  (void)level;
+  (void)format;
   // Discards log message.
 }
 
@@ -50,7 +52,7 @@ void (*TinyDtls_logCallback)(unsigned int, const char *, ...) = discard_log_call
 
 void TinyDtls_set_log_callback(void (*logCallback)(unsigned int, const char *, ...))
 {
-  TinyDtls_logCallback = logCallback;
+  TinyDtls_logCallback = logCallback ? logCallback : discard_log_callback;
 }
 
 void TinyDtls_logBuffer(unsigned int level, const char *name, const unsigned char *buff, int len)

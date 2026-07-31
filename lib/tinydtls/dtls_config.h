@@ -21,13 +21,16 @@
  *
  ******************************************************************************/
 
-#warning "DTLS_CONFIG.H IS BEING USED!"
-
 /* Define to 1 if building with ECC support. */
 #define DTLS_ECC 1
 
 /* Define to 1 if building with PSK support */
-#define DTLS_PSK 0
+/* #undef DTLS_PSK */
+
+/* Define to 1 if building with RFC 5077 session ticket support. */
+#ifndef DTLS_SESSION_TICKET
+#define DTLS_SESSION_TICKET 1
+#endif
 
 /* Define to the address where bug reports for this package should be sent. */
 #define PACKAGE_BUGREPORT ""

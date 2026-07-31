@@ -728,7 +728,7 @@ static const aes_u32 rcon[] = {
  * @return	the number of rounds for the given cipher key size.
  */
 int
-rijndaelKeySetupEncTiny(aes_u32 rk[/*4*(Nr + 1)*/], const aes_u8 cipherKey[], int keyBits)
+rijndaelKeySetupEnc(aes_u32 rk[/*4*(Nr + 1)*/], const aes_u8 cipherKey[], int keyBits)
 {
    	int i = 0;
 	aes_u32 temp;
@@ -822,7 +822,7 @@ rijndaelKeySetupDec(aes_u32 rk[/*4*(Nr + 1)*/], const aes_u8 cipherKey[], int ke
 	aes_u32 temp;
 
 	/* expand the cipher key: */
-	Nr = rijndaelKeySetupEncTiny(rk, cipherKey, keyBits);
+	Nr = rijndaelKeySetupEnc(rk, cipherKey, keyBits);
 
 	/* invert the order of the round keys: */
 	for (i = 0, j = 4*Nr; i < j; i += 4, j -= 4) {

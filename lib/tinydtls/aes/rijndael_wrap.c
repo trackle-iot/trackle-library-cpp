@@ -24,7 +24,7 @@ rijndael_set_key_enc_only(rijndael_ctx *ctx, const u_char *key, int bits)
 {
 	int rounds;
 
-	rounds = rijndaelKeySetupEncTiny(ctx->ek, key, bits);
+	rounds = rijndaelKeySetupEnc(ctx->ek, key, bits);
 	if (rounds == 0)
 		return -1;
 
@@ -43,7 +43,7 @@ rijndael_set_key(rijndael_ctx *ctx, const u_char *key, int bits)
 {
 	int rounds;
 
-	rounds = rijndaelKeySetupEncTiny(ctx->ek, key, bits);
+	rounds = rijndaelKeySetupEnc(ctx->ek, key, bits);
 	if (rounds == 0)
 		return -1;
 	if (rijndaelKeySetupDec(ctx->dk, key, bits) != rounds)
