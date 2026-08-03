@@ -415,6 +415,7 @@ namespace trackle
                             return r;
                         }
                         // Note: Make sure SESSION_RESUMED gets returned to the calling code
+                        this->status = CHANNEL_INIT;
                         return error;
                     }
 
