@@ -948,14 +948,14 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
             {
                 LOG(WARN, "Ota upgrade refused: enabled %d, forced: %d", updates_enabled, updates_forced);
                 char ota_cloud_message[256];
-                sprintf(ota_cloud_message, "disabled,%s", job_id);
+                snprintf(ota_cloud_message, sizeof(ota_cloud_message), "disabled,%s", job_id ? job_id : "");
                 ((Trackle *)handler)->publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
             }
             else if (ota_data.running)
             {
                 LOG(ERROR, "Ota already in progress...");
                 char ota_cloud_message[256];
-                sprintf(ota_cloud_message, "busy,%s", job_id);
+                snprintf(ota_cloud_message, sizeof(ota_cloud_message), "busy,%s", job_id ? job_id : "");
                 ((Trackle *)handler)->publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
             }
             else
@@ -976,7 +976,8 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
                     {
                         // product firmware update
                         sscanf(crc32, "%" PRIx32 "", &crc);
-                        strcpy(ota_data.ota_job_id, job_id);
+                        // job_id comes from the cloud payload and is not length limited
+                        snprintf(ota_data.ota_job_id, sizeof(ota_data.ota_job_id), "%s", job_id);
 
                         ota_data.has_signature = true;
                         if (signature != NULL && strlen(signature) >= 136) // 68*2 = 136 hex chars minimum
