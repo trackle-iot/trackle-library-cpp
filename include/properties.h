@@ -112,6 +112,9 @@ namespace trackle
                         o_index++; // increase start user_id position in buffer (length is 2 bytes)
                         user_caller_id_length += queue[o_index];
                     }
+                    // the length comes from the network, never copy more than the buffer holds
+                    if (user_caller_id_length >= (int)MAX_USER_CALLER_ID_LEN)
+                        user_caller_id_length = MAX_USER_CALLER_ID_LEN - 1;
                     memcpy(user_caller_id, queue + o_index + 1, user_caller_id_length);
                 }
 
