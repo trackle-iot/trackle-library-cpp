@@ -591,8 +591,11 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
 
     bool res = false; // global return
 
+    // publish() without payload passes a NULL data, which must never reach strlen()
+    const size_t dataLength = (data != NULL) ? strlen(data) : 0;
+
     // if packet size is ok, else return false
-    if (strlen(data) <= MAX_BLOCK_SIZE * trackle::protocol::trackle_get_blocks_number())
+    if (dataLength <= MAX_BLOCK_SIZE * trackle::protocol::trackle_get_blocks_number())
     {
         if (eventFlag & WITH_ACK) // if WITH_ACK flag is set
         {
@@ -626,18 +629,18 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
             }
 
             // Block-wise, more than one packet
-            if (strlen(data) > MAX_BLOCK_SIZE)
+            if (dataLength > MAX_BLOCK_SIZE)
             {
                 // copy from 2nd block, send 1st block with trackle_protocol_send_event
-                memcpy(block->buffer, data + MAX_BLOCK_SIZE, strlen(data) - MAX_BLOCK_SIZE);
-                block->totBytesNumber = strlen(data) - MAX_BLOCK_SIZE;
-                block->totBlockNumber = ceil((double)strlen(data) / MAX_BLOCK_SIZE);
+                memcpy(block->buffer, data + MAX_BLOCK_SIZE, dataLength - MAX_BLOCK_SIZE);
+                block->totBytesNumber = dataLength - MAX_BLOCK_SIZE;
+                block->totBlockNumber = ceil((double)dataLength / MAX_BLOCK_SIZE);
             }
             else // single packet
             {
                 block->totBytesNumber = 0;
                 block->totBlockNumber = 1;
-                currBlockLength = strlen(data);
+                currBlockLength = dataLength;
             }
 
             block->currBlockIndex = 0;
@@ -658,7 +661,7 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
             if (sendPublishCb)
                 (*sendPublishCb)(eventName, data, msg_key, true);
 
-            LOG(TRACE, "sendPublish %s: %s ", eventName, data);
+            LOG(TRACE, "sendPublish %s: %s ", eventName, (data != NULL) ? data : "");
 
             res = trackle_protocol_send_event(protocol, block->token, block->eventName.c_str(), data, currBlockLength, ttl, block->currBlockIndex, block->totBlockNumber, flags, &d);
             if (!res)
@@ -678,11 +681,14 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
                 return false;
             }
 
-            uint16_t totBytesNumber = strlen(data);
-            uint16_t totBlockNumber = ceil((double)strlen(data) / MAX_BLOCK_SIZE);
+            uint16_t totBytesNumber = dataLength;
+            uint16_t totBlockNumber = ceil((double)dataLength / MAX_BLOCK_SIZE);
             uint16_t currBlockLength = 0;
             uint8_t token = getNextToken();
             bool res = false;
+
+            if (totBlockNumber == 0)
+                totBlockNumber = 1; // an event without payload is still one message to send
 
             for (int i = 0; i < totBlockNumber; i++)
             {
