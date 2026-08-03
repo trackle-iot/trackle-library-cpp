@@ -622,7 +622,7 @@ void dtls_sha256_update(dtls_sha256_ctx* context, const sha2_byte *data, size_t 
 	usedspace = freespace = 0;
 }
 
-void dtls_sha256_final(uint8_t digest[DTLS_SHA256_DIGEST_LENGTH], dtls_sha256_ctx* context) {
+void dtls_sha256_final(sha2_byte digest[DTLS_SHA256_DIGEST_LENGTH], dtls_sha256_ctx* context) {
 	sha2_byte	*d = digest;
 	unsigned int	usedspace;
 

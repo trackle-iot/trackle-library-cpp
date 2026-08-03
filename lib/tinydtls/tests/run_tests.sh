@@ -3,12 +3,13 @@ set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 BUILD_DIR="${TMPDIR:-/tmp}/tinydtls-tests"
-CC=${CC:-clang}
+CC=${CC:-cc}
 
 mkdir -p "$BUILD_DIR"
 
 "$CC" \
   -std=c99 -Wall -Wextra -Werror -Wno-deprecated-declarations \
+  -Wno-unused-parameter \
   -fsanitize=address,undefined \
   -DDTLS_ECC=1 -DDTLSv12 -DWITH_SHA256 -DSHA2_USE_INTTYPES_H \
   -I"$ROOT" -I"$ROOT/../micro-ecc" \

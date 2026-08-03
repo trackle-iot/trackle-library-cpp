@@ -7,7 +7,11 @@ jobs:
       - name: Check out code with submodules
         uses: actions/checkout@v2
       - name: Install Python test dependencies
-        run: python3 -m pip install requests sseclient-py==1.8.0
+        run: python3 -m pip install -r test/posix/requirements.txt
+      - name: Run local DTLS regression tests
+        run: |
+          sh lib/tinydtls/tests/run_tests.sh
+          sh test/posix/run_unit_tests.sh
       - name: Build and test library
         run: |
           cd test/posix
