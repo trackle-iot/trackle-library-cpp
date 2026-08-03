@@ -164,6 +164,26 @@ void Callbacks_set_proxy_enabled(bool status) {
     proxyEnabled = status;
 }
 
+#define INJECT_UDP_BUF_SIZE 1500
+static unsigned char inject_udp_buf[INJECT_UDP_BUF_SIZE];
+static uint32_t inject_udp_len = 0;
+
+/**
+ * Queue a packet to be returned by the next receive_udp callback.
+ * Used by tests to inject malformed / unexpected datagrams.
+ */
+void Callbacks_inject_udp_packet(const unsigned char *buf, uint32_t buflen)
+{
+    if (!buf || buflen == 0 || buflen > INJECT_UDP_BUF_SIZE)
+    {
+        EXAMPLE_LOG("%u inject_udp_packet ignored (len=%u)\n", Callbacks_get_millis_cb(), buflen);
+        return;
+    }
+    memcpy(inject_udp_buf, buf, buflen);
+    inject_udp_len = buflen;
+    EXAMPLE_LOG("%u inject_udp_packet queued %u bytes\n", Callbacks_get_millis_cb(), buflen);
+}
+
 /**
  * It sends the data to the cloud server
  *
@@ -199,6 +219,15 @@ int Callbacks_send_udp_cb(const unsigned char *buf, uint32_t buflen, void *tmp)
  */
 int Callbacks_receive_udp_cb(unsigned char *buf, uint32_t buflen, void *tmp)
 {
+    if (inject_udp_len > 0)
+    {
+        uint32_t n = inject_udp_len < buflen ? inject_udp_len : buflen;
+        memcpy(buf, inject_udp_buf, n);
+        inject_udp_len = 0;
+        EXAMPLE_LOG("%u receive_cb_udp injected %u\n", Callbacks_get_millis_cb(), n);
+        return (int)n;
+    }
+
     if (proxyEnabled)
     {
         size_t res = recvfrom(cloud_socket, (char *)buf, buflen, 0, (struct sockaddr *)NULL, NULL);

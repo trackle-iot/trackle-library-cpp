@@ -82,11 +82,11 @@ setSystemRebootCallback.argtypes = [ctypes.c_void_p, REBOOT_CB]
 setSystemRebootCallback.restype = None
 
 setFirmwareVersion = __lib.trackleSetFirmwareVersion
-setFirmwareVersion.argtypes = [ctypes.c_int]
+setFirmwareVersion.argtypes = [ctypes.c_void_p, ctypes.c_int]
 setFirmwareVersion.restype = None
 
 setOtaMethod = __lib.trackleSetOtaMethod
-setOtaMethod.argtypes = [ctypes.c_int]
+setOtaMethod.argtypes = [ctypes.c_void_p, ctypes.c_int]
 setOtaMethod.restype = None
 
 OTA_UPDATE_CB = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p, ctypes.c_uint32)
@@ -111,7 +111,7 @@ updatesForced.argtypes = [ctypes.c_void_p]
 updatesForced.restype = ctypes.c_bool
 
 setConnectionType = __lib.trackleSetConnectionType
-setConnectionType.argtypes = [ctypes.c_int]
+setConnectionType.argtypes = [ctypes.c_void_p, ctypes.c_int]
 setConnectionType.restype = None
 
 setClaimCode = __lib.trackleSetClaimCode

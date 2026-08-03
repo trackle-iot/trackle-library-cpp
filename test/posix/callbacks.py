@@ -37,6 +37,10 @@ set_proxy_enabled = __lib.Callbacks_set_proxy_enabled
 set_proxy_enabled.argtypes = (ctypes.c_bool,)
 set_proxy_enabled.restype = None
 
+inject_udp_packet = __lib.Callbacks_inject_udp_packet
+inject_udp_packet.argtypes = (ctypes.c_void_p, ctypes.c_uint32)
+inject_udp_packet.restype = None
+
 send_udp = __lib.Callbacks_send_udp_cb
 send_udp.argtypes = (ctypes.c_void_p, ctypes.c_uint32, ctypes.c_void_p)
 send_udp.restype = ctypes.c_int
