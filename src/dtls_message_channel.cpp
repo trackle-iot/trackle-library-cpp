@@ -137,6 +137,11 @@ verify_ecdsa_key(struct dtls_context_t *ctx,
 	(void)other_pub_x;
 	(void)other_pub_y;
 	(void)key_size;
+	
+	// In Trackle architecture, server authentication is handled via 
+	// pre-shared server certificates (get_server_certificate callback).
+	// This verify callback is typically not used in the current setup.
+	// Return 0 (accept) to avoid breaking handshake.
 	return 0;
 }
 
@@ -372,8 +377,7 @@ namespace trackle
 			(void)app_state_crc;
 			int ret = -1;
 
-#define MAX_READ_BUF 1000
-			static uint8 buf[MAX_READ_BUF];
+			uint8 buf[PROTOCOL_BUFFER_SIZE];
 
 			static dtls_timing_context time_cb;
 			int8_t connection_status = -1;
@@ -440,7 +444,7 @@ namespace trackle
 				dtls_data.read_len = 0;
 				dtls_data.read_error = NO_ERROR;
 				dtls_data.transport_error = NO_ERROR;
-				int len = callbacks.receive(buf, MAX_READ_BUF, callbacks.tx_context);
+				int len = callbacks.receive(buf, PROTOCOL_BUFFER_SIZE, callbacks.tx_context);
 
 				if (len < 0)
 				{
@@ -469,12 +473,12 @@ namespace trackle
 						handshake_failed();
 						return error;
 					}
-					if (dtls_data.read_len > MAX_READ_BUF)
+					if (dtls_data.read_len > PROTOCOL_BUFFER_SIZE)
 					{
 						handshake_failed();
 						return INSUFFICIENT_STORAGE;
 					}
-					memset(buf, 0, MAX_READ_BUF);
+					memset(buf, 0, PROTOCOL_BUFFER_SIZE);
 					memcpy(buf, dtls_data.read_buf, dtls_data.read_len);
 				}
 

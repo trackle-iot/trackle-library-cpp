@@ -35,7 +35,7 @@ namespace trackle
 			channel.set_handshake_timeout(conPropType.handshake_timeout * 1000);
 			initialize_ping(conPropType.dumb_ping_interval * 1000, conPropType.coap_ping_ratio);
 
-			ProtocolError error = channel.init(keys.core_private, 121,
+			ProtocolError error = channel.init(keys.core_private, PRIVATE_KEY_LENGTH - 1,
 											   keys.server_public, DTLS_PUBLIC_KEY_LENGTH,
 											   channelCallbacks, &channel.next_id_ref());
 			if (error)
