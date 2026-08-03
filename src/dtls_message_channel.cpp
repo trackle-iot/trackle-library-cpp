@@ -17,25 +17,68 @@ unsigned char server_certificate[DTLS_PUBLIC_KEY_LENGTH];
 
 bool valid_dtls_session = false;
 
-void extract_pub_priv_keys(const uint8_t *key)
+static bool extract_pub_priv_keys(const uint8_t *key, size_t key_size)
 {
-	uint8_t len = key[1];
-
-	int i = 2;
-	while (i < (2 + len))
+	if (!key || key_size < 2 || key[0] != 0x30 || (key[1] & 0x80) != 0)
 	{
+		return false;
+	}
+
+	const size_t der_size = (size_t)key[1] + 2;
+	if (der_size > key_size)
+	{
+		return false;
+	}
+
+	memset(ecdsa_priv_key, 0, sizeof(ecdsa_priv_key));
+	memset(ecdsa_pub_key_x, 0, sizeof(ecdsa_pub_key_x));
+	memset(ecdsa_pub_key_y, 0, sizeof(ecdsa_pub_key_y));
+
+	bool private_key_found = false;
+	bool public_key_found = false;
+	size_t i = 2;
+	while (i < der_size)
+	{
+		if (der_size - i < 2 || (key[i + 1] & 0x80) != 0)
+		{
+			return false;
+		}
+
+		const size_t field_size = key[i + 1];
+		const size_t field_end = i + 2 + field_size;
+		if (field_end > der_size)
+		{
+			return false;
+		}
+
 		if (key[i] == 0x04)
 		{
-			int key_len = key[i + 1];
-			memcpy(ecdsa_priv_key + (DTLS_EC_KEY_SIZE - key_len), key + i + 2, key_len);
+			if (field_size == 0 || field_size > sizeof(ecdsa_priv_key))
+			{
+				return false;
+			}
+			memcpy(ecdsa_priv_key + sizeof(ecdsa_priv_key) - field_size,
+				   key + i + 2, field_size);
+			private_key_found = true;
 		}
 		else if (key[i] == 0xa1)
 		{
-			memcpy(ecdsa_pub_key_x, key + i + 6, 32);
-			memcpy(ecdsa_pub_key_y, key + i + 32 + 6, 32);
+			/* [1] BIT STRING, uncompressed P-256 point: 03 42 00 04 || X || Y */
+			if (field_size != 68 ||
+				key[i + 2] != 0x03 || key[i + 3] != 0x42 ||
+				key[i + 4] != 0x00 || key[i + 5] != 0x04)
+			{
+				return false;
+			}
+			memcpy(ecdsa_pub_key_x, key + i + 6, sizeof(ecdsa_pub_key_x));
+			memcpy(ecdsa_pub_key_y, key + i + 6 + sizeof(ecdsa_pub_key_x),
+				   sizeof(ecdsa_pub_key_y));
+			public_key_found = true;
 		}
-		i += (2 + key[i + 1]);
+		i = field_end;
 	}
+
+	return i == der_size && private_key_found && public_key_found;
 }
 
 static int
@@ -102,10 +145,16 @@ static int read_from_peer(struct dtls_context_t *ctx,
 {
 
 	Dtls_data *t_dtls_data = (Dtls_data *)ctx->app;
-	t_dtls_data->read_len = (int)len;
+	t_dtls_data->read_len = 0;
+	if (len > sizeof(t_dtls_data->read_buf))
+	{
+		t_dtls_data->read_error = trackle::protocol::INSUFFICIENT_STORAGE;
+		return -1;
+	}
 
 	memset(t_dtls_data->read_buf, 0, sizeof(t_dtls_data->read_buf));
 	memcpy(t_dtls_data->read_buf, data, len);
+	t_dtls_data->read_len = (uint32_t)len;
 
 	return 0;
 }
@@ -115,8 +164,12 @@ static int send_to_peer(struct dtls_context_t *ctx,
 {
 
 	Dtls_data *t_dtls_data = (Dtls_data *)ctx->app;
-	size_t res = t_dtls_data->send(data, (int)len, t_dtls_data->channel);
-	return (int)res;
+	int res = t_dtls_data->send(data, (int)len, t_dtls_data->channel);
+	if (res < 0)
+	{
+		t_dtls_data->transport_error = trackle::protocol::IO_ERROR_GENERIC_SEND;
+	}
+	return res;
 }
 
 namespace trackle
@@ -147,9 +200,20 @@ namespace trackle
 
 			dtls_init();
 
-			extract_pub_priv_keys(core_private); // extract client public and private key
+			if (!extract_pub_priv_keys(core_private, core_private_len))
+			{
+				LOG(ERROR, "Invalid DTLS client private key");
+				return IO_ERROR_PARSING_SERVER_PUBLIC_KEY;
+			}
 
-			// copy server public key
+			if (!server_public || server_public_len != DTLS_PUBLIC_KEY_LENGTH)
+			{
+				LOG(ERROR, "Invalid DTLS server public key length: %u",
+					(unsigned)server_public_len);
+				return IO_ERROR_PARSING_SERVER_PUBLIC_KEY;
+			}
+
+			memset(server_certificate, 0, sizeof(server_certificate));
 			memcpy(server_certificate, server_public, server_public_len);
 
 			static dtls_handler_t cb = {
@@ -164,6 +228,9 @@ namespace trackle
 
 			dtls_data.send = sendCallback; // send callback
 			dtls_data.channel = (void *)this;
+			dtls_data.read_len = 0;
+			dtls_data.read_error = NO_ERROR;
+			dtls_data.transport_error = NO_ERROR;
 
 			dtls_context = dtls_new_context(&dtls_data);
 			if (!dtls_context)
@@ -184,6 +251,7 @@ namespace trackle
 		void DTLSMessageChannel::reset_session()
 		{
 			LOG(TRACE, "DTLSMessageChannel::reset_session");
+			this->status = INIT;
 
 			dtls_peer_t *peer = dtls_get_peer(dtls_context, &dst);
 			if (peer)
@@ -219,6 +287,7 @@ namespace trackle
 		{
 			ticket_offered_for_handshake = false;
 			ticket_handshake_failures = 0;
+			this->status = INIT;
 		}
 
 		inline int DTLSMessageChannel::recv(uint8_t *data, size_t len)
@@ -335,6 +404,7 @@ namespace trackle
 
 				ticket_offered_for_handshake = false;
 
+				dtls_data.transport_error = NO_ERROR;
 				res = dtls_connect(dtls_context, &dst);
 #if DTLS_SESSION_TICKET
 				peer = dtls_get_peer(dtls_context, &dst);
@@ -348,8 +418,11 @@ namespace trackle
 				if (res <= 0)
 				{
 					LOG(TRACE, "dtls_connect error %d", res);
+					ProtocolError error = dtls_data.transport_error != NO_ERROR
+											  ? static_cast<ProtocolError>(dtls_data.transport_error)
+											  : IO_ERROR_GENERIC_ESTABLISH;
 					handshake_failed();
-					return IO_ERROR_GENERIC_ESTABLISH;
+					return error;
 				}
 
 				if (!ticket_offered_for_handshake)
@@ -365,16 +438,41 @@ namespace trackle
 			{
 
 				dtls_data.read_len = 0;
+				dtls_data.read_error = NO_ERROR;
+				dtls_data.transport_error = NO_ERROR;
 				int len = callbacks.receive(buf, MAX_READ_BUF, callbacks.tx_context);
+
+				if (len < 0)
+				{
+					handshake_failed();
+					return IO_ERROR_GENERIC_RECEIVE;
+				}
 
 				if (len > 0)
 				{
 					int dtls_res = dtls_handle_message(dtls_context, &dst, buf, len);
+					if (dtls_data.transport_error != NO_ERROR)
+					{
+						ProtocolError error = static_cast<ProtocolError>(dtls_data.transport_error);
+						handshake_failed();
+						return error;
+					}
 					if (dtls_res < 0)
 					{
 						LOG(WARN, "dtls_handle_message failed: %d", dtls_res);
 						handshake_failed();
 						return IO_ERROR_GENERIC_ESTABLISH;
+					}
+					if (dtls_data.read_error != NO_ERROR)
+					{
+						ProtocolError error = static_cast<ProtocolError>(dtls_data.read_error);
+						handshake_failed();
+						return error;
+					}
+					if (dtls_data.read_len > MAX_READ_BUF)
+					{
+						handshake_failed();
+						return INSUFFICIENT_STORAGE;
 					}
 					memset(buf, 0, MAX_READ_BUF);
 					memcpy(buf, dtls_data.read_buf, dtls_data.read_len);
@@ -444,16 +542,32 @@ namespace trackle
 			uint32_t buflen = (uint32_t)message.capacity();
 
 			dtls_data.read_len = 0;
+			dtls_data.read_error = NO_ERROR;
+			dtls_data.transport_error = NO_ERROR;
 			int len = callbacks.receive(buf, buflen, callbacks.tx_context);
+
+			if (len < 0)
+				return IO_ERROR_GENERIC_RECEIVE;
 
 			if (len > 0)
 			{
-				dtls_data.read_len = 0;
 				int dtls_res = dtls_handle_message(dtls_context, &dst, buf, len);
 				LOG(TRACE, "dtls_handle_message error %d, dtls_data.read_len %d", dtls_res, dtls_data.read_len);
+				if (dtls_data.transport_error != NO_ERROR)
+					return static_cast<ProtocolError>(dtls_data.transport_error);
 				if (dtls_res < 0)
-					return IO_ERROR_GENERIC_RECEIVE;
+				{
+					// UDP may deliver garbage / truncated DTLS records. Drop them
+					// without tearing down an established session.
+					LOG(WARN, "dtls_handle_message failed: %d (ignored)", dtls_res);
+					dtls_data.read_len = 0;
+				}
+				else if (dtls_data.read_error != NO_ERROR)
+					return static_cast<ProtocolError>(dtls_data.read_error);
 			}
+
+			if (dtls_data.read_len > buflen)
+				return INSUFFICIENT_STORAGE;
 
 			memset(buf, 0, buflen);
 			memcpy(buf, dtls_data.read_buf, dtls_data.read_len);
@@ -500,8 +614,11 @@ namespace trackle
 			LOG_PRINT(TRACE, "\r\n");
 #endif
 
+			dtls_data.transport_error = NO_ERROR;
 			int ret = dtls_write(dtls_context, &dst, message.buf(), message.length());
-			return (ret >= 0 ? NO_ERROR : IO_ERROR_GENERIC_ESTABLISH);
+			if (dtls_data.transport_error != NO_ERROR)
+				return static_cast<ProtocolError>(dtls_data.transport_error);
+			return (ret >= 0 ? NO_ERROR : IO_ERROR_GENERIC_SEND);
 		}
 
 		bool DTLSMessageChannel::is_unreliable()

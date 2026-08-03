@@ -278,7 +278,7 @@ typedef struct SessionPersistDataOpaque
 } SessionPersistDataOpaque;
 
 #define DEVICE_ID_LENGTH 12
-#define PUBLIC_KEY_LENGTH 92
+#define PUBLIC_KEY_LENGTH 91
 #define PRIVATE_KEY_LENGTH 122
 
 typedef uint32_t system_tick_t;

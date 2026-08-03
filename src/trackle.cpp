@@ -1565,10 +1565,6 @@ int wrapSend(const unsigned char *buf, uint32_t buflen, void *tmp)
     if (!sendCb)
         return -1;
     int bytes_sent = (*sendCb)(buf, buflen, tmp);
-    if (bytes_sent < 0)
-    { // if sending error
-        connectionError(CLOUD_DISCONNECT_REASON_SEND);
-    }
     if (bytes_sent > 0)
     {
         millis_last_sent_received_time = (*callbacks.millis)();
@@ -1582,8 +1578,7 @@ void Trackle::setSendCallback(sendCallback *send)
 }
 
 /**
- * It calls the receive callback function, and if it returns an error, it calls the connectionError
- * function
+ * It calls the receive callback function and propagates its result to the protocol layer.
  *
  * @param buf The buffer to store the received data in.
  * @param buflen The maximum number of bytes to receive.
@@ -1594,12 +1589,7 @@ void Trackle::setSendCallback(sendCallback *send)
 int wrapReceive(unsigned char *buf, uint32_t buflen, void *tmp)
 {
     int bytes_received = (*receiveCb)(buf, buflen, tmp);
-    if (bytes_received < 0)
-    { // if receive error
-        connectionError(CLOUD_DISCONNECT_REASON_RECEIVE);
-        bytes_received = 0;
-    }
-    else if (bytes_received > 0)
+    if (bytes_received > 0)
     {
         millis_last_sent_received_time = (*callbacks.millis)();
     }

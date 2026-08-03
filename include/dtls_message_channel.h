@@ -23,7 +23,6 @@
 #include "protocol_selector.h"
 
 #include "service_debug.h"
-#include "device_keys.h"
 #include "message_channel.h"
 #include "buffer_message_channel.h"
 
@@ -41,6 +40,8 @@ struct Dtls_data
 	int (*send)(const unsigned char *buf, size_t len, void *channel); // Send callback
 	uint32_t read_len;												  // len of received packet
 	uint8_t read_buf[PROTOCOL_BUFFER_SIZE];							  // received buffer
+	int read_error;													  // ProtocolError raised by the read callback
+	int transport_error;												  // ProtocolError raised by the send callback
 };
 
 namespace trackle
