@@ -347,7 +347,7 @@ void TrackleLib_tinydtls_log_wrapper(unsigned int tinydtlsLogLevel, const char *
     va_list args;
     char builtMsg[256] = {0};
     va_start(args, format);
-    vsprintf(builtMsg, format, args);
+    vsnprintf(builtMsg, sizeof(builtMsg), format, args);
     va_end(args);
 
     // Call set callback to display log message
