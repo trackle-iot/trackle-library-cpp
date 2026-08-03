@@ -2408,6 +2408,8 @@ void default_system_set_time_cb(time_t time, unsigned int param, void *)
 
 Trackle::Trackle(void)
 {
+    diagnostic::diagnosticCloud(CLOUD_DISCONNECTION_REASON, CLOUD_DISCONNECT_REASON_NONE);
+
     // Configure the cloud
     memset(&callbacks, 0, sizeof(callbacks));
     callbacks.size = sizeof(callbacks);

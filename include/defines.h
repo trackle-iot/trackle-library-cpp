@@ -41,6 +41,7 @@ typedef enum
  */
 typedef enum
 {
+    CLOUD_DISCONNECT_REASON_NONE = 0,     // No disconnection reason
     CLOUD_DISCONNECT_REASON_SOCKET = 1,   // Socket failure
     CLOUD_DISCONNECT_REASON_SEND = 2,     // Send failure
     CLOUD_DISCONNECT_REASON_RECEIVE = 3,  // Receive failure
