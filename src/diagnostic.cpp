@@ -49,9 +49,10 @@ namespace diagnostic
 	void diagnosticCloud(Cloud key, double value)
 	{
 		int32_t right_value = (int32_t)value;
-		if (key == CLOUD_DISCONNECTS || key == CLOUD_CONNECTION_ATTEMPTS || key == CLOUD_UNACKNOWLEDGED_MESSAGES)
+		if (key == CLOUD_DISCONNECTS || key == CLOUD_CONNECTION_ATTEMPTS ||
+			key == CLOUD_UNACKNOWLEDGED_MESSAGES || key == CLOUD_RATE_LIMITED_EVENTS)
 		{
-			// if valua > 0must increase current value, else reset
+			// if value > 0 must increase current value, else reset
 			if (value == 0)
 			{
 				right_value = 0;

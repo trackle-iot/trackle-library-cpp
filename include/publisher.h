@@ -25,6 +25,7 @@
 #include "message_channel.h"
 #include "messages.h"
 #include "service_debug.h"
+#include "diagnostic.h"
 
 #include "completion_handler.h"
 
@@ -97,7 +98,7 @@ namespace trackle
 					bool rate_limited = is_rate_limited(is_system_event, time);
 					if (rate_limited)
 					{
-						// g_rateLimitedEventsCounter++;
+						diagnostic::diagnosticCloud(CLOUD_RATE_LIMITED_EVENTS, 1);
 						return BANDWIDTH_EXCEEDED;
 					}
 				}
