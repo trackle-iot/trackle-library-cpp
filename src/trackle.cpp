@@ -2213,16 +2213,25 @@ void Trackle::loop()
         return;
 
     // ready or disconnected
+    int protocol_error = 0;
+    static int last_protocol_error = 0;
+    bool force_diagnostic = false;
+
     if (connectionStatus == SOCKET_READY /* || connectionStatus == SOCKET_NOT_CONNECTED*/)
     {
-        int protocol_error = 0;
         int res = trackle_protocol_event_loop(protocol, &protocol_error);
         if (!res)
         {
+            force_diagnostic = (protocol_error > 0 && protocol_error != last_protocol_error);
             // If wrapSend/Receive already closed, status != READY: do not overwrite the reason
             int mapped_error = mapProtocolErrorToDisconnectionReason(protocol_error);
             if (mapped_error != 0)
                 connectionError(mapped_error, false, protocol_error);
+        }
+        else
+        {
+            // Reset on success
+            last_protocol_error = 0;
         }
         if (!res && cloudStatus != res)
         {
@@ -2231,14 +2240,15 @@ void Trackle::loop()
         cloudStatus = res;
     }
 
-    // ready - check publish diagnostic
-    if (connectionStatus == SOCKET_READY && health_check_interval > 0)
+    // ready - check publish diagnostic (force on protocol error)
+    if (connectionStatus == SOCKET_READY && (force_diagnostic || health_check_interval > 0))
     {
         system_tick_t millis_since_last_health_check = (*callbacks.millis)() - millis_last_sent_health_check;
-        if (health_check_interval < millis_since_last_health_check)
+        if (force_diagnostic || health_check_interval < millis_since_last_health_check)
         {
+            last_protocol_error = protocol_error;
             millis_last_sent_health_check = (*callbacks.millis)();
-            LOG(TRACE, "Sending health check");
+            LOG(TRACE, force_diagnostic ? "Sending health check (protocol error)" : "Sending health check");
             trackle_protocol_post_description(protocol, trackle::protocol::DESCRIBE_METRICS);
         }
     }
