@@ -1547,7 +1547,7 @@ void connectionError(int error_type, bool force = false, int protocol_error_code
     // ProtocolError detail: also on failed handshake (not yet SOCKET_READY)
     if (protocol_error_code != 0)
     {
-        diagnostic::diagnosticCloud(CLOUD_CONNECTION_ERROR_CODE, protocol_error_code);
+        diagnostic::diagnosticCloud(CLOUD_PROTOCOL_ERROR_CODE, protocol_error_code);
     }
 
     // if connected or trying to connect

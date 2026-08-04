@@ -36,7 +36,7 @@ typedef enum
  * Cloud disconnection reasons → CLOUD_DISCONNECTION_REASON (cloud:dconnrsn).
  * 0 = no reason / not set.
  *
- * CLOUD_CONNECTION_ERROR_CODE (cloud:err) carries the raw ProtocolError instead
+ * CLOUD_PROTOCOL_ERROR_CODE (cloud:err) carries the raw ProtocolError instead
  * (@ref Cloud_Protocol_Error).
  */
 typedef enum
@@ -52,7 +52,7 @@ typedef enum
 } Cloud_Disconnection_Reason;
 
 /**
- * Raw ProtocolError codes → CLOUD_CONNECTION_ERROR_CODE (cloud:err).
+ * Raw ProtocolError codes → CLOUD_PROTOCOL_ERROR_CODE (cloud:err).
  *
  * Subset of trackle::protocol::ProtocolError (protocol_defs.h) that the stack
  * actually returns. Numeric values match ProtocolError (gaps are intentional).
@@ -233,7 +233,7 @@ typedef enum
 typedef enum
 {
     CLOUD_CONNECTION_STATUS = 10,       // cloud:stat
-    CLOUD_CONNECTION_ERROR_CODE = 13,   // cloud:err
+    CLOUD_PROTOCOL_ERROR_CODE = 13,     // cloud:err
     CLOUD_DISCONNECTS = 14,             // cloud:dconn
     CLOUD_CONNECTION_ATTEMPTS = 29,     // cloud:connatt
     CLOUD_DISCONNECTION_REASON = 30,    // cloud:dconnrsn
