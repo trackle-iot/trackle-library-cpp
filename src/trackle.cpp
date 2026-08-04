@@ -975,7 +975,13 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
                     if (crc32 != NULL && job_id != NULL)
                     {
                         // product firmware update
-                        sscanf(crc32, "%" PRIx32 "", &crc);
+                        // A malformed crc32 must not be silently accepted as 0
+                        const bool crc_is_valid = (sscanf(crc32, "%" PRIx32 "", &crc) == 1);
+                        if (!crc_is_valid)
+                        {
+                            LOG(ERROR, "Ota upgrade refused: invalid crc32 \"%s\"", crc32);
+                        }
+
                         // job_id comes from the cloud payload and is not length limited
                         snprintf(ota_data.ota_job_id, sizeof(ota_data.ota_job_id), "%s", job_id);
 
@@ -1047,7 +1053,8 @@ void subscribe_trackle_handler(void *handler, const char *event_name, const char
                             ota_data.has_signature = false;
                         }
 
-                        ota_type = 1;
+                        // Without a usable crc32 the update is refused, as for an invalid url
+                        ota_type = crc_is_valid ? 1 : 0;
                     }
                     else
                     {
