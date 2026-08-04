@@ -1769,33 +1769,75 @@ void Trackle::setUpdateStateCallback(updateStateCallback *updateState)
 
 void Trackle::setClaimCode(const char *claimCode)
 {
-    memset(claim_code, 0, CLAIM_CODE_SIZE);
-    memcpy(claim_code, claimCode, CLAIM_CODE_SIZE);
-    claim_code[CLAIM_CODE_SIZE] = 0;
+    memset(claim_code, 0, sizeof(claim_code));
+
+    if (claimCode == NULL)
+    {
+        LOG(WARN, "claimCode not set: NULL pointer");
+        return;
+    }
+
+    const int written = snprintf(claim_code, sizeof(claim_code), "%s", claimCode);
+    if (written < 0 || (size_t)written >= sizeof(claim_code))
+    {
+        LOG(WARN, "claimCode too long (max %d char)", CLAIM_CODE_SIZE);
+        memset(claim_code, 0, sizeof(claim_code));
+    }
 }
 
 void Trackle::setComponentsList(const char *componentsList)
 {
-    if (strlen(componentsList) > MAX_COMPONENTS_LIST_LENGTH)
+    if (componentsList == NULL)
     {
-        LOG(WARN, "componentsList too long (max %d char)", MAX_COMPONENTS_LIST_LENGTH);
+        LOG(WARN, "componentsList not set: NULL pointer");
         return;
     }
 
-    memset(components_list, 0, COMPONENTS_LIST_SIZE);
-    sprintf(components_list, ",\"c\":\"%s\"", componentsList);
+    if (strlen(componentsList) > MAX_COMPONENTS_LIST_LENGTH)
+    {
+        LOG(WARN, "componentsList too long (max %zu char)", MAX_COMPONENTS_LIST_LENGTH);
+        return;
+    }
+
+    // A truncated attribute would break the JSON of the describe message, so it's dropped entirely.
+    const int written = snprintf(components_list, sizeof(components_list), ",\"c\":\"%s\"", componentsList);
+    if (written < 0 || (size_t)written >= sizeof(components_list))
+    {
+        LOG(WARN, "componentsList not set: describe attribute would not fit in %d char", COMPONENTS_LIST_SIZE);
+        components_list[0] = 0;
+    }
 }
 
 void Trackle::setImei(const char *imei)
 {
-    memset(describe_imei, 0, DESCRIBE_ATTR_SIZE);
-    sprintf(describe_imei, ",\"imei\":\"%s\"", imei);
+    if (imei == NULL)
+    {
+        LOG(WARN, "imei not set: NULL pointer");
+        return;
+    }
+
+    const int written = snprintf(describe_imei, sizeof(describe_imei), ",\"imei\":\"%s\"", imei);
+    if (written < 0 || (size_t)written >= sizeof(describe_imei))
+    {
+        LOG(WARN, "imei not set: describe attribute would not fit in %d char", DESCRIBE_ATTR_SIZE);
+        describe_imei[0] = 0;
+    }
 }
 
 void Trackle::setIccid(const char *iccid)
 {
-    memset(describe_iccid, 0, DESCRIBE_ATTR_SIZE);
-    sprintf(describe_iccid, ",\"iccid\":\"%s\"", iccid);
+    if (iccid == NULL)
+    {
+        LOG(WARN, "iccid not set: NULL pointer");
+        return;
+    }
+
+    const int written = snprintf(describe_iccid, sizeof(describe_iccid), ",\"iccid\":\"%s\"", iccid);
+    if (written < 0 || (size_t)written >= sizeof(describe_iccid))
+    {
+        LOG(WARN, "iccid not set: describe attribute would not fit in %d char", DESCRIBE_ATTR_SIZE);
+        describe_iccid[0] = 0;
+    }
 }
 
 void Trackle::setSaveSessionCallback(saveSessionCallback *save)
