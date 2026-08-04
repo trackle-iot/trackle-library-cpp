@@ -233,7 +233,10 @@ namespace trackle
                             return channel.send(response);
                         }
 
-                        str_length = strlen(str_val);
+                        // the value is owned by the user callback: bound the scan to the largest
+                        // value the protocol can carry, so that a buffer which is not
+                        // NUL-terminated cannot cause an unbounded over-read
+                        str_length = strnlen(str_val, MAX_BLOCK_SIZE * BLOCKS_NUMBER + 1);
 
                         // If value fits in single response, send simple response
                         if (str_length <= MAX_BLOCK_SIZE)

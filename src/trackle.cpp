@@ -591,8 +591,8 @@ bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Even
 
     bool res = false; // global return
 
-    // publish() without payload passes a NULL data, which must never reach strlen()
-    const size_t dataLength = (data != NULL) ? strlen(data) : 0;
+    // publish() without payload passes a NULL data, which must never reach strnlen()
+    const size_t dataLength = (data != NULL) ? strnlen(data, MAX_BLOCK_SIZE * trackle::protocol::trackle_get_blocks_number() + 1) : 0;
 
     // if packet size is ok, else return false
     if (dataLength <= MAX_BLOCK_SIZE * trackle::protocol::trackle_get_blocks_number())
