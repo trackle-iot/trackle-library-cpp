@@ -1,8 +1,7 @@
 //
-//  Trackle.cpp
+//  trackle.cpp
 //
-//  Created by Flavio Ferrandi on 14/09/17.
-//  Copyright © 2017 Flavio Ferrandi. All rights reserved.
+//  Copyright (c) 2017 IOTREADY S.r.l.
 //
 
 #include "trackle.h"

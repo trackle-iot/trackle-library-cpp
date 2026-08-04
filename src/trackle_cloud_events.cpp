@@ -1,5 +1,7 @@
 //
-// Copyright © 2017 Flavio Ferrandi. All rights reserved.
+//  trackle_cloud_events.cpp
+//
+//  Copyright (c) 2026 IOTREADY S.r.l.
 //
 
 #include "trackle.h"
