@@ -1,165 +1,139 @@
-                   GNU LESSER GENERAL PUBLIC LICENSE
-                       Version 3, 29 June 2007
+TRACKLE LIBRARY SOURCE-AVAILABLE LICENSE AGREEMENT
+Version 1.0 - August 2026
 
- Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
- Everyone is permitted to copy and distribute verbatim copies
- of this license document, but changing it is not allowed.
+IMPORTANT: READ CAREFULLY BEFORE USING THIS SOFTWARE.
 
+This Source-Available License Agreement ("Agreement") is a legal agreement between 
+you (either an individual or a single entity, hereinafter "Licensee") and 
+IOTREADY S.r.l. ("Licensor"), governing the use of the Trackle Library source code, 
+documentation, and associated software artifacts (collectively, the "Software").
 
-  This version of the GNU Lesser General Public License incorporates
-the terms and conditions of version 3 of the GNU General Public
-License, supplemented by the additional permissions listed below.
+BY DOWNLOADING, INSTALLING, COPYING, MODIFYING, OR OTHERWISE USING THE SOFTWARE, 
+YOU AGREE TO BE BOUND BY THE TERMS OF THIS AGREEMENT. IF YOU DO NOT AGREE TO THESE 
+TERMS, DO NOT USE, COPY, OR DISTRIBUTE THE SOFTWARE.
 
-  0. Additional Definitions.
+---
 
-  As used herein, "this License" refers to version 3 of the GNU Lesser
-General Public License, and the "GNU GPL" refers to version 3 of the GNU
-General Public License.
+1. DEFINITIONS
 
-  "The Library" refers to a covered work governed by this License,
-other than an Application or a Combined Work as defined below.
+1.1 "Software" means the Trackle IoT library, source code, headers, build 
+    scripts, sample code, and accompanying documentation provided under this Agreement.
+1.2 "Trackle Cloud" means the cloud infrastructure, API services, and backend systems 
+    operated by Licensor.
+1.3 "Commercial Device" means any physical or virtual hardware device, embedded system, 
+    or gateway running or incorporating the Software (or derivative works thereof) that 
+    is manufactured, distributed, sold, leased, or deployed for operational or commercial 
+    purposes.
+1.4 "Device License Key" means a unique, cryptographically secure key or authentication 
+    credential issued by Licensor (or its authorized distributors) upon payment of the 
+    applicable per-device commercial fee.
 
-  An "Application" is any work that makes use of an interface provided
-by the Library, but which is not otherwise based on the Library.
-Defining a subclass of a class defined by the Library is deemed a mode
-of using an interface provided by the Library.
+---
 
-  A "Combined Work" is a work produced by combining or linking an
-Application with the Library.  The particular version of the Library
-with which the Combined Work was made is also called the "Linked
-Version".
+2. LICENSE GRANTS
 
-  The "Minimal Corresponding Source" for a Combined Work means the
-Corresponding Source for the Combined Work, excluding any source code
-for portions of the Combined Work that, considered in isolation, are
-based on the Application, and not on the Linked Version.
+2.1 Evaluation and Development Grant:
+    Subject to the terms and conditions of this Agreement, Licensor grants Licensee a 
+    non-exclusive, non-transferable, royalty-free license to view, inspect, download, 
+    compile, and modify the Software solely for internal evaluation, testing, 
+    prototyping, and firmware integration during the product development phase.
 
-  The "Corresponding Application Code" for a Combined Work means the
-object code and/or source code for the Application, including any data
-and utility programs needed for reproducing the Combined Work from the
-Application, but excluding the System Libraries of the Combined Work.
+2.2 Source Code Visibility:
+    The Software is made available in source code form to provide transparency and 
+    facilitate debugging, security auditing, and firmware integration. This visibility 
+    does NOT constitute an open-source license under the Open Source Definition (OSD).
 
-  1. Exception to Section 3 of the GNU GPL.
+---
 
-  You may convey a covered work under sections 3 and 4 of this License
-without being bound by section 3 of the GNU GPL.
+3. COMMERCIAL USE AND DEPLOYMENT RESTRICTIONS
 
-  2. Conveying Modified Versions.
+3.1 Commercial License Requirement:
+    Every Commercial Device deployed, distributed, or connected to the Trackle Cloud 
+    requires a valid, paid Device License Key purchased from Licensor.
 
-  If you modify a copy of the Library, and, in your modifications, a
-facility refers to a function or data to be supplied by an Application
-that uses the facility (other than as an argument passed when the
-facility is invoked), then you may convey a copy of the modified
-version:
+3.2 Production Deployment:
+    Licensee shall NOT distribute, deploy, flash, or operate the Software (or any 
+    derivative work) in any Commercial Device or production environment without 
+    obtaining a valid Device License Key for each individual device.
 
-   a) under this License, provided that you make a good faith effort to
-   ensure that, in the event an Application does not supply the
-   function or data, the facility still operates, and performs
-   whatever part of its purpose remains meaningful, or
+---
 
-   b) under the GNU GPL, with none of the additional permissions of
-   this License applicable to that copy.
+4. PROHIBITED USES
 
-  3. Object Code Incorporating Material from Library Header Files.
+Licensee shall NOT, directly or indirectly:
+(a) Bypass, disable, evade, override, or tamper with any authentication, licensing, 
+    device key validation, or security mechanisms embedded in the Software or used to 
+    authenticate with the Trackle Cloud;
+(b) Modify or reconfigure the Software to connect to any non-Trackle cloud 
+    infrastructure, emulated backend, or third-party service without prior written 
+    consent from Licensor;
+(c) Sell, sublicense, rent, lease, or distribute the Software on a standalone basis 
+    as an independent library or competing SDK;
+(d) Remove, alter, or obscure any proprietary notices, copyright legends, or license 
+    headers in the Software source code;
+(e) Re-license the Software or any modified version thereof under any open-source 
+    license (including but not limited to GPL, LGPL, Apache, or MIT).
 
-  The object code form of an Application may incorporate material from
-a header file that is part of the Library.  You may convey such object
-code under terms of your choice, provided that, if the incorporated
-material is not limited to numerical parameters, data structure
-layouts and accessors, or small macros, inline functions and templates
-(ten or fewer lines in length), you do both of the following:
+---
 
-   a) Give prominent notice with each copy of the object code that the
-   Library is used in it and that the Library and its use are
-   covered by this License.
+5. DERIVATIVE WORKS AND CONTRIBUTIONS
 
-   b) Accompany the object code with a copy of the GNU GPL and this license
-   document.
+5.1 Ownership of Derivatives:
+    Any modifications, enhancements, or derivative works created by Licensee based 
+    on the Software shall remain subject to the terms of this Agreement. Licensee 
+    retains ownership of its own proprietary firmware logic, provided it does not 
+    incorporate or replace the Software's licensing framework.
 
-  4. Combined Works.
+5.2 Contributions:
+    If Licensee submits bug fixes, patches, or feature enhancements to Licensor (e.g., 
+    via GitHub Pull Requests), Licensee grants Licensor a perpetual, worldwide, 
+    non-exclusive, royalty-free, transferable license to incorporate, distribute, and 
+    sublicense such contributions within the Software.
 
-  You may convey a Combined Work under terms of your choice that,
-taken together, effectively do not restrict modification of the
-portions of the Library contained in the Combined Work and reverse
-engineering for debugging such modifications, if you also do each of
-the following:
+---
 
-   a) Give prominent notice with each copy of the Combined Work that
-   the Library is used in it and that the Library and its use are
-   covered by this License.
+6. INTELLECTUAL PROPERTY RIGHTS
 
-   b) Accompany the Combined Work with a copy of the GNU GPL and this license
-   document.
+The Software is protected by copyright laws and international copyright treaties. 
+Licensor retains all right, title, and interest in and to the Software, including 
+all copyrights, patents, trade secrets, trademarks, and other intellectual property 
+rights therein.
 
-   c) For a Combined Work that displays copyright notices during
-   execution, include the copyright notice for the Library among
-   these notices, as well as a reference directing the user to the
-   copies of the GNU GPL and this license document.
+---
 
-   d) Do one of the following:
+7. DISCLAIMER OF WARRANTY
 
-       0) Convey the Minimal Corresponding Source under the terms of this
-       License, and the Corresponding Application Code in a form
-       suitable for, and under terms that permit, the user to
-       recombine or relink the Application with a modified version of
-       the Linked Version to produce a modified Combined Work, in the
-       manner specified by section 6 of the GNU GPL for conveying
-       Corresponding Source.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
+PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL LICENSOR BE LIABLE FOR 
+ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, 
+OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE 
+OR OTHER DEALINGS IN THE SOFTWARE.
 
-       1) Use a suitable shared library mechanism for linking with the
-       Library.  A suitable mechanism is one that (a) uses at run time
-       a copy of the Library already present on the user"s computer
-       system, and (b) will operate properly with a modified version
-       of the Library that is interface-compatible with the Linked
-       Version.
+---
 
-   e) Provide Installation Information, but only if you would otherwise
-   be required to provide such information under section 6 of the
-   GNU GPL, and only to the extent that such information is
-   necessary to install and execute a modified version of the
-   Combined Work produced by recombining or relinking the
-   Application with a modified version of the Linked Version. (If
-   you use option 4d0, the Installation Information must accompany
-   the Minimal Corresponding Source and Corresponding Application
-   Code. If you use option 4d1, you must provide the Installation
-   Information in the manner specified by section 6 of the GNU GPL
-   for conveying Corresponding Source.)
+8. LIMITATION OF LIABILITY
 
-  5. Combined Libraries.
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL LICENSOR BE 
+LIABLE FOR ANY INDIRECT, SPECIAL, INCIDENTAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES 
+WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF BUSINESS PROFITS, 
+BUSINESS INTERRUPTION, LOSS OF DATA, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF 
+THE USE OF OR INABILITY TO USE THE SOFTWARE.
 
-  You may place library facilities that are a work based on the
-Library side by side in a single library together with other library
-facilities that are not Applications and are not covered by this
-License, and convey such a combined library under terms of your
-choice, if you do both of the following:
+---
 
-   a) Accompany the combined library with a copy of the same work based
-   on the Library, uncombined with any other library facilities,
-   conveyed under the terms of this License.
+9. TERMINATION
 
-   b) Give prominent notice with the combined library that part of it
-   is a work based on the Library, and explaining where to find the
-   accompanying uncombined form of the same work.
+Without prejudice to any other rights, Licensor may terminate this Agreement 
+immediately if Licensee fails to comply with any term or condition herein. Upon 
+termination, Licensee must cease all use of the Software and destroy all copies 
+of the Software in its possession or control.
 
-  6. Revised Versions of the GNU Lesser General Public License.
+---
 
-  The Free Software Foundation may publish revised and/or new versions
-of the GNU Lesser General Public License from time to time. Such new
-versions will be similar in spirit to the present version, but may
-differ in detail to address new problems or concerns.
+10. GOVERNING LAW AND JURISDICTION
 
-  Each version is given a distinguishing version number. If the
-Library as you received it specifies that a certain numbered version
-of the GNU Lesser General Public License "or any later version"
-applies to it, you have the option of following the terms and
-conditions either of that published version or of any later version
-published by the Free Software Foundation. If the Library as you
-received it does not specify a version number of the GNU Lesser
-General Public License, you may choose any version of the GNU Lesser
-General Public License ever published by the Free Software Foundation.
-
-  If the Library as you received it specifies that a proxy can decide
-whether future versions of the GNU Lesser General Public License shall
-apply, that proxy"s public statement of acceptance of any version is
-permanent authorization for you to choose that version for the
-Library.
+This Agreement shall be governed by and construed in accordance with the laws of 
+Italy, without regard to its conflict of law principles. Any dispute arising out of 
+or in connection with this Agreement shall be submitted to the exclusive 
+jurisdiction of the competent Court of Bergamo, Italy.
