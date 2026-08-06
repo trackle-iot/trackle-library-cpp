@@ -277,9 +277,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a06c18680e42665a2365bc1208114200c" id="r_a06c18680e42665a2365bc1208114200c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8h.html#a06c18680e42665a2365bc1208114200c">trackleSetConnectionType</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, Connection_Type conn) <a class="el" href="trackle__interface_8h.html#ae4ad8e0eba8e8694399616b10b5f06df">DYNLIB</a></td></tr>
 <tr class="memdesc:a06c18680e42665a2365bc1208114200c"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function sets the connection type for the <a class="el" href="class_trackle.html">Trackle</a> library.    <br /></td></tr>
 <tr class="separator:a06c18680e42665a2365bc1208114200c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a387a1f3d6a964a4bee9db44edfffdce0" id="r_a387a1f3d6a964a4bee9db44edfffdce0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8h.html#a387a1f3d6a964a4bee9db44edfffdce0">trackleSetPingInterval</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, uint32_t <a class="el" href="trackle_8cpp.html#a630b3f747793bb20686a528702ce4194">pingInterval</a>) <a class="el" href="trackle__interface_8h.html#ae4ad8e0eba8e8694399616b10b5f06df">DYNLIB</a></td></tr>
-<tr class="memdesc:a387a1f3d6a964a4bee9db44edfffdce0"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function sets the interval at which the <a class="el" href="class_trackle.html">Trackle</a> will send a ping to the server.    <br /></td></tr>
-<tr class="separator:a387a1f3d6a964a4bee9db44edfffdce0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7d4b788cb1b63ae6c6e1177864715cb" id="r_ae7d4b788cb1b63ae6c6e1177864715cb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8h.html#ae7d4b788cb1b63ae6c6e1177864715cb">trackleSetPingInterval</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, uint32_t dumbInterval, uint8_t coapRatio) <a class="el" href="trackle__interface_8h.html#ae4ad8e0eba8e8694399616b10b5f06df">DYNLIB</a></td></tr>
+<tr class="memdesc:ae7d4b788cb1b63ae6c6e1177864715cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function sets the interval at which the <a class="el" href="class_trackle.html">Trackle</a> will send a ping to the server.    <br /></td></tr>
+<tr class="separator:ae7d4b788cb1b63ae6c6e1177864715cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a59be0cd52445433a2a69514510fb591e" id="r_a59be0cd52445433a2a69514510fb591e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8h.html#a59be0cd52445433a2a69514510fb591e">trackleSetOtaMethod</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, Ota_Method method) <a class="el" href="trackle__interface_8h.html#ae4ad8e0eba8e8694399616b10b5f06df">DYNLIB</a></td></tr>
 <tr class="memdesc:a59be0cd52445433a2a69514510fb591e"><td class="mdescLeft">&#160;</td><td class="mdescRight">It sets the OTA method to the method passed in.    <br /></td></tr>
 <tr class="separator:a59be0cd52445433a2a69514510fb591e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -362,10 +362,6 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Copyright (c) 2022 IOTREADY S.r.l.</p>
-<p>This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</p>
-<p>This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.</p>
-<p>You should have received a copy of the GNU Lesser General Public License along with this library; if not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>. </p>
 
 </div>
 </div>
@@ -2112,8 +2108,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a387a1f3d6a964a4bee9db44edfffdce0" name="a387a1f3d6a964a4bee9db44edfffdce0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a387a1f3d6a964a4bee9db44edfffdce0">&#9670;&#160;</a></span>trackleSetPingInterval()</h2>
+<a id="ae7d4b788cb1b63ae6c6e1177864715cb" name="ae7d4b788cb1b63ae6c6e1177864715cb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7d4b788cb1b63ae6c6e1177864715cb">&#9670;&#160;</a></span>trackleSetPingInterval()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2128,7 +2124,13 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">uint32_t&#160;</td>
-          <td class="paramname"><em>pingInterval</em>&#160;</td>
+          <td class="paramname"><em>dumbInterval</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>coapRatio</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -2142,7 +2144,8 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">v</td><td>The <a class="el" href="class_trackle.html">Trackle</a> struct.</td></tr>
-    <tr><td class="paramname">interval</td><td>The interval in seconds between pings.   </td></tr>
+    <tr><td class="paramname">dumbInterval</td><td>The interval in seconds between dumb (keepalive) pings. </td></tr>
+    <tr><td class="paramname">coapRatio</td><td>Send a CoAP ping every N dumb pings (0 = disabled).   </td></tr>
   </table>
   </dd>
 </dl>

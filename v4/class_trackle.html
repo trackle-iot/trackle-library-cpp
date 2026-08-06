@@ -281,9 +281,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:acc11c47b1b33aeda8d75bb79930ad915" id="r_acc11c47b1b33aeda8d75bb79930ad915"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#acc11c47b1b33aeda8d75bb79930ad915">setConnectionType</a> (Connection_Type conn)</td></tr>
 <tr class="memdesc:acc11c47b1b33aeda8d75bb79930ad915"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function sets the connection type for the <a class="el" href="class_trackle.html">Trackle</a> library.  <br /></td></tr>
 <tr class="separator:acc11c47b1b33aeda8d75bb79930ad915"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a15a74d309e49892407df84efdcf611d2" id="r_a15a74d309e49892407df84efdcf611d2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#a15a74d309e49892407df84efdcf611d2">setPingInterval</a> (uint32_t <a class="el" href="trackle_8cpp.html#a630b3f747793bb20686a528702ce4194">pingInterval</a>)</td></tr>
-<tr class="memdesc:a15a74d309e49892407df84efdcf611d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function sets the interval at which the <a class="el" href="class_trackle.html">Trackle</a> will send a ping to the server.  <br /></td></tr>
-<tr class="separator:a15a74d309e49892407df84efdcf611d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26db9361c83f26eb89e2e9c38169e747" id="r_a26db9361c83f26eb89e2e9c38169e747"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#a26db9361c83f26eb89e2e9c38169e747">setPingInterval</a> (uint32_t dumbInterval, uint8_t coapRatio)</td></tr>
+<tr class="memdesc:a26db9361c83f26eb89e2e9c38169e747"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function sets the interval at which the <a class="el" href="class_trackle.html">Trackle</a> will send a ping to the server.  <br /></td></tr>
+<tr class="separator:a26db9361c83f26eb89e2e9c38169e747"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a02617a364c08920d21e7f979122b778f" id="r_a02617a364c08920d21e7f979122b778f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#a02617a364c08920d21e7f979122b778f">setOtaMethod</a> (Ota_Method method)</td></tr>
 <tr class="memdesc:a02617a364c08920d21e7f979122b778f"><td class="mdescLeft">&#160;</td><td class="mdescRight">It sets the OTA method to the method passed in.  <br /></td></tr>
 <tr class="separator:a02617a364c08920d21e7f979122b778f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -368,7 +368,7 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:a68858d50253ca401cca45faed04f224c" id="r_a68858d50253ca401cca45faed04f224c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#a68858d50253ca401cca45faed04f224c">addSubscription</a> (const char *eventName, EventHandler handler, void *handlerData, Subscription_Scope_Type scope, const char *deviceID, void *reserved)</td></tr>
 <tr class="memdesc:a68858d50253ca401cca45faed04f224c"><td class="mdescLeft">&#160;</td><td class="mdescRight">It add a subscription to the subscriptions list.  <br /></td></tr>
 <tr class="separator:a68858d50253ca401cca45faed04f224c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaf69a90a32ce23dfd94dba259bbd240f" id="r_aaf69a90a32ce23dfd94dba259bbd240f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#aaf69a90a32ce23dfd94dba259bbd240f">addGet</a> (const char *varKey, user_variable_pointer_t fn, Data_TypeDef <a class="el" href="trackle_8cpp.html#af31e4733797ca631e2ea70f5a6bf43ba">userVarType</a>)</td></tr>
+<tr class="memitem:aaf69a90a32ce23dfd94dba259bbd240f" id="r_aaf69a90a32ce23dfd94dba259bbd240f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_trackle.html#aaf69a90a32ce23dfd94dba259bbd240f">addGet</a> (const char *varKey, user_variable_pointer_t fn, Data_TypeDef userVarType)</td></tr>
 <tr class="memdesc:aaf69a90a32ce23dfd94dba259bbd240f"><td class="mdescLeft">&#160;</td><td class="mdescRight">It adds a variable to the list of variables that can be set by the cloud.  <br /></td></tr>
 <tr class="separator:aaf69a90a32ce23dfd94dba259bbd240f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -2246,8 +2246,8 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a15a74d309e49892407df84efdcf611d2" name="a15a74d309e49892407df84efdcf611d2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a15a74d309e49892407df84efdcf611d2">&#9670;&#160;</a></span>setPingInterval()</h2>
+<a id="a26db9361c83f26eb89e2e9c38169e747" name="a26db9361c83f26eb89e2e9c38169e747"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26db9361c83f26eb89e2e9c38169e747">&#9670;&#160;</a></span>setPingInterval()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2256,8 +2256,18 @@ Private Member Functions</h2></td></tr>
           <td class="memname">void setPingInterval </td>
           <td>(</td>
           <td class="paramtype">uint32_t&#160;</td>
-          <td class="paramname"><em>pingInterval</em></td><td>)</td>
+          <td class="paramname"><em>dumbInterval</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>coapRatio</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -2265,7 +2275,8 @@ Private Member Functions</h2></td></tr>
 <p>This function sets the interval at which the <a class="el" href="class_trackle.html">Trackle</a> will send a ping to the server. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">interval</td><td>The interval in seconds between pings. </td></tr>
+    <tr><td class="paramname">dumbInterval</td><td>The interval in seconds between dumb (keepalive) pings. </td></tr>
+    <tr><td class="paramname">coapRatio</td><td>Send a CoAP ping every N dumb pings (0 = disabled). </td></tr>
   </table>
   </dd>
 </dl>

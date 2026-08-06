@@ -1,10 +1,11 @@
 var searchData=
 [
-  ['max_5fcounter_0',['MAX_COUNTER',['../trackle_8cpp.html#a9585d08d345ce32c97c66808fa1d3cd7',1,'trackle.cpp']]],
-  ['max_5fping_5finterval_1',['MAX_PING_INTERVAL',['../trackle_8cpp.html#a486a5fa100ced1e4b70232f98c35c6f4',1,'trackle.cpp']]],
-  ['max_5freconnection_5fretry_5fincrement_2',['MAX_RECONNECTION_RETRY_INCREMENT',['../trackle_8cpp.html#a0c4f0292ef0bb6521de7c461314d079f',1,'trackle.cpp']]],
-  ['millis_5flast_5fdisconnection_3',['millis_last_disconnection',['../trackle_8cpp.html#a67b4492693536f0bc10afca2f713a59c',1,'trackle.cpp']]],
-  ['millis_5flast_5fsent_5fhealth_5fcheck_4',['millis_last_sent_health_check',['../trackle_8cpp.html#ad50415da9e1ec4b0f42ba4eb289d9a66',1,'trackle.cpp']]],
-  ['millis_5flast_5fsent_5freceived_5ftime_5',['millis_last_sent_received_time',['../trackle_8cpp.html#a36674b34513a1aea8cb4c21148c9d90f',1,'trackle.cpp']]],
-  ['millis_5fstarted_5fat_6',['millis_started_at',['../trackle_8cpp.html#a5f6f68242d19f39da0825ba9b2289f6f',1,'trackle.cpp']]]
+  ['id_20and_20a_20private_20key_0',['Get a Device ID and a private key',['../md__r_e_a_d_m_e.html#autotoc_md25',1,'']]],
+  ['if_5fnot_5finitialized_5fwarning_1',['IF_NOT_INITIALIZED_WARNING',['../trackle__interface_8cpp.html#a93395b8a39c51a878ec51aecdb76f046',1,'trackle_interface.cpp']]],
+  ['in_20c_2',['in c',['../md__r_e_a_d_m_e.html#autotoc_md27',1,'Getting started in C'],['../md__r_e_a_d_m_e.html#autotoc_md26',1,'Getting started in C++']]],
+  ['increase_5fconnection_5ftimeout_3',['increase_connection_timeout',['../trackle_8cpp.html#a619931bfdd95ed3fee3c0febe3e8f8ae',1,'trackle.cpp']]],
+  ['inquiries_4',['Commercial Licensing &amp; Inquiries',['../md__r_e_a_d_m_e.html#autotoc_md33',1,'']]],
+  ['is_20trackle_5',['What is Trackle',['../md__r_e_a_d_m_e.html#autotoc_md20',1,'']]],
+  ['isenabled_6',['isEnabled',['../class_trackle.html#a56722b6f1c22da04885bc9853148bb71',1,'Trackle']]],
+  ['it_7',['How to use it',['../md__d_i_a_g_n_o_s_t_i_c.html#autotoc_md4',1,'']]]
 ];

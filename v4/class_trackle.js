@@ -58,7 +58,7 @@ var class_trackle =
     [ "setOtaUpdateDone", "class_trackle.html#a6af5cd84b3659f8af8224ccf77bc7c65", null ],
     [ "setOtaVerificationKey", "class_trackle.html#a09dcdfd8dadc0a78befbf23f5e88543a", null ],
     [ "setPincodeCallback", "class_trackle.html#a9d5c75733d1125183c007980d4c869ac", null ],
-    [ "setPingInterval", "class_trackle.html#a15a74d309e49892407df84efdcf611d2", null ],
+    [ "setPingInterval", "class_trackle.html#a26db9361c83f26eb89e2e9c38169e747", null ],
     [ "setPrepareForFirmwareUpdateCallback", "class_trackle.html#a3bc30b74dc4feb3d356dbd678181a91b", null ],
     [ "setProductId", "class_trackle.html#a170ff0ef96353805a118e83cb9d4dc0a", null ],
     [ "setPublishHealthCheckInterval", "class_trackle.html#a130b31f3034272aa501598ec0481455f", null ],

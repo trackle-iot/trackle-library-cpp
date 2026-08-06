@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['enableupdates_0',['enableUpdates',['../class_trackle.html#a17521adc3cc00339312d467dcedac381',1,'Trackle']]],
-  ['event_5fhandler_5ftrackle_1',['event_handler_trackle',['../trackle_8cpp.html#a584efb5607b4e4388aef382bd2a4dd9f',1,'trackle.cpp']]]
+  ['bits_5fin_5frand_0',['BITS_IN_RAND',['../trackle_8cpp.html#a236693566044c3b30f585bf72a086a94',1,'trackle.cpp']]],
+  ['by_20the_20library_1',['Cloud (&lt;tt&gt;diagnosticCloud&lt;/tt&gt;) — mostly filled by the library',['../md__d_i_a_g_n_o_s_t_i_c.html#autotoc_md13',1,'']]]
 ];

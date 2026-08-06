@@ -1,11 +1,10 @@
 var searchData=
 [
-  ['of_20contents_0',['Table of contents',['../md__r_e_a_d_m_e.html#autotoc_md1',1,'']]],
-  ['ota_20verification_1',['Generating Public/Private Key Pair for OTA Verification',['../md__r_e_a_d_m_e.html#autotoc_md12',1,'']]],
-  ['ota_5fdata_2',['ota_data',['../trackle_8cpp.html#a0ec3e8b18ca29897c3fd74d831dc6711',1,'trackle.cpp']]],
-  ['ota_5fjob_5fid_3',['ota_job_id',['../struct__ota__data.html#a32f21d2566ec41ad622760ca166b7884',1,'_ota_data']]],
-  ['otamethod_4',['otaMethod',['../trackle_8cpp.html#a2d838c3e89267abfaf57269e70248916',1,'trackle.cpp']]],
-  ['otaupdatecb_5',['otaUpdateCb',['../trackle_8cpp.html#a86e28ce7fa6a1c769e8dc9cfe5c8683f',1,'trackle.cpp']]],
-  ['overview_6',['Overview',['../md__r_e_a_d_m_e.html#autotoc_md3',1,'']]],
-  ['owners_7',['owners',['../trackle_8cpp.html#acfae85b075e92385eaed14bc7cf17e26',1,'trackle.cpp']]]
+  ['library_0',['library',['../md__d_i_a_g_n_o_s_t_i_c.html#autotoc_md13',1,'Cloud (&lt;tt&gt;diagnosticCloud&lt;/tt&gt;) — mostly filled by the library'],['../md__r_e_a_d_m_e.html',1,'Trackle library']]],
+  ['library_20diagnostics_1',['Trackle Library Diagnostics',['../md__d_i_a_g_n_o_s_t_i_c.html',1,'']]],
+  ['licensing_20commercial_20use_2',['Licensing &amp; Commercial Use',['../md__r_e_a_d_m_e.html#autotoc_md31',1,'']]],
+  ['licensing_20inquiries_3',['Commercial Licensing &amp; Inquiries',['../md__r_e_a_d_m_e.html#autotoc_md33',1,'']]],
+  ['list_4',['Deprecated List',['../deprecated.html',1,'']]],
+  ['loop_5',['loop',['../class_trackle.html#afe461d27b9c48d5921c00d521181f12f',1,'Trackle']]],
+  ['loop_20tt_20regularly_6',['3. Call &lt;tt&gt;loop()&lt;/tt&gt; regularly',['../md__d_i_a_g_n_o_s_t_i_c.html#autotoc_md7',1,'']]]
 ];

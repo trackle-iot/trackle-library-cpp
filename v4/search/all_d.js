@@ -1,6 +1,9 @@
 var searchData=
 [
-  ['newtrackle_0',['newtrackle',['../trackle__interface_8h.html#ad2bc3a77d0cd89614c7d844a44d8c224',1,'newTrackle(void) DYNLIB:&#160;trackle_interface.cpp'],['../trackle__interface_8cpp.html#a96e6e4ba8c3a81bc54cc00b14e11e56a',1,'newTrackle(void):&#160;trackle_interface.cpp']]],
-  ['num_5ffunctions_1',['num_functions',['../trackle_8cpp.html#a22d36f19b9fcb867136d96410df30d5b',1,'trackle.cpp']]],
-  ['numuservariables_2',['numUserVariables',['../trackle_8cpp.html#a25e51744bcf4efe3ae87c74689431ab2',1,'trackle.cpp']]]
+  ['keep_20values_20up_20to_20date_0',['1. Keep values up to date',['../md__d_i_a_g_n_o_s_t_i_c.html#autotoc_md5',1,'']]],
+  ['key_1',['Get a Device ID and a private key',['../md__r_e_a_d_m_e.html#autotoc_md25',1,'']]],
+  ['key_20pair_20for_20ota_20verification_2',['Generating Public/Private Key Pair for OTA Verification',['../md__r_e_a_d_m_e.html#autotoc_md29',1,'']]],
+  ['key_20terms_3',['Key Terms',['../md__r_e_a_d_m_e.html#autotoc_md32',1,'']]],
+  ['keys_4',['keys',['../md__d_i_a_g_n_o_s_t_i_c.html#autotoc_md10',1,'Available keys'],['../trackle_8cpp.html#aca64e4f31ed044079a464038d99ee0fb',1,'keys:&#160;trackle.cpp']]],
+  ['knowing_5',['Value semantics worth knowing',['../md__d_i_a_g_n_o_s_t_i_c.html#autotoc_md14',1,'']]]
 ];

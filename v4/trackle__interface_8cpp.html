@@ -228,9 +228,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a97af6ae6ac18cf6b947e507b3bfc0b64" id="r_a97af6ae6ac18cf6b947e507b3bfc0b64"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8cpp.html#a97af6ae6ac18cf6b947e507b3bfc0b64">trackleSetIccid</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, const char *iccid)</td></tr>
 <tr class="memdesc:a97af6ae6ac18cf6b947e507b3bfc0b64"><td class="mdescLeft">&#160;</td><td class="mdescRight">It saves the iccid value and send it to <a class="el" href="class_trackle.html">Trackle</a> on description.    <br /></td></tr>
 <tr class="separator:a97af6ae6ac18cf6b947e507b3bfc0b64"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa59f3699b8fb6605366e89aa4ca451b2" id="r_aa59f3699b8fb6605366e89aa4ca451b2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8cpp.html#aa59f3699b8fb6605366e89aa4ca451b2">trackleSetPingInterval</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, uint32_t <a class="el" href="trackle_8cpp.html#a630b3f747793bb20686a528702ce4194">pingInterval</a>)</td></tr>
-<tr class="memdesc:aa59f3699b8fb6605366e89aa4ca451b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function sets the interval at which the <a class="el" href="class_trackle.html">Trackle</a> will send a ping to the server.    <br /></td></tr>
-<tr class="separator:aa59f3699b8fb6605366e89aa4ca451b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e99f778b2a7e857ab31829ff328c81a" id="r_a6e99f778b2a7e857ab31829ff328c81a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8cpp.html#a6e99f778b2a7e857ab31829ff328c81a">trackleSetPingInterval</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, uint32_t dumbInterval, uint8_t coapRatio)</td></tr>
+<tr class="memdesc:a6e99f778b2a7e857ab31829ff328c81a"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function sets the interval at which the <a class="el" href="class_trackle.html">Trackle</a> will send a ping to the server.    <br /></td></tr>
+<tr class="separator:a6e99f778b2a7e857ab31829ff328c81a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa638ee822cf1bc15c638fc411a350190" id="r_aa638ee822cf1bc15c638fc411a350190"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle__interface_8cpp.html#aa638ee822cf1bc15c638fc411a350190">trackleSetSaveSessionCallback</a> (<a class="el" href="class_trackle.html">Trackle</a> *v, saveSessionCallback *save)</td></tr>
 <tr class="memdesc:aa638ee822cf1bc15c638fc411a350190"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function sets the callback function that will be called when it's needed to save the current DTLS session.    <br /></td></tr>
 <tr class="separator:aa638ee822cf1bc15c638fc411a350190"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1960,8 +1960,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="aa59f3699b8fb6605366e89aa4ca451b2" name="aa59f3699b8fb6605366e89aa4ca451b2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa59f3699b8fb6605366e89aa4ca451b2">&#9670;&#160;</a></span>trackleSetPingInterval()</h2>
+<a id="a6e99f778b2a7e857ab31829ff328c81a" name="a6e99f778b2a7e857ab31829ff328c81a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6e99f778b2a7e857ab31829ff328c81a">&#9670;&#160;</a></span>trackleSetPingInterval()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1976,7 +1976,13 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">uint32_t&#160;</td>
-          <td class="paramname"><em>pingInterval</em>&#160;</td>
+          <td class="paramname"><em>dumbInterval</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>coapRatio</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1990,7 +1996,8 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">v</td><td>The <a class="el" href="class_trackle.html">Trackle</a> struct.</td></tr>
-    <tr><td class="paramname">interval</td><td>The interval in seconds between pings.   </td></tr>
+    <tr><td class="paramname">dumbInterval</td><td>The interval in seconds between dumb (keepalive) pings. </td></tr>
+    <tr><td class="paramname">coapRatio</td><td>Send a CoAP ping every N dumb pings (0 = disabled).   </td></tr>
   </table>
   </dd>
 </dl>

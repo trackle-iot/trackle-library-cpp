@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['bits_5fin_5frand_0',['BITS_IN_RAND',['../trackle_8cpp.html#a236693566044c3b30f585bf72a086a94',1,'trackle.cpp']]]
+  ['3_20call_20tt_20loop_20tt_20regularly_0',['3. Call &lt;tt&gt;loop()&lt;/tt&gt; regularly',['../md__d_i_a_g_n_o_s_t_i_c.html#autotoc_md7',1,'']]]
 ];

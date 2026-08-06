@@ -94,15 +94,17 @@ $(document).ready(function(){initNavTree('md__r_e_a_d_m_e.html',''); initResizab
   <div class="headertitle"><div class="title">Trackle library</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md0"></a> </p><div class="fragment"><div class="line">                     __     _         _ </div>
+<div class="textblock"><p><a class="anchor" id="autotoc_md18"></a> </p><div class="fragment"><div class="line">                     __     _         _ </div>
 <div class="line">  _                 |    __| |       (_)   </div>
 <div class="line"> / |_  _ __ ___  ___|   / /| | ___    _  ___  </div>
 <div class="line">/_ __||  _/|__ \/ __|  / / | |/ _ \  | |/ _ \ </div>
 <div class="line"> | |__| |  / _ | (__| /  \ | |  __/ _| | (_) |</div>
 <div class="line">  \__/|_|  \___/\___|/  \_\|_|\___|(_)_|\___/</div>
 </div><!-- fragment --><p><a href="https://github.com/trackle-iot/trackle-library-cpp/actions/workflows/test_on_push_v4.yml"><img src="https://github.com/trackle-iot/trackle-library-cpp/actions/workflows/test_on_push_v4.yml/badge.svg?branch=v4" alt="Test cases (branch v4)" style="pointer-events: none;" class="inline"/></a></p>
-<p>Complete documentation can be found <a href="https://trackle-iot.github.io/trackle-library-cpp/v4">here</a>.</p>
-<h1><a class="anchor" id="autotoc_md1"></a>
+<blockquote class="doxtable">
+<p>&zwj;⚠️ <b>License Notice</b> <b><a class="el" href="class_trackle.html">Trackle</a> Library</b> is released under a <b>Source-Available Commercial License</b>. The source code is publicly inspectable and buildable for evaluation, prototyping, and debugging purposes. Deploying this library on production/commercial devices requires a valid <b>Device License Key</b> purchased from IOTREADY S.r.l. for each device. </p>
+</blockquote>
+<h1><a class="anchor" id="autotoc_md19"></a>
 Table of contents</h1>
 <ul>
 <li>Trackle library<ul>
@@ -110,7 +112,6 @@ Table of contents</h1>
 <li>What is Trackle</li>
 <li>Overview<ul>
 <li>Supported hardware</li>
-<li>License</li>
 <li>Download</li>
 <li>Usage and API<ul>
 <li>Get a Device ID and a private key</li>
@@ -122,27 +123,26 @@ Table of contents</h1>
 </li>
 </ul>
 </li>
+<li>Licensing &amp; Commercial Use</li>
 </ul>
 </li>
 </ul>
-<h1><a class="anchor" id="autotoc_md2"></a>
+<h1><a class="anchor" id="autotoc_md20"></a>
 What is Trackle</h1>
 <p><a class="el" href="class_trackle.html">Trackle</a> is an IoT platform that offers all the software and services needed to develop an IoT solution from Device to Cloud. <a href="https://www.trackle.io">Trackle website</a></p>
-<h1><a class="anchor" id="autotoc_md3"></a>
+<h1><a class="anchor" id="autotoc_md21"></a>
 Overview</h1>
 <p>This document provides instructions to use the <a class="el" href="class_trackle.html">Trackle</a> library and connect your device to <a class="el" href="class_trackle.html">Trackle</a> Cloud.</p>
-<h2><a class="anchor" id="autotoc_md4"></a>
+<p>Full API reference and guides: <a href="https://trackle-iot.github.io/trackle-library-cpp/v4">Trackle Library documentation (v4)</a>.</p>
+<h2><a class="anchor" id="autotoc_md22"></a>
 Supported hardware</h2>
 <p><a class="el" href="class_trackle.html">Trackle</a> library is hardware agnostic. It depends on tinydtls that is compatible with contiki, esp-idf, posix, riot, windows and zephyr.</p>
-<h2><a class="anchor" id="autotoc_md5"></a>
-License</h2>
-<p>Unless stated elsewhere, file headers or otherwise, all files herein are licensed under an LGPLv3 license. For more information, please read the LICENSE file.</p>
-<h2><a class="anchor" id="autotoc_md6"></a>
+<h2><a class="anchor" id="autotoc_md23"></a>
 Download</h2>
 <p>You can download last <b><a class="el" href="class_trackle.html">Trackle</a> Library</b> from <a href="https://github.com/trackle-iot/trackle-library-cpp/releases/latest">here</a>.</p>
-<h2><a class="anchor" id="autotoc_md7"></a>
+<h2><a class="anchor" id="autotoc_md24"></a>
 Usage and API</h2>
-<h3><a class="anchor" id="autotoc_md8"></a>
+<h3><a class="anchor" id="autotoc_md25"></a>
 Get a Device ID and a private key</h3>
 <ul>
 <li>Create an account on <a class="el" href="class_trackle.html">Trackle</a> Cloud (<a href="https://trackle.cloud/">https://trackle.cloud/</a>)</li>
@@ -151,7 +151,7 @@ Get a Device ID and a private key</h3>
 <li>Select the link "I don't have a device id", then Continue</li>
 <li>The Device Id will be shown on the screen and the private key file will be download with name &lt;device_id&gt;.der where &lt;device_id&gt; is Device ID taken from <a class="el" href="class_trackle.html">Trackle</a>.</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md9"></a>
+<h3><a class="anchor" id="autotoc_md26"></a>
 Getting started in C++</h3>
 <p>Here is a very simple C++ example that create a client and connect it to <a class="el" href="class_trackle.html">Trackle</a> cloud</p>
 <div class="fragment"><div class="line">#include &quot;trackle.h&quot;</div>
@@ -290,7 +290,7 @@ Getting started in C++</h3>
 <div class="line"> </div>
 <div class="line">    return 0;</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md10"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md27"></a>
 Getting started in C</h3>
 <p>Here is a very simple C example that create a client and connect it to <a class="el" href="class_trackle.html">Trackle</a> cloud</p>
 <div class="fragment"><div class="line">#include &quot;trackle_interface.h&quot;</div>
@@ -432,7 +432,7 @@ Getting started in C</h3>
 <div class="line"> </div>
 <div class="line">    return 0;</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md11"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md28"></a>
 Trackle client</h3>
 <p>The minimal usage flow for <a class="el" href="class_trackle.html">Trackle</a> client is as follows (C++ and C):</p>
 <ul>
@@ -448,7 +448,7 @@ Trackle client</h3>
 <li><b>trackle.connect() - trackleConnect(trackle_s)</b>: start the cloud connection flow</li>
 <li><b>trackle.loop() - trackleLoop(trackle_s)</b>: loop function, to keep the device connected to the cloud. Must be called as soon as possible</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md12"></a>
+<h3><a class="anchor" id="autotoc_md29"></a>
 Generating Public/Private Key Pair for OTA Verification</h3>
 <p><a class="el" href="class_trackle.html">Trackle</a> OTA verification uses an <b>ECC P-256 (secp256r1)</b> public/private key pair. The <b>private key</b> is used to sign the firmware, while the <b>public key</b> is embedded in your firmware to verify the signature.</p>
 <p>To generate the keys and configure OTA verification, follow these steps:</p>
@@ -466,7 +466,26 @@ Generating Public/Private Key Pair for OTA Verification</h3>
 </div><!-- fragment --><p>To use OTA verification in your code, you need to configure the following functions (C++ and C):</p>
 <ul>
 <li><b>trackle.setOtaVerificationKey(firmware_key, length) - trackleSetOtaVerificationKey(trackle_s, firmware_key, length)</b>: set the public key for OTA firmware verification. The firmware_key should be the DER-encoded public key generated following the steps above. This is required if you want to enable OTA updates with signature verification.</li>
-<li><b>trackle.verifyOtaSignature(firmware_hash, length) - trackleVerifyOtaSignature(trackle_s, firmware_hash, length)</b>: verify the signature of a firmware OTA. This function should be called during the OTA update process after calculating the SHA256 hash of the downloaded firmware. Returns 1 on success, 0 if verification is skipped (no key set), -1 on error. </li>
+<li><b>trackle.verifyOtaSignature(firmware_hash, length) - trackleVerifyOtaSignature(trackle_s, firmware_hash, length)</b>: verify the signature of a firmware OTA. This function should be called during the OTA update process after calculating the SHA256 hash of the downloaded firmware. Returns 1 on success, 0 if verification is skipped (no key set), -1 on error.</li>
+</ul>
+<hr  />
+<h1><a class="anchor" id="autotoc_md31"></a>
+Licensing &amp; Commercial Use</h1>
+<p>This repository contains the source code for the official <a class="el" href="class_trackle.html">Trackle</a> Library.</p>
+<h2><a class="anchor" id="autotoc_md32"></a>
+Key Terms</h2>
+<ul>
+<li><b>Development &amp; Debugging:</b> You are free to inspect, build, modify, and integrate this source code within your firmware during the development and prototyping phase.</li>
+<li><b>Commercial Deployment:</b> Each device running or incorporating this library (or any derivative work) and connecting to the <a class="el" href="class_trackle.html">Trackle</a> Cloud requires a paid <b>Device License Key</b> (a unique per-device private key authentication credential).</li>
+<li><b>Restrictions:</b> Bypassing authentication mechanisms, re-licensing the code under open-source terms, or redirecting the library to third-party/emulated cloud backends is strictly prohibited.</li>
+</ul>
+<p>For full legal terms and conditions, please refer to the [LICENSE](LICENSE) file.</p>
+<h2><a class="anchor" id="autotoc_md33"></a>
+Commercial Licensing &amp; Inquiries</h2>
+<p>To purchase Device License Keys or to discuss enterprise licensing terms for high-volume deployments, please contact us:</p>
+<ul>
+<li><b>Website:</b> <a href="https://www.iotready.it">https://www.iotready.it</a></li>
+<li><b>Email:</b> <a href="#" onclick="location.href='mai'+'lto:'+'hel'+'lo'+'@io'+'tr'+'ead'+'y.'+'it'; return false;">hello@iotready.it</a> </li>
 </ul>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->

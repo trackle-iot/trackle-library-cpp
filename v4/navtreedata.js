@@ -25,20 +25,40 @@
 var NAVTREE =
 [
   [ "Trackle library v4", "index.html", [
+    [ "Trackle Library Diagnostics", "md__d_i_a_g_n_o_s_t_i_c.html", [
+      [ "How publishing works", "md__d_i_a_g_n_o_s_t_i_c.html#autotoc_md2", null ],
+      [ "How to use it", "md__d_i_a_g_n_o_s_t_i_c.html#autotoc_md4", [
+        [ "1. Keep values up to date", "md__d_i_a_g_n_o_s_t_i_c.html#autotoc_md5", null ],
+        [ "2. Optional periodic upload", "md__d_i_a_g_n_o_s_t_i_c.html#autotoc_md6", null ],
+        [ "3. Call <tt>loop()</tt> regularly", "md__d_i_a_g_n_o_s_t_i_c.html#autotoc_md7", null ],
+        [ "4. Force a publish when needed", "md__d_i_a_g_n_o_s_t_i_c.html#autotoc_md8", null ]
+      ] ],
+      [ "Available keys", "md__d_i_a_g_n_o_s_t_i_c.html#autotoc_md10", [
+        [ "System (<tt>diagnosticSystem</tt>)", "md__d_i_a_g_n_o_s_t_i_c.html#autotoc_md11", null ],
+        [ "Network (<tt>diagnosticNetwork</tt>)", "md__d_i_a_g_n_o_s_t_i_c.html#autotoc_md12", null ],
+        [ "Cloud (<tt>diagnosticCloud</tt>) — mostly filled by the library", "md__d_i_a_g_n_o_s_t_i_c.html#autotoc_md13", null ],
+        [ "Value semantics worth knowing", "md__d_i_a_g_n_o_s_t_i_c.html#autotoc_md14", null ],
+        [ "Cloud disconnect reasons", "md__d_i_a_g_n_o_s_t_i_c.html#autotoc_md15", null ]
+      ] ],
+      [ "Minimal example", "md__d_i_a_g_n_o_s_t_i_c.html#autotoc_md17", null ]
+    ] ],
     [ "Trackle library", "md__r_e_a_d_m_e.html", [
-      [ "Table of contents", "md__r_e_a_d_m_e.html#autotoc_md1", null ],
-      [ "What is Trackle", "md__r_e_a_d_m_e.html#autotoc_md2", null ],
-      [ "Overview", "md__r_e_a_d_m_e.html#autotoc_md3", [
-        [ "Supported hardware", "md__r_e_a_d_m_e.html#autotoc_md4", null ],
-        [ "License", "md__r_e_a_d_m_e.html#autotoc_md5", null ],
-        [ "Download", "md__r_e_a_d_m_e.html#autotoc_md6", null ],
-        [ "Usage and API", "md__r_e_a_d_m_e.html#autotoc_md7", [
-          [ "Get a Device ID and a private key", "md__r_e_a_d_m_e.html#autotoc_md8", null ],
-          [ "Getting started in C++", "md__r_e_a_d_m_e.html#autotoc_md9", null ],
-          [ "Getting started in C", "md__r_e_a_d_m_e.html#autotoc_md10", null ],
-          [ "Trackle client", "md__r_e_a_d_m_e.html#autotoc_md11", null ],
-          [ "Generating Public/Private Key Pair for OTA Verification", "md__r_e_a_d_m_e.html#autotoc_md12", null ]
+      [ "Table of contents", "md__r_e_a_d_m_e.html#autotoc_md19", null ],
+      [ "What is Trackle", "md__r_e_a_d_m_e.html#autotoc_md20", null ],
+      [ "Overview", "md__r_e_a_d_m_e.html#autotoc_md21", [
+        [ "Supported hardware", "md__r_e_a_d_m_e.html#autotoc_md22", null ],
+        [ "Download", "md__r_e_a_d_m_e.html#autotoc_md23", null ],
+        [ "Usage and API", "md__r_e_a_d_m_e.html#autotoc_md24", [
+          [ "Get a Device ID and a private key", "md__r_e_a_d_m_e.html#autotoc_md25", null ],
+          [ "Getting started in C++", "md__r_e_a_d_m_e.html#autotoc_md26", null ],
+          [ "Getting started in C", "md__r_e_a_d_m_e.html#autotoc_md27", null ],
+          [ "Trackle client", "md__r_e_a_d_m_e.html#autotoc_md28", null ],
+          [ "Generating Public/Private Key Pair for OTA Verification", "md__r_e_a_d_m_e.html#autotoc_md29", null ]
         ] ]
+      ] ],
+      [ "Licensing & Commercial Use", "md__r_e_a_d_m_e.html#autotoc_md31", [
+        [ "Key Terms", "md__r_e_a_d_m_e.html#autotoc_md32", null ],
+        [ "Commercial Licensing & Inquiries", "md__r_e_a_d_m_e.html#autotoc_md33", null ]
       ] ]
     ] ],
     [ "Deprecated List", "deprecated.html", null ],
@@ -54,8 +74,7 @@ var NAVTREE =
       [ "Data Structure Index", "classes.html", null ],
       [ "Data Fields", "functions.html", [
         [ "All", "functions.html", null ],
-        [ "Functions", "functions_func.html", null ],
-        [ "Variables", "functions_vars.html", null ]
+        [ "Functions", "functions_func.html", null ]
       ] ]
     ] ],
     [ "Files", "files.html", [
@@ -74,7 +93,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"trackle_8cpp.html#aaff657926ec5c5b87ec57230c8995dbf"
+"trackle__interface_8cpp.html#a0ee059721d5f1f19473a922e5de0a14c"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

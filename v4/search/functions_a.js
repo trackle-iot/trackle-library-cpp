@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['post_0',['post',['../class_trackle.html#a03155cedf61472457ddaac7fff8ae829',1,'Trackle']]],
-  ['printtype_1',['printType',['../trackle_8cpp.html#aaff657926ec5c5b87ec57230c8995dbf',1,'trackle.cpp']]],
-  ['publish_2',['publish',['../class_trackle.html#ac83ee878d3d273d22836f684bd9e1c39',1,'Trackle::publish(const char *eventName, const char *data, int ttl=DEFAULT_TTL, Event_Type eventType=PUBLIC, Event_Flags eventFlag=EMPTY_FLAGS, uint32_t msg_key=0)'],['../class_trackle.html#a075b847753b3f27b5722bd7fc783a553',1,'Trackle::publish(string eventName, const char *data, int ttl=DEFAULT_TTL, Event_Type eventType=PUBLIC, Event_Flags eventFlag=EMPTY_FLAGS, uint32_t msg_key=0)'],['../class_trackle.html#ae2a49962b23a52eb52535205d4c243a0',1,'Trackle::publish(const char *eventName, const char *data, Event_Type eventType, Event_Flags eventFlag=EMPTY_FLAGS, uint32_t msg_key=0)'],['../class_trackle.html#a112cfedbf400f21708fca4d182bbe1f7',1,'Trackle::publish(string eventName, const char *data, Event_Type eventType, Event_Flags eventFlag=EMPTY_FLAGS, uint32_t msg_key=0)'],['../class_trackle.html#a5bbceaf11cd59ef6dbc0c680e2d5dd76',1,'Trackle::publish(const char *eventName)'],['../class_trackle.html#ac4f5303d456816284620a3ed8e184b9b',1,'Trackle::publish(string eventName)']]],
-  ['publishhealthcheck_3',['publishHealthCheck',['../class_trackle.html#a7f9ce41bd32ceb7c5a18c06ad8f4fdea',1,'Trackle']]]
+  ['registerevent_0',['registerEvent',['../class_trackle.html#a28a14f16ddb006771454c3d3bbb51e96',1,'Trackle']]],
+  ['reset_5fconnection_5ftimeout_1',['reset_connection_timeout',['../trackle_8cpp.html#a47bbd80d1d7632321424030a889cf361',1,'trackle.cpp']]]
 ];

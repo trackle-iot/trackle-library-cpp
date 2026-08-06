@@ -92,7 +92,6 @@ $(document).ready(function(){initNavTree('trackle_8cpp.html',''); initResizable(
 
 <div class="header">
   <div class="summary">
-<a href="#nested-classes">Data Structures</a> &#124;
 <a href="#define-members">Macros</a> &#124;
 <a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
@@ -100,6 +99,7 @@ $(document).ready(function(){initNavTree('trackle_8cpp.html',''); initResizable(
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="trackle_8h_source.html">trackle.h</a>&quot;</code><br />
+<code>#include &quot;trackle_internal.h&quot;</code><br />
 <code>#include &quot;protocol_defs.h&quot;</code><br />
 <code>#include &quot;version.h&quot;</code><br />
 <code>#include &lt;vector&gt;</code><br />
@@ -110,101 +110,86 @@ $(document).ready(function(){initNavTree('trackle_8cpp.html',''); initResizable(
 <code>#include &lt;stdint.h&gt;</code><br />
 <code>#include &lt;sstream&gt;</code><br />
 <code>#include &lt;iomanip&gt;</code><br />
+<code>#include &lt;inttypes.h&gt;</code><br />
+<code>#include &lt;string.h&gt;</code><br />
+<code>#include &lt;stdlib.h&gt;</code><br />
 <code>#include &quot;dtls_protocol.h&quot;</code><br />
 <code>#include &quot;tinydtls.h&quot;</code><br />
 <code>#include &quot;uECC.h&quot;</code><br />
 <code>#include &quot;tinydtls_set_rand.h&quot;</code><br />
 <code>#include &quot;tinydtls_set_get_millis.h&quot;</code><br />
 <code>#include &quot;messages.h&quot;</code><br />
+<code>#include &quot;diagnostic.h&quot;</code><br />
+<code>#include &quot;file_transfer.h&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for trackle.cpp:</div>
 <div class="dyncontent">
 <div class="center"><img src="trackle_8cpp__incl.png" border="0" usemap="#asrc_2trackle_8cpp" alt=""/></div>
 <map name="asrc_2trackle_8cpp" id="asrc_2trackle_8cpp">
-<area shape="rect" title=" " alt="" coords="986,5,1103,31"/>
-<area shape="rect" href="trackle_8h.html" title=" " alt="" coords="123,79,201,104"/>
-<area shape="poly" title=" " alt="" coords="986,23,662,38,442,55,215,82,215,76,441,50,661,33,986,18"/>
-<area shape="rect" title=" " alt="" coords="226,79,349,104"/>
-<area shape="poly" title=" " alt="" coords="986,26,721,46,363,81,362,76,720,40,986,20"/>
-<area shape="rect" title=" " alt="" coords="373,79,455,104"/>
-<area shape="poly" title=" " alt="" coords="986,26,764,45,619,61,470,81,469,76,619,56,763,40,986,21"/>
-<area shape="rect" title=" " alt="" coords="480,79,543,104"/>
-<area shape="poly" title=" " alt="" coords="986,27,799,46,680,61,557,81,556,76,679,56,798,40,986,21"/>
-<area shape="rect" title=" " alt="" coords="567,79,653,104"/>
-<area shape="poly" title=" " alt="" coords="986,30,667,81,666,76,986,25"/>
-<area shape="rect" title=" " alt="" coords="677,79,794,104"/>
-<area shape="poly" title=" " alt="" coords="996,33,799,78,798,73,994,28"/>
-<area shape="rect" title=" " alt="" coords="817,79,885,104"/>
-<area shape="poly" title=" " alt="" coords="1015,33,896,76,895,71,1013,28"/>
-<area shape="rect" title=" " alt="" coords="910,79,985,104"/>
-<area shape="poly" title=" " alt="" coords="1031,33,976,72,973,68,1027,29"/>
-<area shape="rect" title=" " alt="" coords="1009,79,1080,104"/>
-<area shape="poly" title=" " alt="" coords="1047,31,1047,65,1042,65,1042,31"/>
-<area shape="rect" title=" " alt="" coords="1105,79,1179,104"/>
-<area shape="poly" title=" " alt="" coords="1062,29,1116,68,1113,72,1059,33"/>
-<area shape="rect" title=" " alt="" coords="1203,79,1278,104"/>
-<area shape="poly" title=" " alt="" coords="1077,28,1197,71,1195,76,1075,33"/>
-<area shape="rect" title=" " alt="" coords="1303,79,1421,104"/>
-<area shape="poly" title=" " alt="" coords="1096,28,1298,73,1297,78,1095,33"/>
-<area shape="rect" title=" " alt="" coords="1445,79,1527,104"/>
-<area shape="poly" title=" " alt="" coords="1104,24,1249,45,1432,76,1431,81,1248,51,1103,30"/>
-<area shape="rect" title=" " alt="" coords="1552,79,1620,104"/>
-<area shape="poly" title=" " alt="" coords="1104,21,1293,41,1414,56,1539,76,1538,81,1413,62,1293,46,1103,27"/>
-<area shape="rect" title=" " alt="" coords="1645,79,1791,104"/>
-<area shape="poly" title=" " alt="" coords="1104,22,1331,44,1632,76,1631,81,1330,49,1103,27"/>
-<area shape="rect" title=" " alt="" coords="1815,79,1997,104"/>
-<area shape="poly" title=" " alt="" coords="1104,21,1399,42,1802,76,1802,81,1399,47,1104,26"/>
-<area shape="rect" title=" " alt="" coords="2021,79,2121,104"/>
-<area shape="poly" title=" " alt="" coords="1104,18,1480,33,1740,50,2008,76,2007,81,1739,55,1480,38,1103,23"/>
+<area shape="rect" title=" " alt="" coords="1293,5,1410,31"/>
+<area shape="rect" href="trackle_8h.html" title=" " alt="" coords="115,79,193,104"/>
+<area shape="poly" title=" " alt="" coords="1292,23,1111,26,846,36,536,53,220,81,207,83,207,78,219,76,536,48,846,30,1111,21,1292,17"/>
+<area shape="rect" title=" " alt="" coords="194,152,295,177"/>
+<area shape="poly" title=" " alt="" coords="1293,23,710,42,410,59,310,69,280,75,265,81,255,93,249,107,245,138,240,138,244,106,251,90,262,77,278,70,309,64,410,53,710,36,1292,18"/>
+<area shape="rect" title=" " alt="" coords="275,79,411,104"/>
+<area shape="poly" title=" " alt="" coords="1293,24,931,42,682,59,425,81,425,76,682,53,930,37,1292,19"/>
+<area shape="rect" title=" " alt="" coords="435,79,558,104"/>
+<area shape="poly" title=" " alt="" coords="1293,25,988,44,784,60,572,81,572,76,783,55,988,38,1292,20"/>
+<area shape="rect" title=" " alt="" coords="582,79,665,104"/>
+<area shape="poly" title=" " alt="" coords="1293,25,1031,43,858,59,679,82,678,76,857,54,1030,37,1292,20"/>
+<area shape="rect" title=" " alt="" coords="689,79,752,104"/>
+<area shape="poly" title=" " alt="" coords="1293,25,1066,42,918,59,766,82,765,76,917,53,1065,37,1292,20"/>
+<area shape="rect" title=" " alt="" coords="777,79,862,104"/>
+<area shape="poly" title=" " alt="" coords="1293,28,1111,48,876,81,875,76,1110,43,1292,22"/>
+<area shape="rect" title=" " alt="" coords="886,79,1003,104"/>
+<area shape="poly" title=" " alt="" coords="1293,32,1017,80,1016,75,1292,27"/>
+<area shape="rect" title=" " alt="" coords="1027,79,1095,104"/>
+<area shape="poly" title=" " alt="" coords="1305,33,1109,81,1107,76,1304,28"/>
+<area shape="rect" title=" " alt="" coords="1119,79,1194,104"/>
+<area shape="poly" title=" " alt="" coords="1321,33,1202,76,1200,71,1319,28"/>
+<area shape="rect" title=" " alt="" coords="1219,79,1289,104"/>
+<area shape="poly" title=" " alt="" coords="1337,33,1283,72,1280,68,1334,29"/>
+<area shape="rect" title=" " alt="" coords="1314,79,1389,104"/>
+<area shape="poly" title=" " alt="" coords="1354,31,1354,65,1349,65,1349,31"/>
+<area shape="rect" title=" " alt="" coords="1413,79,1487,104"/>
+<area shape="poly" title=" " alt="" coords="1369,29,1424,68,1421,73,1366,33"/>
+<area shape="rect" title=" " alt="" coords="1512,79,1599,104"/>
+<area shape="poly" title=" " alt="" coords="1385,28,1510,72,1509,77,1383,33"/>
+<area shape="rect" title=" " alt="" coords="1623,79,1693,104"/>
+<area shape="poly" title=" " alt="" coords="1403,28,1610,76,1609,81,1402,33"/>
+<area shape="rect" title=" " alt="" coords="1717,79,1788,104"/>
+<area shape="poly" title=" " alt="" coords="1411,25,1542,46,1704,76,1703,81,1541,51,1410,31"/>
+<area shape="rect" title=" " alt="" coords="1812,79,1931,104"/>
+<area shape="poly" title=" " alt="" coords="1411,24,1799,76,1798,81,1410,29"/>
+<area shape="rect" title=" " alt="" coords="1954,79,2037,104"/>
+<area shape="poly" title=" " alt="" coords="1410,20,1639,39,1788,55,1941,76,1940,81,1787,60,1639,44,1410,26"/>
+<area shape="rect" title=" " alt="" coords="2061,79,2129,104"/>
+<area shape="poly" title=" " alt="" coords="1410,19,1682,35,1862,51,2048,76,2048,82,1862,57,1682,40,1410,24"/>
+<area shape="rect" title=" " alt="" coords="2154,79,2301,104"/>
+<area shape="poly" title=" " alt="" coords="1411,20,1719,40,2141,76,2140,81,1718,45,1410,25"/>
+<area shape="rect" title=" " alt="" coords="2325,79,2506,104"/>
+<area shape="poly" title=" " alt="" coords="1411,19,1786,39,2311,76,2311,81,1785,44,1410,25"/>
+<area shape="rect" title=" " alt="" coords="2531,79,2631,104"/>
+<area shape="poly" title=" " alt="" coords="1410,17,1594,20,1866,29,2186,46,2517,76,2517,81,2186,52,1865,34,1594,25,1410,22"/>
+<area shape="rect" title=" " alt="" coords="2655,79,2765,104"/>
+<area shape="poly" title=" " alt="" coords="1410,17,1611,19,1913,28,2271,45,2457,59,2641,76,2641,81,2457,64,2271,51,1913,33,1611,25,1410,22"/>
 <area shape="rect" title=" " alt="" coords="5,152,87,177"/>
-<area shape="poly" title=" " alt="" coords="145,106,78,147,75,142,142,102"/>
-<area shape="rect" title=" " alt="" coords="111,152,213,177"/>
-<area shape="poly" title=" " alt="" coords="165,104,165,138,159,138,159,104"/>
-<area shape="rect" title=" " alt="" coords="237,152,295,177"/>
-<area shape="poly" title=" " alt="" coords="180,102,239,142,236,146,177,106"/>
+<area shape="poly" title=" " alt="" coords="138,106,77,147,74,142,135,102"/>
+<area shape="poly" title=" " alt="" coords="170,102,221,141,217,145,167,106"/>
+<area shape="rect" title=" " alt="" coords="111,152,170,177"/>
+<area shape="poly" title=" " alt="" coords="154,105,148,139,143,138,149,104"/>
 </map>
 </div>
 </div><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
-Data Structures</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__ota__data.html">_ota_data</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_cloud_variable_type_base.html">CloudVariableTypeBase</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_cloud_function_type_base.html">CloudFunctionTypeBase</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:ae37b22a86eeb9ae92f2f384ed2a41633" id="r_ae37b22a86eeb9ae92f2f384ed2a41633"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#ae37b22a86eeb9ae92f2f384ed2a41633">PUB_KEY_OFFSET</a>&#160;&#160;&#160;26</td></tr>
-<tr class="separator:ae37b22a86eeb9ae92f2f384ed2a41633"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9789ca0927b7de7da9f8dd05cf4a0554" id="r_a9789ca0927b7de7da9f8dd05cf4a0554"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a9789ca0927b7de7da9f8dd05cf4a0554">PUB_KEY_MARKER</a>&#160;&#160;&#160;0x04</td></tr>
-<tr class="separator:a9789ca0927b7de7da9f8dd05cf4a0554"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1af0b2438cc3ef10000e68b59ae18c96" id="r_a1af0b2438cc3ef10000e68b59ae18c96"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a1af0b2438cc3ef10000e68b59ae18c96">PUB_KEY_XY_SIZE</a>&#160;&#160;&#160;64</td></tr>
-<tr class="separator:a1af0b2438cc3ef10000e68b59ae18c96"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad1d35b0a1fafc882e1fe0eaf622a2a81" id="r_ad1d35b0a1fafc882e1fe0eaf622a2a81"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#ad1d35b0a1fafc882e1fe0eaf622a2a81">DEFAULT_CONNECTION_TIMEOUT</a>&#160;&#160;&#160;1000</td></tr>
-<tr class="separator:ad1d35b0a1fafc882e1fe0eaf622a2a81"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a672f246456dde03b499c6e477559acdf" id="r_a672f246456dde03b499c6e477559acdf"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a672f246456dde03b499c6e477559acdf">RECONNECTION_TIMEOUT</a>&#160;&#160;&#160;3750</td></tr>
-<tr class="separator:a672f246456dde03b499c6e477559acdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0c4f0292ef0bb6521de7c461314d079f" id="r_a0c4f0292ef0bb6521de7c461314d079f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a0c4f0292ef0bb6521de7c461314d079f">MAX_RECONNECTION_RETRY_INCREMENT</a>&#160;&#160;&#160;4</td></tr>
-<tr class="separator:a0c4f0292ef0bb6521de7c461314d079f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9585d08d345ce32c97c66808fa1d3cd7" id="r_a9585d08d345ce32c97c66808fa1d3cd7"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a9585d08d345ce32c97c66808fa1d3cd7">MAX_COUNTER</a>&#160;&#160;&#160;9999999</td></tr>
-<tr class="separator:a9585d08d345ce32c97c66808fa1d3cd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a486a5fa100ced1e4b70232f98c35c6f4" id="r_a486a5fa100ced1e4b70232f98c35c6f4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a486a5fa100ced1e4b70232f98c35c6f4">MAX_PING_INTERVAL</a>&#160;&#160;&#160;1000</td></tr>
-<tr class="separator:a486a5fa100ced1e4b70232f98c35c6f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af7eca4512d6ed0d66bab75d508eabca1" id="r_af7eca4512d6ed0d66bab75d508eabca1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#af7eca4512d6ed0d66bab75d508eabca1">VERSION_DEV</a>&#160;&#160;&#160;&quot;&quot;</td></tr>
 <tr class="separator:af7eca4512d6ed0d66bab75d508eabca1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa55bbb692b1c5e89d3a5c3bee1ce8399" id="r_aa55bbb692b1c5e89d3a5c3bee1ce8399"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#aa55bbb692b1c5e89d3a5c3bee1ce8399">POLY</a>&#160;&#160;&#160;0xedb88320</td></tr>
-<tr class="separator:aa55bbb692b1c5e89d3a5c3bee1ce8399"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a236693566044c3b30f585bf72a086a94" id="r_a236693566044c3b30f585bf72a086a94"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a236693566044c3b30f585bf72a086a94">BITS_IN_RAND</a></td></tr>
 <tr class="separator:a236693566044c3b30f585bf72a086a94"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ae0fedc317f845aa6bf9a9629f4f86a60" id="r_ae0fedc317f845aa6bf9a9629f4f86a60"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#ae0fedc317f845aa6bf9a9629f4f86a60">TrackleLib_tinydtls_millis_wrapper</a> (uint32_t *t)</td></tr>
-<tr class="separator:ae0fedc317f845aa6bf9a9629f4f86a60"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7531be98a3dc08d5257eb3f9efb049be" id="r_a7531be98a3dc08d5257eb3f9efb049be"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a7531be98a3dc08d5257eb3f9efb049be">TrackleLib_set_latest_millis_callback_for_tinydtls</a> (uint32_t(*new_latest_millis_callback)())</td></tr>
-<tr class="separator:a7531be98a3dc08d5257eb3f9efb049be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae748e3df3f1a6fe102452d88f914e0cb" id="r_ae748e3df3f1a6fe102452d88f914e0cb"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#ae748e3df3f1a6fe102452d88f914e0cb">getNextPublishCounter</a> ()</td></tr>
 <tr class="separator:ae748e3df3f1a6fe102452d88f914e0cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6e5aff0fd3e63714ad15486c12348541" id="r_a6e5aff0fd3e63714ad15486c12348541"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a6e5aff0fd3e63714ad15486c12348541">getNextToken</a> ()</td></tr>
@@ -215,56 +200,10 @@ Functions</h2></td></tr>
 <tr class="separator:a619931bfdd95ed3fee3c0febe3e8f8ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a47bbd80d1d7632321424030a889cf361" id="r_a47bbd80d1d7632321424030a889cf361"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a47bbd80d1d7632321424030a889cf361">reset_connection_timeout</a> ()</td></tr>
 <tr class="separator:a47bbd80d1d7632321424030a889cf361"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9b7d7483c6ef551335cf2b1609d37ff9" id="r_a9b7d7483c6ef551335cf2b1609d37ff9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_cloud_variable_type_base.html">CloudVariableTypeBase</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a9b7d7483c6ef551335cf2b1609d37ff9">find_var_by_key</a> (const char *varKey)</td></tr>
-<tr class="separator:a9b7d7483c6ef551335cf2b1609d37ff9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af31e4733797ca631e2ea70f5a6bf43ba" id="r_af31e4733797ca631e2ea70f5a6bf43ba"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#af31e4733797ca631e2ea70f5a6bf43ba">userVarType</a> (const char *varKey)</td></tr>
-<tr class="separator:af31e4733797ca631e2ea70f5a6bf43ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8acbf7b6b18316549fb3c1c5fdeef184" id="r_a8acbf7b6b18316549fb3c1c5fdeef184"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a8acbf7b6b18316549fb3c1c5fdeef184">user_is_owner</a> (const char *user_id)</td></tr>
-<tr class="separator:a8acbf7b6b18316549fb3c1c5fdeef184"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0097c9f0c71ef0019affba290838a375" id="r_a0097c9f0c71ef0019affba290838a375"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_cloud_function_type_base.html">CloudFunctionTypeBase</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a0097c9f0c71ef0019affba290838a375">find_func_by_key</a> (const char *funcKey)</td></tr>
-<tr class="separator:a0097c9f0c71ef0019affba290838a375"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa0300576e6ff8803581373fe187248e2" id="r_aa0300576e6ff8803581373fe187248e2"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#aa0300576e6ff8803581373fe187248e2">convert</a> (uint32_t flags)</td></tr>
-<tr class="separator:aa0300576e6ff8803581373fe187248e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adf9d90b650e6d68f76400bcdaa72391e" id="r_adf9d90b650e6d68f76400bcdaa72391e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#adf9d90b650e6d68f76400bcdaa72391e">cloud_flag_connected</a> (void)</td></tr>
-<tr class="separator:adf9d90b650e6d68f76400bcdaa72391e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a943d8ac5399cd845ad89db857cf1dc06" id="r_a943d8ac5399cd845ad89db857cf1dc06"><td class="memItemLeft" align="right" valign="top">SubscriptionScope::Enum&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a943d8ac5399cd845ad89db857cf1dc06">convert</a> (Subscription_Scope_Type subscription_type)</td></tr>
-<tr class="separator:a943d8ac5399cd845ad89db857cf1dc06"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a80eabf860c7dcb199cf7596574e44fad" id="r_a80eabf860c7dcb199cf7596574e44fad"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a80eabf860c7dcb199cf7596574e44fad">subscribe_trackle_handler</a> (void *handler, const char *event_name, const char *data)</td></tr>
-<tr class="separator:a80eabf860c7dcb199cf7596574e44fad"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aab60b552aebdd63e732aaed4d673f0a7" id="r_aab60b552aebdd63e732aaed4d673f0a7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#aab60b552aebdd63e732aaed4d673f0a7">was_ota_upgrade_successful</a> (void)</td></tr>
-<tr class="separator:aab60b552aebdd63e732aaed4d673f0a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4e1aab47caad92177775cc677b4bea88" id="r_a4e1aab47caad92177775cc677b4bea88"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a4e1aab47caad92177775cc677b4bea88">HAL_OTA_Flashed_ResetStatus</a> (void)</td></tr>
-<tr class="separator:a4e1aab47caad92177775cc677b4bea88"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa14e4b7ee7a1cbfa00b9693c105c4602" id="r_aa14e4b7ee7a1cbfa00b9693c105c4602"><td class="memItemLeft" align="right" valign="top">TrackleReturnType::Enum&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#aa14e4b7ee7a1cbfa00b9693c105c4602">wrapVarTypeInEnum</a> (const char *varKey)</td></tr>
-<tr class="separator:aa14e4b7ee7a1cbfa00b9693c105c4602"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a22d36f19b9fcb867136d96410df30d5b" id="r_a22d36f19b9fcb867136d96410df30d5b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a22d36f19b9fcb867136d96410df30d5b">num_functions</a> (void)</td></tr>
-<tr class="separator:a22d36f19b9fcb867136d96410df30d5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a91255a568f24138aa021070d63faabe1" id="r_a91255a568f24138aa021070d63faabe1"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a91255a568f24138aa021070d63faabe1">getUserFunctionKey</a> (int function_index)</td></tr>
-<tr class="separator:a91255a568f24138aa021070d63faabe1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a584efb5607b4e4388aef382bd2a4dd9f" id="r_a584efb5607b4e4388aef382bd2a4dd9f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a584efb5607b4e4388aef382bd2a4dd9f">event_handler_trackle</a> (const char *event_name, const char *data)</td></tr>
-<tr class="separator:a584efb5607b4e4388aef382bd2a4dd9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa7c9fbdb516a70b2c864fc1823732917" id="r_aa7c9fbdb516a70b2c864fc1823732917"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#aa7c9fbdb516a70b2c864fc1823732917">update_state</a> (const char *function_key, const char *arg, const char *user_caller_id, TrackleDescriptor::FunctionResultCallback callback, void *)</td></tr>
-<tr class="separator:aa7c9fbdb516a70b2c864fc1823732917"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a38972db64cd2a5a042e1e74a5575f79d" id="r_a38972db64cd2a5a042e1e74a5575f79d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a38972db64cd2a5a042e1e74a5575f79d">call_function</a> (const char *function_key, const char *arg, const char *user_caller_id, TrackleDescriptor::FunctionResultCallback callback, void *)</td></tr>
-<tr class="separator:a38972db64cd2a5a042e1e74a5575f79d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a25e51744bcf4efe3ae87c74689431ab2" id="r_a25e51744bcf4efe3ae87c74689431ab2"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a25e51744bcf4efe3ae87c74689431ab2">numUserVariables</a> (void)</td></tr>
-<tr class="separator:a25e51744bcf4efe3ae87c74689431ab2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeb7f652465ac0fa7fc60f3801189e29f" id="r_aeb7f652465ac0fa7fc60f3801189e29f"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#aeb7f652465ac0fa7fc60f3801189e29f">getUserVariableKey</a> (int variable_index)</td></tr>
-<tr class="separator:aeb7f652465ac0fa7fc60f3801189e29f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab4a0782d341ee8eb62a7a8cf3eaecccc" id="r_ab4a0782d341ee8eb62a7a8cf3eaecccc"><td class="memItemLeft" align="right" valign="top">const void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#ab4a0782d341ee8eb62a7a8cf3eaecccc">getUserVar</a> (const char *varKey)</td></tr>
-<tr class="separator:ab4a0782d341ee8eb62a7a8cf3eaecccc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4c6492cbc39041775e0abeed8a9850bd" id="r_a4c6492cbc39041775e0abeed8a9850bd"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a4c6492cbc39041775e0abeed8a9850bd">appendSystemInfo</a> (appender_fn appender, void *append, void *reserved)</td></tr>
-<tr class="separator:a4c6492cbc39041775e0abeed8a9850bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad206f5982b8f9d356a24818635e976f7" id="r_ad206f5982b8f9d356a24818635e976f7"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#ad206f5982b8f9d356a24818635e976f7">crc32c</a> (uint32_t crc, const unsigned char *buf, uint32_t len)</td></tr>
-<tr class="separator:ad206f5982b8f9d356a24818635e976f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a71b4fcc5c7c16ad4cf27ab193ec2a3da" id="r_a71b4fcc5c7c16ad4cf27ab193ec2a3da"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a71b4fcc5c7c16ad4cf27ab193ec2a3da">calculateCrc</a> (const unsigned char *data, uint32_t len)</td></tr>
-<tr class="separator:a71b4fcc5c7c16ad4cf27ab193ec2a3da"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaff657926ec5c5b87ec57230c8995dbf" id="r_aaff657926ec5c5b87ec57230c8995dbf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#aaff657926ec5c5b87ec57230c8995dbf">printType</a> (const char *varKey)</td></tr>
-<tr class="separator:aaff657926ec5c5b87ec57230c8995dbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2998ac403d48fee9c4a0cbcf5cb7ab47" id="r_a2998ac403d48fee9c4a0cbcf5cb7ab47"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a2998ac403d48fee9c4a0cbcf5cb7ab47">setConnectionStatus</a> (Connection_Status_Type newStatus)</td></tr>
 <tr class="separator:a2998ac403d48fee9c4a0cbcf5cb7ab47"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a24d802dfec673eb4d50e61d151f275a4" id="r_a24d802dfec673eb4d50e61d151f275a4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a24d802dfec673eb4d50e61d151f275a4">connectionError</a> (int error_type, bool force=false)</td></tr>
-<tr class="separator:a24d802dfec673eb4d50e61d151f275a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afd43ead150b9f4a4a393b800cef50685" id="r_afd43ead150b9f4a4a393b800cef50685"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#afd43ead150b9f4a4a393b800cef50685">connectionError</a> (int error_type, bool force, int protocol_error_code)</td></tr>
+<tr class="separator:afd43ead150b9f4a4a393b800cef50685"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acb101e77995001250bb3afbc13b51a86" id="r_acb101e77995001250bb3afbc13b51a86"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#acb101e77995001250bb3afbc13b51a86">wrapSend</a> (const unsigned char *buf, uint32_t buflen, void *tmp)</td></tr>
 <tr class="separator:acb101e77995001250bb3afbc13b51a86"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af691ea3e30ced1d880d9a50a5115f8ef" id="r_af691ea3e30ced1d880d9a50a5115f8ef"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#af691ea3e30ced1d880d9a50a5115f8ef">wrapReceive</a> (unsigned char *buf, uint32_t buflen, void *tmp)</td></tr>
@@ -289,25 +228,21 @@ Functions</h2></td></tr>
 <tr class="separator:a984bd085c52a588621f0c9753b3f67b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abd7eeb850453afdae1e6ac00ecdae295" id="r_abd7eeb850453afdae1e6ac00ecdae295"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#abd7eeb850453afdae1e6ac00ecdae295">HAL_RNG_GetRandomNumber</a> (void)</td></tr>
 <tr class="separator:abd7eeb850453afdae1e6ac00ecdae295"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae0fedc317f845aa6bf9a9629f4f86a60" id="r_ae0fedc317f845aa6bf9a9629f4f86a60"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#ae0fedc317f845aa6bf9a9629f4f86a60">TrackleLib_tinydtls_millis_wrapper</a> (uint32_t *t)</td></tr>
+<tr class="separator:ae0fedc317f845aa6bf9a9629f4f86a60"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7531be98a3dc08d5257eb3f9efb049be" id="r_a7531be98a3dc08d5257eb3f9efb049be"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a7531be98a3dc08d5257eb3f9efb049be">TrackleLib_set_latest_millis_callback_for_tinydtls</a> (uint32_t(*new_latest_millis_callback)())</td></tr>
+<tr class="separator:a7531be98a3dc08d5257eb3f9efb049be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
 <tr class="memitem:a393c457fef3fc122d92d67999b2ae121" id="r_a393c457fef3fc122d92d67999b2ae121"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a393c457fef3fc122d92d67999b2ae121">connection_retry</a> = 0</td></tr>
 <tr class="separator:a393c457fef3fc122d92d67999b2ae121"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa1b93a2bca49e1f34af849501d96340b" id="r_aa1b93a2bca49e1f34af849501d96340b"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#aa1b93a2bca49e1f34af849501d96340b">connection_timeout</a> = <a class="el" href="trackle_8cpp.html#ad1d35b0a1fafc882e1fe0eaf622a2a81">DEFAULT_CONNECTION_TIMEOUT</a></td></tr>
+<tr class="memitem:aa1b93a2bca49e1f34af849501d96340b" id="r_aa1b93a2bca49e1f34af849501d96340b"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#aa1b93a2bca49e1f34af849501d96340b">connection_timeout</a> = DEFAULT_CONNECTION_TIMEOUT</td></tr>
 <tr class="separator:aa1b93a2bca49e1f34af849501d96340b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0ec3e8b18ca29897c3fd74d831dc6711" id="r_a0ec3e8b18ca29897c3fd74d831dc6711"><td class="memItemLeft" align="right" valign="top">struct <a class="el" href="struct__ota__data.html">_ota_data</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a0ec3e8b18ca29897c3fd74d831dc6711">ota_data</a></td></tr>
+<tr class="memitem:a123c2886084fc68ce1556bfb0bbfc02c" id="r_a123c2886084fc68ce1556bfb0bbfc02c"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a123c2886084fc68ce1556bfb0bbfc02c">OTA_EVENT_NAME</a> = &quot;trackle/device/update/status&quot;</td></tr>
+<tr class="separator:a123c2886084fc68ce1556bfb0bbfc02c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ec3e8b18ca29897c3fd74d831dc6711" id="r_a0ec3e8b18ca29897c3fd74d831dc6711"><td class="memItemLeft" align="right" valign="top">struct _ota_data&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a0ec3e8b18ca29897c3fd74d831dc6711">ota_data</a></td></tr>
 <tr class="separator:a0ec3e8b18ca29897c3fd74d831dc6711"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a230538b38280dfd412835cbd3e41714c" id="r_a230538b38280dfd412835cbd3e41714c"><td class="memItemLeft" align="right" valign="top">const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a230538b38280dfd412835cbd3e41714c">PUBLISH_EVENT_FLAG_PUBLIC</a> = 0x0</td></tr>
-<tr class="separator:a230538b38280dfd412835cbd3e41714c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aed4e1c9117d3ce0885ffc43f7cb82c6f" id="r_aed4e1c9117d3ce0885ffc43f7cb82c6f"><td class="memItemLeft" align="right" valign="top">const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#aed4e1c9117d3ce0885ffc43f7cb82c6f">PUBLISH_EVENT_FLAG_PRIVATE</a> = 0x1</td></tr>
-<tr class="separator:aed4e1c9117d3ce0885ffc43f7cb82c6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae642c71b4f85f934302a1c2ae0fbd7a4" id="r_ae642c71b4f85f934302a1c2ae0fbd7a4"><td class="memItemLeft" align="right" valign="top">const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#ae642c71b4f85f934302a1c2ae0fbd7a4">CLAIM_CODE_SIZE</a> = 63</td></tr>
-<tr class="separator:ae642c71b4f85f934302a1c2ae0fbd7a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a561d931c5de5c40e8a211dd63746e7bb" id="r_a561d931c5de5c40e8a211dd63746e7bb"><td class="memItemLeft" align="right" valign="top">const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a561d931c5de5c40e8a211dd63746e7bb">COMPONENTS_LIST_SIZE</a> = MAX_COMPONENTS_LIST_LENGTH + 20</td></tr>
-<tr class="separator:a561d931c5de5c40e8a211dd63746e7bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad48c0bdbc836df1cd789b61d3d29d8d7" id="r_ad48c0bdbc836df1cd789b61d3d29d8d7"><td class="memItemLeft" align="right" valign="top">const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#ad48c0bdbc836df1cd789b61d3d29d8d7">DESCRIBE_ATTR_SIZE</a> = 35</td></tr>
-<tr class="separator:ad48c0bdbc836df1cd789b61d3d29d8d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab4c32b6985960cdc5f8a52dc7a272357" id="r_ab4c32b6985960cdc5f8a52dc7a272357"><td class="memItemLeft" align="right" valign="top">trackle::protocol::DTLSProtocol&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#ab4c32b6985960cdc5f8a52dc7a272357">protocol_instance</a></td></tr>
 <tr class="separator:ab4c32b6985960cdc5f8a52dc7a272357"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9660a413af9a946dedd44eaccdde53c0" id="r_a9660a413af9a946dedd44eaccdde53c0"><td class="memItemLeft" align="right" valign="top">ProtocolFacade *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a9660a413af9a946dedd44eaccdde53c0">protocol</a> = &amp;<a class="el" href="trackle_8cpp.html#ab4c32b6985960cdc5f8a52dc7a272357">protocol_instance</a></td></tr>
@@ -366,6 +301,8 @@ Variables</h2></td></tr>
 <tr class="separator:aa2267f28b921ad8218ac1fe2d01c918e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a630b3f747793bb20686a528702ce4194" id="r_a630b3f747793bb20686a528702ce4194"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a630b3f747793bb20686a528702ce4194">pingInterval</a> = 0</td></tr>
 <tr class="separator:a630b3f747793bb20686a528702ce4194"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c0b44a91d3d2627fa85cf12be1e3da6" id="r_a1c0b44a91d3d2627fa85cf12be1e3da6"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a1c0b44a91d3d2627fa85cf12be1e3da6">coapPingRatio</a> = 0</td></tr>
+<tr class="separator:a1c0b44a91d3d2627fa85cf12be1e3da6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9f4a903377ff13e530c0a8eeda83405c" id="r_a9f4a903377ff13e530c0a8eeda83405c"><td class="memItemLeft" align="right" valign="top">Connection_Type&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a9f4a903377ff13e530c0a8eeda83405c">connectionType</a> = CONNECTION_TYPE_UNDEFINED</td></tr>
 <tr class="separator:a9f4a903377ff13e530c0a8eeda83405c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5e25691881193f499944882e6a275952" id="r_a5e25691881193f499944882e6a275952"><td class="memItemLeft" align="right" valign="top">trackle::protocol::Connection_Properties_Type&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a5e25691881193f499944882e6a275952">connectionPropType</a></td></tr>
@@ -400,18 +337,14 @@ Variables</h2></td></tr>
 <tr class="separator:afb15a99ba5ecd81d7f2ae3bc4ca8f2e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a113c4aecf56e415789e6261996190514" id="r_a113c4aecf56e415789e6261996190514"><td class="memItemLeft" align="right" valign="top">unsigned char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a113c4aecf56e415789e6261996190514">client_private_key</a> [PRIVATE_KEY_LENGTH]</td></tr>
 <tr class="separator:a113c4aecf56e415789e6261996190514"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a55394e29c76fd9d6d31f86518d9e4c00" id="r_a55394e29c76fd9d6d31f86518d9e4c00"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a55394e29c76fd9d6d31f86518d9e4c00">claim_code</a> [<a class="el" href="trackle_8cpp.html#ae642c71b4f85f934302a1c2ae0fbd7a4">CLAIM_CODE_SIZE</a>+1]</td></tr>
+<tr class="memitem:a55394e29c76fd9d6d31f86518d9e4c00" id="r_a55394e29c76fd9d6d31f86518d9e4c00"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a55394e29c76fd9d6d31f86518d9e4c00">claim_code</a> [CLAIM_CODE_SIZE+1]</td></tr>
 <tr class="separator:a55394e29c76fd9d6d31f86518d9e4c00"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5de020fc2383e7ea147fece732d432c8" id="r_a5de020fc2383e7ea147fece732d432c8"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a5de020fc2383e7ea147fece732d432c8">components_list</a> [<a class="el" href="trackle_8cpp.html#a561d931c5de5c40e8a211dd63746e7bb">COMPONENTS_LIST_SIZE</a>+1]</td></tr>
+<tr class="memitem:a5de020fc2383e7ea147fece732d432c8" id="r_a5de020fc2383e7ea147fece732d432c8"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a5de020fc2383e7ea147fece732d432c8">components_list</a> [COMPONENTS_LIST_SIZE+1]</td></tr>
 <tr class="separator:a5de020fc2383e7ea147fece732d432c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a41c819f37613235c174751ea4fc65976" id="r_a41c819f37613235c174751ea4fc65976"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a41c819f37613235c174751ea4fc65976">describe_imei</a> [<a class="el" href="trackle_8cpp.html#ad48c0bdbc836df1cd789b61d3d29d8d7">DESCRIBE_ATTR_SIZE</a>+1]</td></tr>
+<tr class="memitem:a41c819f37613235c174751ea4fc65976" id="r_a41c819f37613235c174751ea4fc65976"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a41c819f37613235c174751ea4fc65976">describe_imei</a> [DESCRIBE_ATTR_SIZE+1]</td></tr>
 <tr class="separator:a41c819f37613235c174751ea4fc65976"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0656b375d5020d5fd1aa1ac794b8ff7b" id="r_a0656b375d5020d5fd1aa1ac794b8ff7b"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a0656b375d5020d5fd1aa1ac794b8ff7b">describe_iccid</a> [<a class="el" href="trackle_8cpp.html#ad48c0bdbc836df1cd789b61d3d29d8d7">DESCRIBE_ATTR_SIZE</a>+1]</td></tr>
+<tr class="memitem:a0656b375d5020d5fd1aa1ac794b8ff7b" id="r_a0656b375d5020d5fd1aa1ac794b8ff7b"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a0656b375d5020d5fd1aa1ac794b8ff7b">describe_iccid</a> [DESCRIBE_ATTR_SIZE+1]</td></tr>
 <tr class="separator:a0656b375d5020d5fd1aa1ac794b8ff7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2e22aedfe2dcb8c8e7f2042dc0fef876" id="r_a2e22aedfe2dcb8c8e7f2042dc0fef876"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="struct_cloud_variable_type_base.html">CloudVariableTypeBase</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a2e22aedfe2dcb8c8e7f2042dc0fef876">vars</a></td></tr>
-<tr class="separator:a2e22aedfe2dcb8c8e7f2042dc0fef876"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3ec629319e81f0a5a840c68da7582feb" id="r_a3ec629319e81f0a5a840c68da7582feb"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="struct_cloud_function_type_base.html">CloudFunctionTypeBase</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a3ec629319e81f0a5a840c68da7582feb">funcs</a></td></tr>
-<tr class="separator:a3ec629319e81f0a5a840c68da7582feb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acfae85b075e92385eaed14bc7cf17e26" id="r_acfae85b075e92385eaed14bc7cf17e26"><td class="memItemLeft" align="right" valign="top">std::vector&lt; string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#acfae85b075e92385eaed14bc7cf17e26">owners</a></td></tr>
 <tr class="separator:acfae85b075e92385eaed14bc7cf17e26"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a879b12bbe1d9a9ace498f32cd543f238" id="r_a879b12bbe1d9a9ace498f32cd543f238"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="trackle_8cpp.html#a879b12bbe1d9a9ace498f32cd543f238">file_content</a></td></tr>
@@ -441,132 +374,6 @@ Variables</h2></td></tr>
 </div><!-- fragment -->
 </div>
 </div>
-<a id="ad1d35b0a1fafc882e1fe0eaf622a2a81" name="ad1d35b0a1fafc882e1fe0eaf622a2a81"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad1d35b0a1fafc882e1fe0eaf622a2a81">&#9670;&#160;</a></span>DEFAULT_CONNECTION_TIMEOUT</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define DEFAULT_CONNECTION_TIMEOUT&#160;&#160;&#160;1000</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a9585d08d345ce32c97c66808fa1d3cd7" name="a9585d08d345ce32c97c66808fa1d3cd7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9585d08d345ce32c97c66808fa1d3cd7">&#9670;&#160;</a></span>MAX_COUNTER</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define MAX_COUNTER&#160;&#160;&#160;9999999</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a486a5fa100ced1e4b70232f98c35c6f4" name="a486a5fa100ced1e4b70232f98c35c6f4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a486a5fa100ced1e4b70232f98c35c6f4">&#9670;&#160;</a></span>MAX_PING_INTERVAL</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define MAX_PING_INTERVAL&#160;&#160;&#160;1000</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a0c4f0292ef0bb6521de7c461314d079f" name="a0c4f0292ef0bb6521de7c461314d079f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0c4f0292ef0bb6521de7c461314d079f">&#9670;&#160;</a></span>MAX_RECONNECTION_RETRY_INCREMENT</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define MAX_RECONNECTION_RETRY_INCREMENT&#160;&#160;&#160;4</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="aa55bbb692b1c5e89d3a5c3bee1ce8399" name="aa55bbb692b1c5e89d3a5c3bee1ce8399"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa55bbb692b1c5e89d3a5c3bee1ce8399">&#9670;&#160;</a></span>POLY</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define POLY&#160;&#160;&#160;0xedb88320</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a9789ca0927b7de7da9f8dd05cf4a0554" name="a9789ca0927b7de7da9f8dd05cf4a0554"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9789ca0927b7de7da9f8dd05cf4a0554">&#9670;&#160;</a></span>PUB_KEY_MARKER</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PUB_KEY_MARKER&#160;&#160;&#160;0x04</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="ae37b22a86eeb9ae92f2f384ed2a41633" name="ae37b22a86eeb9ae92f2f384ed2a41633"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae37b22a86eeb9ae92f2f384ed2a41633">&#9670;&#160;</a></span>PUB_KEY_OFFSET</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PUB_KEY_OFFSET&#160;&#160;&#160;26</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a1af0b2438cc3ef10000e68b59ae18c96" name="a1af0b2438cc3ef10000e68b59ae18c96"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1af0b2438cc3ef10000e68b59ae18c96">&#9670;&#160;</a></span>PUB_KEY_XY_SIZE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define PUB_KEY_XY_SIZE&#160;&#160;&#160;64</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a672f246456dde03b499c6e477559acdf" name="a672f246456dde03b499c6e477559acdf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a672f246456dde03b499c6e477559acdf">&#9670;&#160;</a></span>RECONNECTION_TIMEOUT</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define RECONNECTION_TIMEOUT&#160;&#160;&#160;3750</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="af7eca4512d6ed0d66bab75d508eabca1" name="af7eca4512d6ed0d66bab75d508eabca1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af7eca4512d6ed0d66bab75d508eabca1">&#9670;&#160;</a></span>VERSION_DEV</h2>
 
@@ -582,165 +389,6 @@ Variables</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="a4c6492cbc39041775e0abeed8a9850bd" name="a4c6492cbc39041775e0abeed8a9850bd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4c6492cbc39041775e0abeed8a9850bd">&#9670;&#160;</a></span>appendSystemInfo()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool appendSystemInfo </td>
-          <td>(</td>
-          <td class="paramtype">appender_fn&#160;</td>
-          <td class="paramname"><em>appender</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>append</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>reserved</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>It returns a string with the system information</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">appender</td><td>A function pointer to the function that will be used to append the data to the buffer. </td></tr>
-    <tr><td class="paramname">append</td><td>The function to call to append the data to the JSON string. </td></tr>
-    <tr><td class="paramname">reserved</td><td>Reserved for future use.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The system information. </dd></dl>
-
-</div>
-</div>
-<a id="a71b4fcc5c7c16ad4cf27ab193ec2a3da" name="a71b4fcc5c7c16ad4cf27ab193ec2a3da"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a71b4fcc5c7c16ad4cf27ab193ec2a3da">&#9670;&#160;</a></span>calculateCrc()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint32_t calculateCrc </td>
-          <td>(</td>
-          <td class="paramtype">const unsigned char *&#160;</td>
-          <td class="paramname"><em>data</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint32_t&#160;</td>
-          <td class="paramname"><em>len</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>It takes a pointer to a buffer and a length, and returns a CRC32C value</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">data</td><td>The data to calculate the CRC for. </td></tr>
-    <tr><td class="paramname">len</td><td>the length of the data to be CRC'd</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The CRC32C checksum of the data. </dd></dl>
-
-</div>
-</div>
-<a id="a38972db64cd2a5a042e1e74a5575f79d" name="a38972db64cd2a5a042e1e74a5575f79d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a38972db64cd2a5a042e1e74a5575f79d">&#9670;&#160;</a></span>call_function()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int call_function </td>
-          <td>(</td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>function_key</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>arg</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>user_caller_id</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">TrackleDescriptor::FunctionResultCallback&#160;</td>
-          <td class="paramname"><em>callback</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname">&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>It calls the function with the given key, passing the given argument, and returns the result to the caller</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">function_key</td><td>The name of the function to call. </td></tr>
-    <tr><td class="paramname">arg</td><td>The argument passed to the function. </td></tr>
-    <tr><td class="paramname">user_caller_id</td><td>The user id of the user who called the function. </td></tr>
-    <tr><td class="paramname">callback</td><td>This is the callback function that will be called when the function is called from the cloud. </td></tr>
-    <tr><td class="paramname">`function_key`</td><td>The name of the function to call.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The return value is the result of the function call. </dd></dl>
-
-</div>
-</div>
-<a id="adf9d90b650e6d68f76400bcdaa72391e" name="adf9d90b650e6d68f76400bcdaa72391e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adf9d90b650e6d68f76400bcdaa72391e">&#9670;&#160;</a></span>cloud_flag_connected()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool cloud_flag_connected </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>It checks if the socket is ready.</p>
-<dl class="section return"><dt>Returns</dt><dd>A boolean value. </dd></dl>
-
-</div>
-</div>
 <a id="ad23b27c1c7c3c08fb594dc39f076b2a8" name="ad23b27c1c7c3c08fb594dc39f076b2a8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad23b27c1c7c3c08fb594dc39f076b2a8">&#9670;&#160;</a></span>completeCloudConnection()</h2>
 
@@ -758,8 +406,8 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a24d802dfec673eb4d50e61d151f275a4" name="a24d802dfec673eb4d50e61d151f275a4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a24d802dfec673eb4d50e61d151f275a4">&#9670;&#160;</a></span>connectionError()</h2>
+<a id="afd43ead150b9f4a4a393b800cef50685" name="afd43ead150b9f4a4a393b800cef50685"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afd43ead150b9f4a4a393b800cef50685">&#9670;&#160;</a></span>connectionError()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -774,7 +422,13 @@ Variables</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>force</em> = <code>false</code>&#160;</td>
+          <td class="paramname"><em>force</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>protocol_error_code</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -791,110 +445,6 @@ Variables</h2></td></tr>
   </table>
   </dd>
 </dl>
-
-</div>
-</div>
-<a id="a943d8ac5399cd845ad89db857cf1dc06" name="a943d8ac5399cd845ad89db857cf1dc06"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a943d8ac5399cd845ad89db857cf1dc06">&#9670;&#160;</a></span>convert() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">SubscriptionScope::Enum convert </td>
-          <td>(</td>
-          <td class="paramtype">Subscription_Scope_Type&#160;</td>
-          <td class="paramname"><em>subscription_type</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Convert a Subscription_Scope_Type enum to a SubscriptionScope::Enum enum.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">subscription_type</td><td>This is the type of subscription you want to create. It can be either MY_DEVICES or FIREHOSE.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A pointer to a new instance of the Subscription class. </dd></dl>
-
-</div>
-</div>
-<a id="aa0300576e6ff8803581373fe187248e2" name="aa0300576e6ff8803581373fe187248e2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa0300576e6ff8803581373fe187248e2">&#9670;&#160;</a></span>convert() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint32_t convert </td>
-          <td>(</td>
-          <td class="paramtype">uint32_t&#160;</td>
-          <td class="paramname"><em>flags</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>It converts from the API flags to the communications lib flags The event visibility flag (public/private) is encoded differently. The other flags map directly.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">flags</td><td>The flags for the event.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The flags with the private flag removed and the public flag set. </dd></dl>
-
-</div>
-</div>
-<a id="ad206f5982b8f9d356a24818635e976f7" name="ad206f5982b8f9d356a24818635e976f7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad206f5982b8f9d356a24818635e976f7">&#9670;&#160;</a></span>crc32c()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint32_t crc32c </td>
-          <td>(</td>
-          <td class="paramtype">uint32_t&#160;</td>
-          <td class="paramname"><em>crc</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const unsigned char *&#160;</td>
-          <td class="paramname"><em>buf</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint32_t&#160;</td>
-          <td class="paramname"><em>len</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Calculate CRC-32</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">crc</td><td>The initial value of the CRC. </td></tr>
-    <tr><td class="paramname">buf</td><td>The buffer to calculate the CRC32C for. </td></tr>
-    <tr><td class="paramname">len</td><td>the length of the data to be crc'ed</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The CRC32 checksum of the data. </dd></dl>
 
 </div>
 </div>
@@ -1233,94 +783,6 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a584efb5607b4e4388aef382bd2a4dd9f" name="a584efb5607b4e4388aef382bd2a4dd9f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a584efb5607b4e4388aef382bd2a4dd9f">&#9670;&#160;</a></span>event_handler_trackle()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void event_handler_trackle </td>
-          <td>(</td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>event_name</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>data</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>It prints the event name and data to the log</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">event_name</td><td>The name of the event. </td></tr>
-    <tr><td class="paramname">data</td><td>The data that was sent with the event. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a0097c9f0c71ef0019affba290838a375" name="a0097c9f0c71ef0019affba290838a375"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0097c9f0c71ef0019affba290838a375">&#9670;&#160;</a></span>find_func_by_key()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="struct_cloud_function_type_base.html">CloudFunctionTypeBase</a> * find_func_by_key </td>
-          <td>(</td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>funcKey</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>It searches the <code>funcs</code> array for a function with the given <code>funcKey</code> and returns a pointer to the function if found, or <code>NULL</code> if not found</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">funcKey</td><td>The key of the function to be found.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A pointer to the function that matches the key. </dd></dl>
-
-</div>
-</div>
-<a id="a9b7d7483c6ef551335cf2b1609d37ff9" name="a9b7d7483c6ef551335cf2b1609d37ff9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9b7d7483c6ef551335cf2b1609d37ff9">&#9670;&#160;</a></span>find_var_by_key()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="struct_cloud_variable_type_base.html">CloudVariableTypeBase</a> * find_var_by_key </td>
-          <td>(</td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>varKey</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>It searches the vars array for a variable with the given key, and returns a pointer to that variable if found, or NULL if not found</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">varKey</td><td>The key of the variable to be found.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A pointer to the variable. </dd></dl>
-
-</div>
-</div>
 <a id="ae748e3df3f1a6fe102452d88f914e0cb" name="ae748e3df3f1a6fe102452d88f914e0cb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae748e3df3f1a6fe102452d88f914e0cb">&#9670;&#160;</a></span>getNextPublishCounter()</h2>
 
@@ -1335,8 +797,6 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>It generates a random number in the range [1, 199] and uses it as the prefix for the publish counter</p>
-<dl class="section return"><dt>Returns</dt><dd>The next publish counter. </dd></dl>
 
 </div>
 </div>
@@ -1354,105 +814,6 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>It gives a token for a coap packet. Alway more then 0.</p>
-<dl class="section return"><dt>Returns</dt><dd>The token. </dd></dl>
-
-</div>
-</div>
-<a id="a91255a568f24138aa021070d63faabe1" name="a91255a568f24138aa021070d63faabe1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a91255a568f24138aa021070d63faabe1">&#9670;&#160;</a></span>getUserFunctionKey()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char * getUserFunctionKey </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>function_index</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>This function returns the user function key for the function at the specified index</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">function_index</td><td>The index of the function in the array of functions.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The user function key. </dd></dl>
-
-</div>
-</div>
-<a id="ab4a0782d341ee8eb62a7a8cf3eaecccc" name="ab4a0782d341ee8eb62a7a8cf3eaecccc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab4a0782d341ee8eb62a7a8cf3eaecccc">&#9670;&#160;</a></span>getUserVar()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const void * getUserVar </td>
-          <td>(</td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>varKey</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>It returns a pointer to the value of the variable</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">varKey</td><td>The name of the variable you want to get the value of.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The value of the variable. </dd></dl>
-
-</div>
-</div>
-<a id="aeb7f652465ac0fa7fc60f3801189e29f" name="aeb7f652465ac0fa7fc60f3801189e29f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aeb7f652465ac0fa7fc60f3801189e29f">&#9670;&#160;</a></span>getUserVariableKey()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char * getUserVariableKey </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>variable_index</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>This function returns the key of the user variable at the specified index</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">variable_index</td><td>The index of the variable to get the key for.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The key of the user variable. </dd></dl>
-
-</div>
-</div>
-<a id="a4e1aab47caad92177775cc677b4bea88" name="a4e1aab47caad92177775cc677b4bea88"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4e1aab47caad92177775cc677b4bea88">&#9670;&#160;</a></span>HAL_OTA_Flashed_ResetStatus()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void HAL_OTA_Flashed_ResetStatus </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>It resets the status of the OTA flash. </p>
 
 </div>
 </div>
@@ -1501,15 +862,6 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>It takes a pointer to a char array and the length of the array, and returns a string containing the hexadecimal representation of the data in the array</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">data</td><td>The data to be converted to hex </td></tr>
-    <tr><td class="paramname">len</td><td>The length of the data to be converted.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A string of hexadecimal characters. </dd></dl>
 
 </div>
 </div>
@@ -1527,72 +879,6 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>The function increases the connection timeout with each retry by a factor of 2 adding a random factor to the timeout value (between 0 and 0.512) </p>
-
-</div>
-</div>
-<a id="a22d36f19b9fcb867136d96410df30d5b" name="a22d36f19b9fcb867136d96410df30d5b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a22d36f19b9fcb867136d96410df30d5b">&#9670;&#160;</a></span>num_functions()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int num_functions </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>It returns the number of functions in the current program</p>
-<dl class="section return"><dt>Returns</dt><dd>The number of functions in the program. </dd></dl>
-
-</div>
-</div>
-<a id="a25e51744bcf4efe3ae87c74689431ab2" name="a25e51744bcf4efe3ae87c74689431ab2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a25e51744bcf4efe3ae87c74689431ab2">&#9670;&#160;</a></span>numUserVariables()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int numUserVariables </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>This function returns the number of user variables in the current program</p>
-<dl class="section return"><dt>Returns</dt><dd>The number of user variables. </dd></dl>
-
-</div>
-</div>
-<a id="aaff657926ec5c5b87ec57230c8995dbf" name="aaff657926ec5c5b87ec57230c8995dbf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaff657926ec5c5b87ec57230c8995dbf">&#9670;&#160;</a></span>printType()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void printType </td>
-          <td>(</td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>varKey</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>It takes a variable key as a parameter, finds the variable in the list of variables, and prints the value of the variable to the console</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">varKey</td><td>The variable key that you want to print the value of. </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>
@@ -1610,7 +896,6 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Resets the connection timeout to 1000 milliseconds and the connection retry to 0. </p>
 
 </div>
 </div>
@@ -1633,49 +918,6 @@ Variables</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">newStatus</td><td>The new connection status. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a80eabf860c7dcb199cf7596574e44fad" name="a80eabf860c7dcb199cf7596574e44fad"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a80eabf860c7dcb199cf7596574e44fad">&#9670;&#160;</a></span>subscribe_trackle_handler()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void subscribe_trackle_handler </td>
-          <td>(</td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>handler</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>event_name</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>data</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>It handles all the events that are sent to the device from the <a class="el" href="class_trackle.html">Trackle</a> cloud</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">handler</td><td>This is the pointer to the <a class="el" href="class_trackle.html">Trackle</a> object. </td></tr>
-    <tr><td class="paramname">event_name</td><td>The name of the event that was published. </td></tr>
-    <tr><td class="paramname">data</td><td>the data that was sent with the event </td></tr>
   </table>
   </dd>
 </dl>
@@ -1724,136 +966,6 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="aa7c9fbdb516a70b2c864fc1823732917" name="aa7c9fbdb516a70b2c864fc1823732917"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa7c9fbdb516a70b2c864fc1823732917">&#9670;&#160;</a></span>update_state()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int update_state </td>
-          <td>(</td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>function_key</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>arg</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>user_caller_id</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">TrackleDescriptor::FunctionResultCallback&#160;</td>
-          <td class="paramname"><em>callback</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname">&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>It's a callback function that is called by the <a class="el" href="class_trackle.html">Trackle</a> server when a user calls the update_state function</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">function_key</td><td>The name of the function to be called. </td></tr>
-    <tr><td class="paramname">arg</td><td>the argument passed to the function </td></tr>
-    <tr><td class="paramname">user_caller_id</td><td>The user id of the user who is calling the function. </td></tr>
-    <tr><td class="paramname">callback</td><td>This is the callback function that will be called when the function is done. </td></tr>
-    <tr><td class="paramname">`function_key`</td><td>the name of the function to be called.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The return value is the result of the function. </dd></dl>
-
-</div>
-</div>
-<a id="a8acbf7b6b18316549fb3c1c5fdeef184" name="a8acbf7b6b18316549fb3c1c5fdeef184"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8acbf7b6b18316549fb3c1c5fdeef184">&#9670;&#160;</a></span>user_is_owner()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool user_is_owner </td>
-          <td>(</td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>user_id</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Check if the user_id is in the owners vector</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">user_id</td><td>The user ID of the user to check.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A boolean value. </dd></dl>
-
-</div>
-</div>
-<a id="af31e4733797ca631e2ea70f5a6bf43ba" name="af31e4733797ca631e2ea70f5a6bf43ba"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af31e4733797ca631e2ea70f5a6bf43ba">&#9670;&#160;</a></span>userVarType()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int userVarType </td>
-          <td>(</td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>varKey</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>It returns the type of a variable, given its key</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">varKey</td><td>The variable key.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The type of the variable. </dd></dl>
-
-</div>
-</div>
-<a id="aab60b552aebdd63e732aaed4d673f0a7" name="aab60b552aebdd63e732aaed4d673f0a7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aab60b552aebdd63e732aaed4d673f0a7">&#9670;&#160;</a></span>was_ota_upgrade_successful()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool was_ota_upgrade_successful </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>If the OTA upgrade was successful, return true, otherwise return false</p>
-<dl class="section return"><dt>Returns</dt><dd>The return value is a boolean value. </dd></dl>
-
-</div>
-</div>
 <a id="af691ea3e30ced1d880d9a50a5115f8ef" name="af691ea3e30ced1d880d9a50a5115f8ef"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af691ea3e30ced1d880d9a50a5115f8ef">&#9670;&#160;</a></span>wrapReceive()</h2>
 
@@ -1885,7 +997,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>It calls the receive callback function, and if it returns an error, it calls the connectionError function</p>
+<p>It calls the receive callback function and propagates its result to the protocol layer.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">buf</td><td>The buffer to store the received data in. </td></tr>
@@ -1942,32 +1054,6 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="aa14e4b7ee7a1cbfa00b9693c105c4602" name="aa14e4b7ee7a1cbfa00b9693c105c4602"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa14e4b7ee7a1cbfa00b9693c105c4602">&#9670;&#160;</a></span>wrapVarTypeInEnum()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">TrackleReturnType::Enum wrapVarTypeInEnum </td>
-          <td>(</td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>varKey</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>It takes a variable key and returns the variable type</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">varKey</td><td>The variable key you want to get the type of.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The return type of the variable. </dd></dl>
-
-</div>
-</div>
 <h2 class="groupheader">Variable Documentation</h2>
 <a id="a318c54d11bd482903c9f7fb77f7f7c21" name="a318c54d11bd482903c9f7fb77f7f7c21"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a318c54d11bd482903c9f7fb77f7f7c21">&#9670;&#160;</a></span>callbacks</h2>
@@ -1990,21 +1076,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">char claim_code[<a class="el" href="trackle_8cpp.html#ae642c71b4f85f934302a1c2ae0fbd7a4">CLAIM_CODE_SIZE</a>+1]</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="ae642c71b4f85f934302a1c2ae0fbd7a4" name="ae642c71b4f85f934302a1c2ae0fbd7a4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae642c71b4f85f934302a1c2ae0fbd7a4">&#9670;&#160;</a></span>CLAIM_CODE_SIZE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const int CLAIM_CODE_SIZE = 63</td>
+          <td class="memname">char claim_code[CLAIM_CODE_SIZE+1]</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -2053,6 +1125,20 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="a1c0b44a91d3d2627fa85cf12be1e3da6" name="a1c0b44a91d3d2627fa85cf12be1e3da6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c0b44a91d3d2627fa85cf12be1e3da6">&#9670;&#160;</a></span>coapPingRatio</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t coapPingRatio = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a7dcd3767b8efacc21547089b0f3e8f81" name="a7dcd3767b8efacc21547089b0f3e8f81"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7dcd3767b8efacc21547089b0f3e8f81">&#9670;&#160;</a></span>completedPublishCb</h2>
 
@@ -2074,21 +1160,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">char components_list[<a class="el" href="trackle_8cpp.html#a561d931c5de5c40e8a211dd63746e7bb">COMPONENTS_LIST_SIZE</a>+1]</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a561d931c5de5c40e8a211dd63746e7bb" name="a561d931c5de5c40e8a211dd63746e7bb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a561d931c5de5c40e8a211dd63746e7bb">&#9670;&#160;</a></span>COMPONENTS_LIST_SIZE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const int COMPONENTS_LIST_SIZE = MAX_COMPONENTS_LIST_LENGTH + 20</td>
+          <td class="memname">char components_list[COMPONENTS_LIST_SIZE+1]</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -2130,7 +1202,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">uint32_t connection_timeout = <a class="el" href="trackle_8cpp.html#ad1d35b0a1fafc882e1fe0eaf622a2a81">DEFAULT_CONNECTION_TIMEOUT</a></td>
+          <td class="memname">uint32_t connection_timeout = DEFAULT_CONNECTION_TIMEOUT</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -2163,11 +1235,11 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Initial value:</b><div class="fragment"><div class="line">= {</div>
-<div class="line">    {30, 10, 2},  </div>
-<div class="line">    {30, 10, 2},  </div>
-<div class="line">    {30, 10, 2},  </div>
-<div class="line">    {30, 10, 2},  </div>
-<div class="line">    {150, 20, 5}, </div>
+<div class="line">    {30, 2, 10, 2},</div>
+<div class="line">    {30, 2, 10, 2},</div>
+<div class="line">    {30, 2, 10, 2},</div>
+<div class="line">    {30, 10, 10, 2},</div>
+<div class="line">    {150, 2, 20, 5},</div>
 <div class="line">}</div>
 </div><!-- fragment -->
 </div>
@@ -2242,20 +1314,6 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="ad48c0bdbc836df1cd789b61d3d29d8d7" name="ad48c0bdbc836df1cd789b61d3d29d8d7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad48c0bdbc836df1cd789b61d3d29d8d7">&#9670;&#160;</a></span>DESCRIBE_ATTR_SIZE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const int DESCRIBE_ATTR_SIZE = 35</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="a0656b375d5020d5fd1aa1ac794b8ff7b" name="a0656b375d5020d5fd1aa1ac794b8ff7b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0656b375d5020d5fd1aa1ac794b8ff7b">&#9670;&#160;</a></span>describe_iccid</h2>
 
@@ -2263,7 +1321,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">char describe_iccid[<a class="el" href="trackle_8cpp.html#ad48c0bdbc836df1cd789b61d3d29d8d7">DESCRIBE_ATTR_SIZE</a>+1]</td>
+          <td class="memname">char describe_iccid[DESCRIBE_ATTR_SIZE+1]</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -2277,7 +1335,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">char describe_imei[<a class="el" href="trackle_8cpp.html#ad48c0bdbc836df1cd789b61d3d29d8d7">DESCRIBE_ATTR_SIZE</a>+1]</td>
+          <td class="memname">char describe_imei[DESCRIBE_ATTR_SIZE+1]</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -2382,20 +1440,6 @@ Variables</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">firmwareChunkCallback* firmwareChunkCb = NULL</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a3ec629319e81f0a5a840c68da7582feb" name="a3ec629319e81f0a5a840c68da7582feb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3ec629319e81f0a5a840c68da7582feb">&#9670;&#160;</a></span>funcs</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::vector&lt;<a class="el" href="struct_cloud_function_type_base.html">CloudFunctionTypeBase</a>&gt; funcs</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -2531,7 +1575,21 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">struct <a class="el" href="struct__ota__data.html">_ota_data</a> ota_data</td>
+          <td class="memname">struct _ota_data ota_data</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a123c2886084fc68ce1556bfb0bbfc02c" name="a123c2886084fc68ce1556bfb0bbfc02c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a123c2886084fc68ce1556bfb0bbfc02c">&#9670;&#160;</a></span>OTA_EVENT_NAME</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char* OTA_EVENT_NAME = &quot;trackle/device/update/status&quot;</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -2658,34 +1716,6 @@ Variables</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">trackle::protocol::DTLSProtocol protocol_instance</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="aed4e1c9117d3ce0885ffc43f7cb82c6f" name="aed4e1c9117d3ce0885ffc43f7cb82c6f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aed4e1c9117d3ce0885ffc43f7cb82c6f">&#9670;&#160;</a></span>PUBLISH_EVENT_FLAG_PRIVATE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const uint32_t PUBLISH_EVENT_FLAG_PRIVATE = 0x1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a230538b38280dfd412835cbd3e41714c" name="a230538b38280dfd412835cbd3e41714c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a230538b38280dfd412835cbd3e41714c">&#9670;&#160;</a></span>PUBLISH_EVENT_FLAG_PUBLIC</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const uint32_t PUBLISH_EVENT_FLAG_PUBLIC = 0x0</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -2854,20 +1884,6 @@ Variables</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">updateStateCallback* updateStateCb = NULL</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a2e22aedfe2dcb8c8e7f2042dc0fef876" name="a2e22aedfe2dcb8c8e7f2042dc0fef876"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2e22aedfe2dcb8c8e7f2042dc0fef876">&#9670;&#160;</a></span>vars</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::vector&lt;<a class="el" href="struct_cloud_variable_type_base.html">CloudVariableTypeBase</a>&gt; vars</td>
         </tr>
       </table>
 </div><div class="memdoc">

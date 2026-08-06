@@ -1,9 +1,8 @@
 var searchData=
 [
-  ['describe_5fattr_5fsize_0',['DESCRIBE_ATTR_SIZE',['../trackle_8cpp.html#ad48c0bdbc836df1cd789b61d3d29d8d7',1,'trackle.cpp']]],
-  ['describe_5ficcid_1',['describe_iccid',['../trackle_8cpp.html#a0656b375d5020d5fd1aa1ac794b8ff7b',1,'trackle.cpp']]],
-  ['describe_5fimei_2',['describe_imei',['../trackle_8cpp.html#a41c819f37613235c174751ea4fc65976',1,'trackle.cpp']]],
-  ['descriptor_3',['descriptor',['../trackle_8cpp.html#aae62c290bd18517402f5bd416d3df709',1,'trackle.cpp']]],
-  ['deviceclaimedcb_4',['deviceClaimedCb',['../trackle_8cpp.html#a0fb9f0ad589dd7d8fe14082f821ff248',1,'trackle.cpp']]],
-  ['disconnectcb_5',['disconnectCb',['../trackle_8cpp.html#a16edb4d886d34ad9417ebe0b817b30fc',1,'trackle.cpp']]]
+  ['describe_5ficcid_0',['describe_iccid',['../trackle_8cpp.html#a0656b375d5020d5fd1aa1ac794b8ff7b',1,'trackle.cpp']]],
+  ['describe_5fimei_1',['describe_imei',['../trackle_8cpp.html#a41c819f37613235c174751ea4fc65976',1,'trackle.cpp']]],
+  ['descriptor_2',['descriptor',['../trackle_8cpp.html#aae62c290bd18517402f5bd416d3df709',1,'trackle.cpp']]],
+  ['deviceclaimedcb_3',['deviceClaimedCb',['../trackle_8cpp.html#a0fb9f0ad589dd7d8fe14082f821ff248',1,'trackle.cpp']]],
+  ['disconnectcb_4',['disconnectCb',['../trackle_8cpp.html#a16edb4d886d34ad9417ebe0b817b30fc',1,'trackle.cpp']]]
 ];
