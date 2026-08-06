@@ -147,11 +147,15 @@ typedef enum
     ALL_DEVICES
 } Subscription_Scope_Type;
 
+/*
+ * Generic network disconnect reasons → NETWORK_DISCONNECTION_REASON (net:dconnrsn).
+ * Additional to interface-specific values defined by the platform wrappers.
+ */
 typedef enum network_disconnect_reason
 {
-    NETWORK_DISCONNECT_REASON_RESET = 6,  ///< Disconnected to recover from a cloud connection error.
-    NETWORK_DISCONNECT_REASON_UNKNOWN = 7 ///< Unspecified disconnection reason.
-} network_disconnect_reason;
+    NETWORK_DISCONNECT_REASON_NONE = 0,
+    NETWORK_DISCONNECT_REASON_UNKNOWN = 0xFFFF
+} Network_Disconnect_Reason;
 
 typedef enum
 {
