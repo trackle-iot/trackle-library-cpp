@@ -1171,7 +1171,12 @@ void default_system_set_time_cb(time_t time, unsigned int param, void *)
 
 Trackle::Trackle(void)
 {
+    // default values for diagnostics
+    diagnostic::diagnosticCloud(CLOUD_PROTOCOL_ERROR_CODE, CLOUD_PROTOCOL_NO_ERROR);
     diagnostic::diagnosticCloud(CLOUD_DISCONNECTION_REASON, CLOUD_DISCONNECT_REASON_NONE);
+    diagnostic::diagnosticCloud(CLOUD_DISCONNECTS, 0);
+    diagnostic::diagnosticNetwork(NETWORK_DISCONNECTION_REASON, 0);
+    diagnostic::diagnosticNetwork(NETWORK_DISCONNECTS, 0);  
 
     // Configure the cloud
     memset(&callbacks, 0, sizeof(callbacks));
