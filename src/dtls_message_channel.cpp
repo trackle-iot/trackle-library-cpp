@@ -94,7 +94,17 @@ static int
 dtls_event(struct dtls_context_t *ctx, session_t *session,
 		   dtls_alert_level_t level, unsigned short code)
 {
+	(void)session;
 	LOG(TRACE, "dtls_event alert: %d %d", level, code);
+#if DTLS_SESSION_TICKET
+	/* Fatal alert: drop ticket so the next connect does a full handshake.
+	 * Warning (e.g. close_notify) keeps the ticket. */
+	if (level == DTLS_ALERT_LEVEL_FATAL && ctx)
+	{
+		LOG(WARN, "Session Ticket: discarding after fatal alert %u", (unsigned)code);
+		memset(&ctx->session_ticket, 0, sizeof(ctx->session_ticket));
+	}
+#endif
 	return 0;
 }
 
@@ -506,9 +516,11 @@ namespace trackle
 
 						if (connection_status == 1)
 						{
-							LOG(TRACE, "timeout\n");
+							// Silence: keep ticket (do not count as ticket failure).
+							LOG(TRACE, "Handshake timeout, keeping ticket");
+							ticket_offered_for_handshake = false;
 							handshake_failed();
-							return IO_ERROR_GENERIC_ESTABLISH;
+							return MESSAGE_TIMEOUT;
 						}
 					}
 				}
