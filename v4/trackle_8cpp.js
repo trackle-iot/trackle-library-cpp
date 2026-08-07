@@ -1,7 +1,6 @@
 var trackle_8cpp =
 [
     [ "BITS_IN_RAND", "trackle_8cpp.html#a236693566044c3b30f585bf72a086a94", null ],
-    [ "VERSION_DEV", "trackle_8cpp.html#af7eca4512d6ed0d66bab75d508eabca1", null ],
     [ "completeCloudConnection", "trackle_8cpp.html#ad23b27c1c7c3c08fb594dc39f076b2a8", null ],
     [ "connectionError", "trackle_8cpp.html#afd43ead150b9f4a4a393b800cef50685", null ],
     [ "default_finish_firmware_update", "trackle_8cpp.html#a4fa5dce5a2b79776f0e218202637766c", null ],
