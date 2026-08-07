@@ -1,9 +1,11 @@
-//
-//  Trackle.cpp
-//
-//  Created by Flavio Ferrandi on 14/09/17.
-//  Copyright © 2017 Flavio Ferrandi. All rights reserved.
-//
+/*
+ * Trackle Library - Source-Available IoT Client Library
+ * Copyright (c) 2017 IOTREADY S.r.l. All rights reserved.
+ *
+ * This source code is licensed under the Trackle Source-Available License
+ * Agreement found in the LICENSE file in the root directory of this source tree.
+ * Commercial deployment requires one paid Device License Key per device.
+ */
 
 #include "trackle_interface.h"
 #include "trackle.h"
@@ -227,10 +229,10 @@ void trackleSetIccid(Trackle *v, const char *iccid)
     v->setIccid(iccid);
 }
 
-void trackleSetPingInterval(Trackle *v, uint32_t pingInterval)
+void trackleSetPingInterval(Trackle *v, uint32_t dumbInterval, uint8_t coapRatio)
 {
     IF_NOT_INITIALIZED_WARNING();
-    v->setPingInterval(pingInterval);
+    v->setPingInterval(dumbInterval, coapRatio);
 }
 
 void trackleSetSaveSessionCallback(Trackle *v, saveSessionCallback *save)

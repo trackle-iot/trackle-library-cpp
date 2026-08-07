@@ -68,7 +68,6 @@ block0(size_t M,       /* number of auth bytes */
  *             authentication block.
  * \param X    The output buffer where the result of the CBC calculation
  *             is placed.
- * \return     The result is written to \p X.
  */
 static void
 add_auth_data(rijndael_ctx *ctx, const unsigned char *msg, uint64_t la,
@@ -96,12 +95,12 @@ add_auth_data(rijndael_ctx *ctx, const unsigned char *msg, uint64_t la,
     dtls_int_to_uint64(B+2, la);
   }
 
-  i = min2(DTLS_CCM_BLOCKSIZE - j, la);
-  memcpy(B + j, msg, i);
-  la -= i;
-  msg += i;
-  
-  memxor(B, X, DTLS_CCM_BLOCKSIZE);
+    i = DTLS_MIN(DTLS_CCM_BLOCKSIZE - j, la);
+    memcpy(B + j, msg, i);
+    la -= i;
+    msg += i;
+    
+    memxor(B, X, DTLS_CCM_BLOCKSIZE);
   
   rijndael_encrypt(ctx, B, X);
   

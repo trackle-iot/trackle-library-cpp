@@ -37,6 +37,9 @@
 #define DTLS_MAC_LENGTH        DTLS_HMAC_DIGEST_SIZE
 #define DTLS_IV_LENGTH         4  /* length of nonce_explicit */
 
+/* EC key size for curve secp256r1 */
+#define DTLS_EC_KEY_SIZE 32
+
 /** 
  * Maximum size of the generated keyblock. Note that MAX_KEYBLOCK_LENGTH must 
  * be large enough to hold the pre_master_secret, i.e. twice the length of the 
@@ -48,6 +51,14 @@
 /** Length of DTLS master_secret */
 #define DTLS_MASTER_SECRET_LENGTH 48
 #define DTLS_RANDOM_LENGTH 32
+
+/** Type of index in cipher parameter table */
+typedef uint8_t dtls_cipher_index_t;
+/** Index in cipher parameter table for NULL cipher */
+#define DTLS_CIPHER_INDEX_NULL 0
+
+/** Maximum number of cipher suites */
+#define DTLS_MAX_CIPHER_SUITES 4
 
 typedef enum { AES128=0 
 } dtls_crypto_alg;
@@ -70,11 +81,11 @@ typedef struct dtls_cipher_context_t {
 } dtls_cipher_context_t;
 
 typedef struct {
-  uint8 own_eph_priv[32];
-  uint8 other_eph_pub_x[32];
-  uint8 other_eph_pub_y[32];
-  uint8 other_pub_x[32];
-  uint8 other_pub_y[32];
+  uint8 own_eph_priv[DTLS_EC_KEY_SIZE];
+  uint8 other_eph_pub_x[DTLS_EC_KEY_SIZE];
+  uint8 other_eph_pub_y[DTLS_EC_KEY_SIZE];
+  uint8 other_pub_x[DTLS_EC_KEY_SIZE];
+  uint8 other_pub_y[DTLS_EC_KEY_SIZE];
 } dtls_handshake_parameters_ecdsa_t;
 
 /* This is the maximal supported length of the psk client identity and psk
@@ -102,10 +113,40 @@ typedef struct {
     uint64_t bitfield;
 } seqnum_t;
 
+/* Maximum CID length. */
+#ifndef DTLS_MAX_CID_LENGTH
+#define DTLS_MAX_CID_LENGTH 16
+#endif
+
+#if (DTLS_MAX_CID_LENGTH > 0)
+#ifndef DTLS_USE_CID_DEFAULT
+#define DTLS_USE_CID_DEFAULT 1
+#endif /* DTLS_USE_CID_DEFAULT */
+#endif /* DTLS_MAX_CID_LENGTH > 0 */
+
+#define DTLS_SESSION_ID_LENGTH 32
+
+#if DTLS_SESSION_TICKET
+#ifndef DTLS_MAX_SESSION_TICKET_LENGTH
+#define DTLS_MAX_SESSION_TICKET_LENGTH 512
+#endif
+
+typedef struct {
+  uint8_t ticket[DTLS_MAX_SESSION_TICKET_LENGTH];
+  uint16_t ticket_length;
+  uint32_t lifetime_hint;
+  uint32_t received_at;
+  uint8_t master_secret[DTLS_MASTER_SECRET_LENGTH];
+  dtls_cipher_t cipher_suite;
+  unsigned int extended_master_secret:1;
+  unsigned int valid:1;
+} dtls_session_ticket_t;
+#endif /* DTLS_SESSION_TICKET */
+
 typedef struct {
   dtls_compression_t compression;	/**< compression method */
 
-  dtls_cipher_t cipher;		/**< cipher type */
+  dtls_cipher_index_t cipher_index;	/**< internal index for cipher_suite_params, DTLS_CIPHER_INDEX_NULL for TLS_NULL_WITH_NULL_NULL */
   uint16_t epoch;	     /**< counter for cipher state changes*/
   uint64_t rseq;	     /**< sequence number of last record sent */
 
@@ -116,11 +157,40 @@ typedef struct {
    * access the components of the key block.
    */
   uint8 key_block[MAX_KEYBLOCK_LENGTH];
-  
+
+#if (DTLS_MAX_CID_LENGTH > 0)
+  uint8_t write_cid[DTLS_MAX_CID_LENGTH];
+  uint8_t write_cid_length;
+  unsigned int cid_negotiated:1;
+#endif /* DTLS_MAX_CID_LENGTH > 0 */
+
   seqnum_t cseq;        /**<sequence number of last record received*/
 } dtls_security_parameters_t;
 
 struct netq_t;
+
+/**
+ * Set of user parameters used by the handshake.
+ *
+ * A copy of default_user_parameters (see dtls.c) are passed to the
+ * get_user_parameters callback provided in dtls_handler_t and may be
+ * adapted according the user's requirements.
+ */
+typedef struct dtls_user_parameters_t {
+  /**
+   * The list of cipher suites.
+   * The list must be terminated by TLS_NULL_WITH_NULL_NULL.
+   */
+  dtls_cipher_t cipher_suites[DTLS_MAX_CIPHER_SUITES + 1];
+  unsigned int force_extended_master_secret:1; /** force extended master secret extension (RFC7627) */
+  unsigned int force_renegotiation_info:1;     /** force renegotiation info extension (RFC5746) */
+#if (DTLS_MAX_CID_LENGTH > 0)
+  unsigned int support_cid:1;                  /** indicate CID support (RFC9146) */
+#endif
+#if DTLS_SESSION_TICKET
+  unsigned int support_session_ticket:1;       /** request an RFC5077 session ticket */
+#endif
+} dtls_user_parameters_t;
 
 typedef struct {
   union {
@@ -135,9 +205,29 @@ typedef struct {
   dtls_hs_state_t hs_state;  /**< handshake protocol status */
 
   dtls_compression_t compression;		/**< compression method */
-  dtls_cipher_t cipher;		/**< cipher type */
+  dtls_user_parameters_t user_parameters;	/**< user parameters */
+  dtls_cipher_index_t cipher_index;		/**< internal index for cipher_suite_params, DTLS_CIPHER_INDEX_NULL for TLS_NULL_WITH_NULL_NULL */
+
+#if (DTLS_MAX_CID_LENGTH > 0)
+  uint8_t write_cid[DTLS_MAX_CID_LENGTH];
+  uint8_t write_cid_length;
+  unsigned int cid_offered:1;
+  unsigned int cid_negotiated:1;
+#endif /* DTLS_MAX_CID_LENGTH > 0 */
+#if DTLS_SESSION_TICKET
+  dtls_session_ticket_t pending_session_ticket;
+  uint8_t session_id[DTLS_SESSION_ID_LENGTH];
+  uint8_t session_id_length;
+  unsigned int session_ticket_offered:1;
+  unsigned int session_ticket_expected:1;
+  unsigned int session_ticket_received:1;
+  unsigned int session_ticket_presented:1;
+  unsigned int session_resumed:1;
+#endif /* DTLS_SESSION_TICKET */
+
   unsigned int do_client_auth:1;
   unsigned int extended_master_secret:1;
+  unsigned int renegotiation_info:1;
   union {
 #ifdef DTLS_ECC
     dtls_handshake_parameters_ecdsa_t ecdsa;
@@ -397,8 +487,6 @@ int dtls_decrypt(const unsigned char *src, size_t length,
 int dtls_psk_pre_master_secret(unsigned char *key, size_t keylen,
 			       unsigned char *result, size_t result_len);
 
-#define DTLS_EC_KEY_SIZE 32
-
 int dtls_ecdh_pre_master_secret(unsigned char *priv_key,
 				unsigned char *pub_key_x,
                                 unsigned char *pub_key_y,
@@ -406,20 +494,20 @@ int dtls_ecdh_pre_master_secret(unsigned char *priv_key,
                                 unsigned char *result,
                                 size_t result_len);
 
-void dtls_ecdsa_generate_key(unsigned char *priv_key,
-			     unsigned char *pub_key_x,
-			     unsigned char *pub_key_y,
-			     size_t key_size);
+int dtls_ecdsa_generate_key(unsigned char *priv_key,
+			    unsigned char *pub_key_x,
+			    unsigned char *pub_key_y,
+			    size_t key_size);
 
-void dtls_ecdsa_create_sig_hash(const unsigned char *priv_key, size_t key_size,
-				const unsigned char *sign_hash, size_t sign_hash_size,
-				uint32_t point_r[9], uint32_t point_s[9]);
+int dtls_ecdsa_create_sig_hash(const unsigned char *priv_key, size_t key_size,
+			       const unsigned char *sign_hash, size_t sign_hash_size,
+			       uint32_t point_r[9], uint32_t point_s[9]);
 
-void dtls_ecdsa_create_sig(const unsigned char *priv_key, size_t key_size,
-			   const unsigned char *client_random, size_t client_random_size,
-			   const unsigned char *server_random, size_t server_random_size,
-			   const unsigned char *keyx_params, size_t keyx_params_size,
-			   uint32_t point_r[9], uint32_t point_s[9]);
+int dtls_ecdsa_create_sig(const unsigned char *priv_key, size_t key_size,
+			  const unsigned char *client_random, size_t client_random_size,
+			  const unsigned char *server_random, size_t server_random_size,
+			  const unsigned char *keyx_params, size_t keyx_params_size,
+			  uint32_t point_r[9], uint32_t point_s[9]);
 
 int dtls_ecdsa_verify_sig_hash(const unsigned char *pub_key_x,
 			       const unsigned char *pub_key_y, size_t key_size,

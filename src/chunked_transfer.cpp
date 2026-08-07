@@ -1,3 +1,12 @@
+/*
+ * Trackle Library - Source-Available IoT Client Library
+ * Copyright (c) 2022 IOTREADY S.r.l. All rights reserved.
+ *
+ * This source code is licensed under the Trackle Source-Available License
+ * Agreement found in the LICENSE file in the root directory of this source tree.
+ * Commercial deployment requires one paid Device License Key per device.
+ */
+
 #include "chunked_transfer.h"
 #include "service_debug.h"
 #include "coap.h"
@@ -52,6 +61,13 @@ namespace trackle
             if (success)
             {
                 success = file.chunk_count(file.chunk_size) < MAX_CHUNKS;
+            }
+            if (success)
+            {
+                // the bitmap is kept in the tail of the channel buffer, where the chunk messages
+                // are stored too: refuse the transfer if the two would overlap
+                const unsigned bitmap_size = (file.chunk_count(file.chunk_size) + 7) / 8;
+                success = message.capacity() >= file.chunk_size + 32u + bitmap_size; // 32: CoAP framing of a chunk
             }
             Message response;
             channel.response(message, response, 16);
@@ -116,11 +132,11 @@ namespace trackle
             }
 
             bool fast_ota = false;
-            uint8_t payload = 7;
+            size_t payload = 7; // size_t, on a full message the offset does not fit a byte
 
             unsigned option = 0;
             uint32_t given_crc = 0;
-            while (queue[payload] != 0xFF)
+            while (payload < message.length() && queue[payload] != 0xFF)
             {
                 switch (option)
                 {
@@ -134,6 +150,13 @@ namespace trackle
                 }
                 option++;
                 payload += (queue[payload] & 0xF) + 1; // increase by the size. todo handle > 11
+            }
+
+            if (payload >= message.length())
+            {
+                // no payload marker: dropping it also avoids underflowing the chunk size below
+                LOG(WARN, "malformed chunk");
+                return NO_ERROR;
             }
 
             if (!fast_ota)
@@ -156,7 +179,7 @@ namespace trackle
                 const uint8_t *chunk = queue + payload;
                 file.chunk_size = message.length() - payload;
                 file.chunk_address = file.file_address + (chunk_index * chunk_size);
-                if (chunk_index >= MAX_CHUNKS)
+                if (chunk_index >= file.chunk_count(chunk_size))
                 {
                     LOG(WARN, "invalid chunk index %d", chunk_index);
                     return NO_ERROR;

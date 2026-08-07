@@ -37,6 +37,7 @@ extern "C"
     int Callbacks_connect_udp_cb(const char *address, int port);
     int Callbacks_disconnect_udp_cb();
     void Callbacks_set_proxy_enabled(bool status);
+    void Callbacks_inject_udp_packet(const unsigned char *buf, uint32_t buflen);
     int Callbacks_send_udp_cb(const unsigned char *buf, uint32_t buflen, void *tmp);
     int Callbacks_receive_udp_cb(unsigned char *buf, uint32_t buflen, void *tmp);
     void Callbacks_log_cb(const char *msg, int level, const char *category, void *attribute, void *reserved);

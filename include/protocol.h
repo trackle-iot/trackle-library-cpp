@@ -1,21 +1,11 @@
-/**
- ******************************************************************************
-  Copyright (c) 2022 IOTREADY S.r.l.
-  Copyright (c) 2015 Particle Industries, Inc.
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation, either
-  version 3 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, see <http://www.gnu.org/licenses/>.
- ******************************************************************************
+/*
+ * Trackle Library - Source-Available IoT Client Library
+ * Copyright (c) 2022 IOTREADY S.r.l. All rights reserved.
+ * Copyright (c) 2015 Particle Industries, Inc.
+ *
+ * This source code is licensed under the Trackle Source-Available License
+ * Agreement found in the LICENSE file in the root directory of this source tree.
+ * Commercial deployment requires one paid Device License Key per device.
  */
 
 #pragma once
@@ -266,11 +256,13 @@ namespace trackle
 				else
 				{
 					ProtocolError error = pinger.process(
-						callbacks.millis() - last_message_millis, [this]
+						callbacks.millis() - last_message_millis, [this](bool forceCoAP)
 						{
-							// ping is not ackable, so reset last msg millis to now
+							// Reset idle timer on send so we don't flood keepalives.
+							// Dumb ping: fire-and-forget. CoAP CON ping: ACK/retransmit
+							// handled by CoAPReliableChannel independently of this timer.
 							last_message_millis = callbacks.millis();
-							return ping(); });
+							return ping(forceCoAP); });
 					if (error)
 						return error;
 				}
@@ -358,9 +350,9 @@ namespace trackle
 							  const TrackleDescriptor &descriptor,
 							  const trackle::protocol::Connection_Properties_Type &conPropType) = 0;
 
-			void initialize_ping(system_tick_t interval, system_tick_t timeout)
+			void initialize_ping(system_tick_t interval, uint8_t coap_ratio = 0)
 			{
-				pinger.init(interval, timeout);
+				pinger.init(interval, coap_ratio);
 			}
 
 			void set_keepalive(system_tick_t interval, keepalive_source_t source)

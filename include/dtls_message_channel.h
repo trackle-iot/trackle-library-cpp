@@ -1,21 +1,11 @@
-/**
- ******************************************************************************
-  Copyright (c) 2022 IOTREADY S.r.l.
-  Copyright (c) 2015 Particle Industries, Inc.
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation, either
-  version 3 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, see <http://www.gnu.org/licenses/>.
- ******************************************************************************
+/*
+ * Trackle Library - Source-Available IoT Client Library
+ * Copyright (c) 2022 IOTREADY S.r.l. All rights reserved.
+ * Copyright (c) 2015 Particle Industries, Inc.
+ *
+ * This source code is licensed under the Trackle Source-Available License
+ * Agreement found in the LICENSE file in the root directory of this source tree.
+ * Commercial deployment requires one paid Device License Key per device.
  */
 
 #pragma once
@@ -23,7 +13,6 @@
 #include "protocol_selector.h"
 
 #include "service_debug.h"
-#include "device_keys.h"
 #include "message_channel.h"
 #include "buffer_message_channel.h"
 
@@ -41,18 +30,14 @@ struct Dtls_data
 	int (*send)(const unsigned char *buf, size_t len, void *channel); // Send callback
 	uint32_t read_len;												  // len of received packet
 	uint8_t read_buf[PROTOCOL_BUFFER_SIZE];							  // received buffer
+	int read_error;													  // ProtocolError raised by the read callback
+	int transport_error;												  // ProtocolError raised by the send callback
 };
 
 namespace trackle
 {
 	namespace protocol
 	{
-
-		/**
-		 * Please centralize this somewhere else!
-		 */
-		const size_t DEVICE_ID_LEN = 12;
-
 		/**
 		 * This implements the lightweight and RSA encrypted handshake, AES session encryption over a TCP Stream.
 		 *
@@ -104,8 +89,8 @@ namespace trackle
 			 * The next message ID for new messages over this channel.
 			 */
 			message_id_t *coap_state;
-			bool move_session;
-			const uint8_t *device_id;
+			uint8_t ticket_handshake_failures;
+			bool ticket_offered_for_handshake;
 
 			void init();
 			void dispose();
@@ -122,9 +107,11 @@ namespace trackle
 
 			ProtocolError setup_context();
 
-			void cancel_move_session();
-
 			void reset_session();
+			void handshake_failed();
+			void handshake_succeeded();
+
+			static const uint8_t TICKET_HANDSHAKE_FAILURE_LIMIT = 2;
 
 			enum StateEnum
 			{
@@ -135,12 +122,15 @@ namespace trackle
 			enum StateEnum status;
 
 		public:
-			DTLSMessageChannel() : coap_state(nullptr), move_session(false) {}
+			DTLSMessageChannel()
+				: coap_state(nullptr),
+				  ticket_handshake_failures(0),
+				  ticket_offered_for_handshake(false) {}
 
 			ProtocolError init(const uint8_t *core_private, size_t core_private_len,
 							   // const uint8_t *core_public, size_t core_public_len,
 							   const uint8_t *server_public, size_t server_public_len,
-							   const uint8_t *device_id, Callbacks &callbacks,
+							   Callbacks &callbacks,
 							   message_id_t *coap_state);
 
 			void set_handshake_timeout(uint32_t timeout)

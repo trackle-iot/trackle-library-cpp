@@ -1,21 +1,11 @@
-/**
- ******************************************************************************
-  Copyright (c) 2022 IOTREADY S.r.l.
-  Copyright (c) 2015 Particle Industries, Inc.
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation, either
-  version 3 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, see <http://www.gnu.org/licenses/>.
- ******************************************************************************
+/*
+ * Trackle Library - Source-Available IoT Client Library
+ * Copyright (c) 2022 IOTREADY S.r.l. All rights reserved.
+ * Copyright (c) 2015 Particle Industries, Inc.
+ *
+ * This source code is licensed under the Trackle Source-Available License
+ * Agreement found in the LICENSE file in the root directory of this source tree.
+ * Commercial deployment requires one paid Device License Key per device.
  */
 
 #pragma once
@@ -80,8 +70,10 @@ namespace trackle
 					result = wait_confirmable();
 					break;
 				case ProtocolCommands::DISCONNECT:
-					result = wait_confirmable();
 					ack_handlers.clear();
+					// Drop local DTLS peer so a new UDP socket cannot reuse CONNECTED state.
+					channel.command(MessageChannel::CLOSE);
+					result = NO_ERROR;
 					break;
 				case ProtocolCommands::WAKE:
 					wake();
@@ -94,7 +86,7 @@ namespace trackle
 				case ProtocolCommands::FORCE_PING:
 				{
 					LOG(INFO, "Forcing a cloud ping");
-					pinger.process(UINT32_MAX, [this]
+					pinger.process(UINT32_MAX, [this](bool)
 								   { return ping(true); });
 					break;
 				}

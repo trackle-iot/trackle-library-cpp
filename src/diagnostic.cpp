@@ -1,3 +1,12 @@
+/*
+ * Trackle Library - Source-Available IoT Client Library
+ * Copyright (c) 2022 IOTREADY S.r.l. All rights reserved.
+ *
+ * This source code is licensed under the Trackle Source-Available License
+ * Agreement found in the LICENSE file in the root directory of this source tree.
+ * Commercial deployment requires one paid Device License Key per device.
+ */
+
 #include "logging.h"
 LOG_SOURCE_CATEGORY("comm.diagnostic")
 
@@ -49,9 +58,10 @@ namespace diagnostic
 	void diagnosticCloud(Cloud key, double value)
 	{
 		int32_t right_value = (int32_t)value;
-		if (key == CLOUD_DISCONNECTS || key == CLOUD_CONNECTION_ATTEMPTS || key == CLOUD_UNACKNOWLEDGED_MESSAGES)
+		if (key == CLOUD_DISCONNECTS || key == CLOUD_CONNECTION_ATTEMPTS ||
+			key == CLOUD_UNACKNOWLEDGED_MESSAGES || key == CLOUD_RATE_LIMITED_EVENTS)
 		{
-			// if valua > 0must increase current value, else reset
+			// if value > 0 must increase current value, else reset
 			if (value == 0)
 			{
 				right_value = 0;

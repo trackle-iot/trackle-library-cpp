@@ -181,6 +181,13 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
                     log.info("msgs.KILLING device")
                     to_tester.put({"msg" : msgs.KILLING})
                     break
+                case msgs.DISCONNECT:
+                    trackle.disconnect(trackle_s)
+                    log.info("disconnect requested")
+                case msgs.RECONNECT:
+                    res = trackle.connect(trackle_s)
+                    to_tester.put({"msg": msgs.RECONNECT_RESULT, "return": res})
+                    log.info("reconnect requested")
                 case msgs.MULTIPUBLISH:
                     if {"event", "data", "ttl", "visibility", "key", "times"}.issubset(set(in_msg)):
                         result = []
@@ -241,6 +248,14 @@ def device_code(from_tester : mp.Queue, to_tester : mp.Queue, startup_params : D
                         warnings.simplefilter("ignore")
                         trackle.get_time(trackle_s)
                     log.info("get time received")
+                case msgs.INJECT_UDP_PACKET:
+                    payload = in_msg.get("data", b"")
+                    if isinstance(payload, str):
+                        payload = payload.encode("latin-1")
+                    buf = (ctypes.c_uint8 * len(payload)).from_buffer_copy(payload)
+                    callbacks.inject_udp_packet(buf, len(payload))
+                    to_tester.put({"msg": msgs.UDP_PACKET_INJECTED})
+                    log.info("injected udp packet (%d bytes)", len(payload))
                 case msgs.PROXY_OFF:
                     callbacks.set_proxy_enabled(False)
                     log.info("proxy switched off")

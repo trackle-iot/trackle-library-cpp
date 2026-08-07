@@ -21,16 +21,16 @@
 
 #include "tinydtls.h"
 
-static uint32_t defaultRand()
+static uint32_t defaultRand(void)
 {
     return (uint32_t)rand();
 }
 
-static uint32_t (*customRand)() = defaultRand;
+static uint32_t (*customRand)(void) = defaultRand;
 
-void TinyDtls_set_rand(uint32_t (*newCustomRand)())
+void TinyDtls_set_rand(uint32_t (*newCustomRand)(void))
 {
-    customRand = newCustomRand;
+    customRand = newCustomRand ? newCustomRand : defaultRand;
 }
 
 int dtls_prng(uint8_t *buf, unsigned len)
