@@ -41,10 +41,6 @@ using namespace trackle::protocol;
 // {"f":[...],"v":{...},"i":30.1,"o":0,"p":102,"s":"3.2.0"} // min len is 50
 // TOTAL LEN = 50 + 20 * (MAX_VARIABLE_KEY_LENGTH + 3) + 20 * (MAX_FUNCTION_KEY_LENGTH + 5) + (MAX_COMPONENTS_LIST_LENGTH + 7) - 2 = 1015
 
-#ifndef VERSION_DEV
-#define VERSION_DEV ""
-#endif
-
 uint16_t connection_retry = 0;
 uint32_t connection_timeout = DEFAULT_CONNECTION_TIMEOUT;
 

@@ -37,6 +37,10 @@
 
 using namespace trackle::protocol;
 
+#ifndef VERSION_DEV
+#define VERSION_DEV ""
+#endif
+
 // TRACKLE.VARIABLE ------------------------------------------------------------
 
 struct CloudVariableTypeBase
