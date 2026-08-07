@@ -559,7 +559,7 @@ bool Trackle::registerEvent(const char *eventName, Subscription_Scope_Type event
         success = trackle_protocol_send_subscription_scope(protocol, eventName, scope);
     }
 
-    LOG(TRACE, "register_event %d\n", success);
+    LOG(TRACE, "register_event %d", success);
     return success;
 }
 

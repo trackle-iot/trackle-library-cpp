@@ -271,7 +271,7 @@ static void handle_device_update(Trackle *trackle, const char *data)
  */
 void subscribe_trackle_handler(void *handler, const char *event_name, const char *data)
 {
-    LOG(TRACE, "trackle handler %s, %s\n", event_name, data);
+    LOG(TRACE, "trackle handler %s, %s", event_name, data);
 
     bool replyWithPublish = false;
     Trackle *trackle = (Trackle *)handler;
