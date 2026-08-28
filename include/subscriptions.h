@@ -263,9 +263,8 @@ namespace trackle
 						{
 							const size_t MAX_ID_LEN =
 								sizeof(event_handlers[i].device_id) - 1;
-							const size_t id_len = id ? strnlen(id, MAX_ID_LEN) : 0;
-							if (id_len)
-								return !strncmp(event_handlers[i].device_id, id, id_len);
+							if (id)
+								return !memcmp(event_handlers[i].device_id, id, MAX_ID_LEN);
 							else
 								return !event_handlers[i].device_id[0];
 						}
@@ -294,11 +293,10 @@ namespace trackle
 						memset(event_handlers[i].filter + FILTER_LEN, 0, MAX_FILTER_LEN - FILTER_LEN);
 						event_handlers[i].handler = handler;
 						event_handlers[i].handler_data = handler_data;
-						event_handlers[i].device_id[0] = 0;
 						const size_t MAX_ID_LEN = sizeof(event_handlers[i].device_id) - 1;
-						const size_t id_len = id ? strnlen(id, MAX_ID_LEN) : 0;
-						memcpy(event_handlers[i].device_id, id, id_len);
-						event_handlers[i].device_id[id_len] = 0;
+						memset(event_handlers[i].device_id, 0, sizeof(event_handlers[i].device_id));
+						if (id)
+							memcpy(event_handlers[i].device_id, id, MAX_ID_LEN);
 						event_handlers[i].scope = scope;
 						return NO_ERROR;
 					}

@@ -590,9 +590,8 @@ bool Trackle::addSubscription(const char *eventName, EventHandler handler, void 
                 offset += 2;
             }
         }
-        else if (L == DEVICE_ID_LENGTH)
-        { // binary device id
-            // TODO: does the (L == DEVICE_ID_LENGTH) check work for binary data? is 0 guaranteed never to be a byte of the id?? is the array NUL-terminated even if it contains binary data?
+        else if (L <= DEVICE_ID_LENGTH)
+        { // binary device id: strnlen stops at the first 0x00 byte, so copy the full length
             memcpy(charDeviceId, deviceId, DEVICE_ID_LENGTH);
         }
         else
