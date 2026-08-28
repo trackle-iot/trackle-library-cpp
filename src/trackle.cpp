@@ -477,12 +477,14 @@ void Trackle::setClaimCode(const char *claimCode)
         return;
     }
 
-    const int written = snprintf(claim_code, sizeof(claim_code), "%s", claimCode);
-    if (written < 0 || (size_t)written >= sizeof(claim_code))
+    const size_t len = strnlen(claimCode, CLAIM_CODE_SIZE + 1);
+    if (len > (size_t)CLAIM_CODE_SIZE)
     {
         LOG(WARN, "claimCode too long (max %d char)", CLAIM_CODE_SIZE);
-        memset(claim_code, 0, sizeof(claim_code));
+        return;
     }
+
+    memcpy(claim_code, claimCode, len);
 }
 
 void Trackle::setComponentsList(const char *componentsList)
@@ -493,7 +495,7 @@ void Trackle::setComponentsList(const char *componentsList)
         return;
     }
 
-    if (strlen(componentsList) > MAX_COMPONENTS_LIST_LENGTH)
+    if (strnlen(componentsList, MAX_COMPONENTS_LIST_LENGTH + 1) > MAX_COMPONENTS_LIST_LENGTH)
     {
         LOG(WARN, "componentsList too long (max %zu char)", MAX_COMPONENTS_LIST_LENGTH);
         return;
@@ -516,6 +518,13 @@ void Trackle::setImei(const char *imei)
         return;
     }
 
+    if (strnlen(imei, sizeof(describe_imei)) == sizeof(describe_imei))
+    {
+        LOG(WARN, "imei too long (max %d char for describe attr)", DESCRIBE_ATTR_SIZE);
+        describe_imei[0] = 0;
+        return;
+    }
+
     const int written = snprintf(describe_imei, sizeof(describe_imei), ",\"imei\":\"%s\"", imei);
     if (written < 0 || (size_t)written >= sizeof(describe_imei))
     {
@@ -529,6 +538,13 @@ void Trackle::setIccid(const char *iccid)
     if (iccid == NULL)
     {
         LOG(WARN, "iccid not set: NULL pointer");
+        return;
+    }
+
+    if (strnlen(iccid, sizeof(describe_iccid)) == sizeof(describe_iccid))
+    {
+        LOG(WARN, "iccid too long (max %d char for describe attr)", DESCRIBE_ATTR_SIZE);
+        describe_iccid[0] = 0;
         return;
     }
 

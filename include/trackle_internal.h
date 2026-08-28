@@ -30,7 +30,7 @@ using namespace std;
 #define MAX_COUNTER 9999999
 #define MAX_PING_INTERVAL 1000
 
-const int CLAIM_CODE_SIZE = 63;
+const int CLAIM_CODE_SIZE = 64;
 const int COMPONENTS_LIST_SIZE = trackle::protocol::MAX_COMPONENTS_LIST_LENGTH + 20;
 const int DESCRIBE_ATTR_SIZE = 35;
 
