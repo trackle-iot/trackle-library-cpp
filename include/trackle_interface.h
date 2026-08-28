@@ -1,20 +1,10 @@
-/**
- ******************************************************************************
-  Copyright (c) 2022 IOTREADY S.r.l.
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation, either
-  version 3 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, see <http://www.gnu.org/licenses/>.
- ******************************************************************************
+/*
+ * Trackle Library - Source-Available IoT Client Library
+ * Copyright (c) 2022 IOTREADY S.r.l. All rights reserved.
+ *
+ * This source code is licensed under the Trackle Source-Available License
+ * Agreement found in the LICENSE file in the root directory of this source tree.
+ * Commercial deployment requires one paid Device License Key per device.
  */
 
 #ifndef trackle_interface_h
@@ -361,7 +351,7 @@ extern "C"
      * @trackle
      * @copydetails Trackle::setPingInterval()
      */
-    void trackleSetPingInterval(Trackle *v, uint32_t pingInterval) DYNLIB;
+    void trackleSetPingInterval(Trackle *v, uint32_t dumbInterval, uint8_t coapRatio) DYNLIB;
 
     /*!
      * @copybrief Trackle::setOtaMethod()

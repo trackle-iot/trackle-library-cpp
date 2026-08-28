@@ -1,3 +1,12 @@
+/*
+ * Trackle Library - Source-Available IoT Client Library
+ * Copyright (c) 2022 IOTREADY S.r.l. All rights reserved.
+ *
+ * This source code is licensed under the Trackle Source-Available License
+ * Agreement found in the LICENSE file in the root directory of this source tree.
+ * Commercial deployment requires one paid Device License Key per device.
+ */
+
 #include "logging.h"
 LOG_SOURCE_CATEGORY("comm.dtls")
 
@@ -9,43 +18,93 @@ LOG_SOURCE_CATEGORY("comm.dtls")
 #include <string.h>
 
 #define ECDSA_KEY_LENGTH 32
-#define MALFORMED_PACKET_LEN 15
 
 unsigned char ecdsa_priv_key[ECDSA_KEY_LENGTH];
 unsigned char ecdsa_pub_key_x[ECDSA_KEY_LENGTH];
 unsigned char ecdsa_pub_key_y[ECDSA_KEY_LENGTH];
 unsigned char server_certificate[DTLS_PUBLIC_KEY_LENGTH];
 
-uint8_t malformed[MALFORMED_PACKET_LEN] = {0x16, 0xfe, 0xfd, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00};
-uint8_t malformed_counter = 0;
 bool valid_dtls_session = false;
 
-void extract_pub_priv_keys(const uint8_t *key)
+static bool extract_pub_priv_keys(const uint8_t *key, size_t key_size)
 {
-	uint8_t len = key[1];
-
-	int i = 2;
-	while (i < (2 + len))
+	if (!key || key_size < 2 || key[0] != 0x30 || (key[1] & 0x80) != 0)
 	{
+		return false;
+	}
+
+	const size_t der_size = (size_t)key[1] + 2;
+	if (der_size > key_size)
+	{
+		return false;
+	}
+
+	memset(ecdsa_priv_key, 0, sizeof(ecdsa_priv_key));
+	memset(ecdsa_pub_key_x, 0, sizeof(ecdsa_pub_key_x));
+	memset(ecdsa_pub_key_y, 0, sizeof(ecdsa_pub_key_y));
+
+	bool private_key_found = false;
+	bool public_key_found = false;
+	size_t i = 2;
+	while (i < der_size)
+	{
+		if (der_size - i < 2 || (key[i + 1] & 0x80) != 0)
+		{
+			return false;
+		}
+
+		const size_t field_size = key[i + 1];
+		const size_t field_end = i + 2 + field_size;
+		if (field_end > der_size)
+		{
+			return false;
+		}
+
 		if (key[i] == 0x04)
 		{
-			int key_len = key[i + 1];
-			memcpy(ecdsa_priv_key + (DTLS_EC_KEY_SIZE - key_len), key + i + 2, key_len);
+			if (field_size == 0 || field_size > sizeof(ecdsa_priv_key))
+			{
+				return false;
+			}
+			memcpy(ecdsa_priv_key + sizeof(ecdsa_priv_key) - field_size,
+				   key + i + 2, field_size);
+			private_key_found = true;
 		}
 		else if (key[i] == 0xa1)
 		{
-			memcpy(ecdsa_pub_key_x, key + i + 6, 32);
-			memcpy(ecdsa_pub_key_y, key + i + 32 + 6, 32);
+			/* [1] BIT STRING, uncompressed P-256 point: 03 42 00 04 || X || Y */
+			if (field_size != 68 ||
+				key[i + 2] != 0x03 || key[i + 3] != 0x42 ||
+				key[i + 4] != 0x00 || key[i + 5] != 0x04)
+			{
+				return false;
+			}
+			memcpy(ecdsa_pub_key_x, key + i + 6, sizeof(ecdsa_pub_key_x));
+			memcpy(ecdsa_pub_key_y, key + i + 6 + sizeof(ecdsa_pub_key_x),
+				   sizeof(ecdsa_pub_key_y));
+			public_key_found = true;
 		}
-		i += (2 + key[i + 1]);
+		i = field_end;
 	}
+
+	return i == der_size && private_key_found && public_key_found;
 }
 
 static int
 dtls_event(struct dtls_context_t *ctx, session_t *session,
 		   dtls_alert_level_t level, unsigned short code)
 {
+	(void)session;
 	LOG(TRACE, "dtls_event alert: %d %d", level, code);
+#if DTLS_SESSION_TICKET
+	/* Fatal alert: drop ticket so the next connect does a full handshake.
+	 * Warning (e.g. close_notify) keeps the ticket. */
+	if (level == DTLS_ALERT_LEVEL_FATAL && ctx)
+	{
+		LOG(WARN, "Session Ticket: discarding after fatal alert %u", (unsigned)code);
+		memset(&ctx->session_ticket, 0, sizeof(ctx->session_ticket));
+	}
+#endif
 	return 0;
 }
 
@@ -97,6 +156,11 @@ verify_ecdsa_key(struct dtls_context_t *ctx,
 	(void)other_pub_x;
 	(void)other_pub_y;
 	(void)key_size;
+	
+	// In Trackle architecture, server authentication is handled via 
+	// pre-shared server certificates (get_server_certificate callback).
+	// This verify callback is typically not used in the current setup.
+	// Return 0 (accept) to avoid breaking handshake.
 	return 0;
 }
 
@@ -105,10 +169,16 @@ static int read_from_peer(struct dtls_context_t *ctx,
 {
 
 	Dtls_data *t_dtls_data = (Dtls_data *)ctx->app;
-	t_dtls_data->read_len = (int)len;
+	t_dtls_data->read_len = 0;
+	if (len > sizeof(t_dtls_data->read_buf))
+	{
+		t_dtls_data->read_error = trackle::protocol::INSUFFICIENT_STORAGE;
+		return -1;
+	}
 
 	memset(t_dtls_data->read_buf, 0, sizeof(t_dtls_data->read_buf));
 	memcpy(t_dtls_data->read_buf, data, len);
+	t_dtls_data->read_len = (uint32_t)len;
 
 	return 0;
 }
@@ -118,8 +188,12 @@ static int send_to_peer(struct dtls_context_t *ctx,
 {
 
 	Dtls_data *t_dtls_data = (Dtls_data *)ctx->app;
-	size_t res = t_dtls_data->send(data, (int)len, t_dtls_data->channel);
-	return (int)res;
+	int res = t_dtls_data->send(data, (int)len, t_dtls_data->channel);
+	if (res < 0)
+	{
+		t_dtls_data->transport_error = trackle::protocol::IO_ERROR_GENERIC_SEND;
+	}
+	return res;
 }
 
 namespace trackle
@@ -138,30 +212,39 @@ namespace trackle
 		ProtocolError DTLSMessageChannel::init(
 			const uint8_t *core_private, size_t core_private_len,
 			const uint8_t *server_public, size_t server_public_len,
-			const uint8_t *device_id, Callbacks &callbacks,
+			Callbacks &callbacks,
 			message_id_t *coap_state)
 		{
 			init();
 
 			this->coap_state = coap_state;
 			this->callbacks = callbacks;
-			this->device_id = device_id;
 
 			getMillis = callbacks.millis;
 
 			dtls_init();
 
-			extract_pub_priv_keys(core_private); // extract client public and private key
+			if (!extract_pub_priv_keys(core_private, core_private_len))
+			{
+				LOG(ERROR, "Invalid DTLS client private key");
+				return IO_ERROR_PARSING_SERVER_PUBLIC_KEY;
+			}
 
-			// copy server public key
+			if (!server_public || server_public_len != DTLS_PUBLIC_KEY_LENGTH)
+			{
+				LOG(ERROR, "Invalid DTLS server public key length: %u",
+					(unsigned)server_public_len);
+				return IO_ERROR_PARSING_SERVER_PUBLIC_KEY;
+			}
+
+			memset(server_certificate, 0, sizeof(server_certificate));
 			memcpy(server_certificate, server_public, server_public_len);
 
 			static dtls_handler_t cb = {
 				.write = send_to_peer,
 				.read = read_from_peer,
 				.event = dtls_event,
-				//.event = NULL,
-				.get_psk_info = NULL,
+				.get_user_parameters = NULL,
 				.get_server_certificate = get_server_certificate,
 				.get_ecdsa_key = get_ecdsa_key,
 				.verify_ecdsa_key = verify_ecdsa_key,
@@ -169,54 +252,66 @@ namespace trackle
 
 			dtls_data.send = sendCallback; // send callback
 			dtls_data.channel = (void *)this;
+			dtls_data.read_len = 0;
+			dtls_data.read_error = NO_ERROR;
+			dtls_data.transport_error = NO_ERROR;
 
 			dtls_context = dtls_new_context(&dtls_data);
 			if (!dtls_context)
 			{
-				LOG(TRACE, "Cannot create context");
-				exit(-1);
+				LOG(ERROR, "Cannot create DTLS context");
+				return UNKNOWN;
 			}
 
 			dtls_set_handler(dtls_context, &cb);
 			return NO_ERROR;
 		}
 
-		/*
-		 * Inspects the move session flag to amend the application data record to a move session record.
-		 * See: https://github.com/trackle-iot/knowledge/blob/8df146d88c4237e90553f3fd6d8465ab58ec79e0/services/dtls-ip-change.md
-		 */
 		inline int DTLSMessageChannel::send(const uint8_t *data, size_t len)
 		{
-			// if (move_session && len && data[0] == 0x70)
-			if (move_session && len && data[0] == 23)
-			{
-				LOG(TRACE, "DTLSMessageChannel -> move_session");
-				// buffer for a new packet that contains the device ID length and a byte for the length appended to the existing data.
-				uint8_t d[len + DEVICE_ID_LEN + 1];
-				memcpy(d, data, len);					   // original application data
-				d[0] = 254;								   // move session record type
-				memcpy(d + len, device_id, DEVICE_ID_LEN); // set the device ID
-				d[len + DEVICE_ID_LEN] = DEVICE_ID_LEN;	   // set the device ID length as the last byte in the packet
-				int result = callbacks.send(d, len + DEVICE_ID_LEN + 1, callbacks.tx_context);
-				// hide the increased length from DTLS
-				if (result == int(len + DEVICE_ID_LEN + 1))
-					result = len;
-				return result;
-			}
-			else
-				return callbacks.send(data, len, callbacks.tx_context);
+			return callbacks.send(data, len, callbacks.tx_context);
 		}
 
 		void DTLSMessageChannel::reset_session()
 		{
 			LOG(TRACE, "DTLSMessageChannel::reset_session");
-			cancel_move_session();
+			this->status = INIT;
 
 			dtls_peer_t *peer = dtls_get_peer(dtls_context, &dst);
 			if (peer)
 			{
 				dtls_reset_peer(dtls_context, peer);
 			}
+		}
+
+		void DTLSMessageChannel::handshake_failed()
+		{
+#if DTLS_SESSION_TICKET
+			if (ticket_offered_for_handshake)
+			{
+				++ticket_handshake_failures;
+				LOG(WARN, "Session Ticket: handshake failure %u/%u",
+					(unsigned)ticket_handshake_failures,
+					(unsigned)TICKET_HANDSHAKE_FAILURE_LIMIT);
+
+				if (ticket_handshake_failures >= TICKET_HANDSHAKE_FAILURE_LIMIT)
+				{
+					LOG(WARN, "Session Ticket: discarding ticket after repeated failures");
+					memset(&dtls_context->session_ticket, 0,
+						   sizeof(dtls_context->session_ticket));
+					ticket_handshake_failures = 0;
+				}
+			}
+#endif
+			ticket_offered_for_handshake = false;
+			reset_session();
+		}
+
+		void DTLSMessageChannel::handshake_succeeded()
+		{
+			ticket_offered_for_handshake = false;
+			ticket_handshake_failures = 0;
+			this->status = INIT;
 		}
 
 		inline int DTLSMessageChannel::recv(uint8_t *data, size_t len)
@@ -298,16 +393,15 @@ namespace trackle
 
 		ProtocolError DTLSMessageChannel::establish(uint32_t &flags, uint32_t app_state_crc)
 		{
+			(void)app_state_crc;
 			int ret = -1;
 
-#define MAX_READ_BUF 1000
-			static uint8 buf[MAX_READ_BUF];
+			uint8 buf[PROTOCOL_BUFFER_SIZE];
 
 			static dtls_timing_context time_cb;
 			int8_t connection_status = -1;
 			int8_t timeout_status = 0;
 			int res = 0;
-			bool toConnect = false;
 
 			switch (this->status)
 			{
@@ -316,50 +410,49 @@ namespace trackle
 
 				dtls_timing_set_delay(&time_cb, this->handshake_timeout);
 
-				/* delete peer if not connected */
+				/*
+				 * Trackle invokes establish() after creating a new UDP socket.
+				 * A CONNECTED peer belongs to the previous socket/path and its
+				 * CID must not be reused. The session ticket is stored in the
+				 * context, so resetting the peer preserves ticket resumption.
+				 */
 				dtls_peer_t *peer = dtls_get_peer(dtls_context, &dst);
-
-				if (!peer)
+				if (peer)
 				{
-					LOG(TRACE, "peer not extists");
-					toConnect = true;
-				}
-				else if (peer && peer->state != DTLS_STATE_CONNECTED)
-				{
-					LOG(TRACE, "dtls_reset_peer");
+					LOG(TRACE, "Resetting DTLS peer before reconnect (state %d)",
+						peer->state);
 					peer->state = DTLS_STATE_CLOSING;
 					dtls_reset_peer(dtls_context, peer);
-					toConnect = true;
-				}
-				else
-				{
-					LOG(TRACE, "DTLS_STATE_CONNECTED");
-					toConnect = false;
 				}
 
-				if (toConnect)
-				{
-					res = dtls_connect(dtls_context, &dst);
-					LOG(TRACE, "dtls_connect: %d", res);
-				}
+				ticket_offered_for_handshake = false;
 
-				if (res < 0)
+				dtls_data.transport_error = NO_ERROR;
+				res = dtls_connect(dtls_context, &dst);
+#if DTLS_SESSION_TICKET
+				peer = dtls_get_peer(dtls_context, &dst);
+				ticket_offered_for_handshake =
+					peer && peer->handshake_params &&
+					peer->handshake_params->session_ticket_presented;
+#endif
+				LOG(TRACE, "dtls_connect: %d, ticket offered: %d",
+					res, (int)ticket_offered_for_handshake);
+
+				if (res <= 0)
 				{
 					LOG(TRACE, "dtls_connect error %d", res);
-					return IO_ERROR_GENERIC_ESTABLISH;
+					ProtocolError error = dtls_data.transport_error != NO_ERROR
+											  ? static_cast<ProtocolError>(dtls_data.transport_error)
+											  : IO_ERROR_GENERIC_ESTABLISH;
+					handshake_failed();
+					return error;
 				}
-				else if (res == 0)
-				{
-					// resume session
-					LOG(TRACE, "trying to restore session....");
-					flags |= Protocol::SKIP_SESSION_RESUME_HELLO;
-					return SESSION_RESUMED;
-				}
-				else
-				{
-					LOG(TRACE, "starting handshake");
-					this->status = HANDSHAKE;
-				}
+
+				if (!ticket_offered_for_handshake)
+					ticket_handshake_failures = 0;
+
+				LOG(TRACE, "starting handshake");
+				this->status = HANDSHAKE;
 
 				break;
 			}
@@ -368,12 +461,43 @@ namespace trackle
 			{
 
 				dtls_data.read_len = 0;
-				int len = callbacks.receive(buf, MAX_READ_BUF, callbacks.tx_context);
+				dtls_data.read_error = NO_ERROR;
+				dtls_data.transport_error = NO_ERROR;
+				int len = callbacks.receive(buf, PROTOCOL_BUFFER_SIZE, callbacks.tx_context);
+
+				if (len < 0)
+				{
+					handshake_failed();
+					return IO_ERROR_GENERIC_RECEIVE;
+				}
 
 				if (len > 0)
 				{
-					dtls_handle_message(dtls_context, &dst, buf, len);
-					memset(buf, 0, MAX_READ_BUF);
+					int dtls_res = dtls_handle_message(dtls_context, &dst, buf, len);
+					if (dtls_data.transport_error != NO_ERROR)
+					{
+						ProtocolError error = static_cast<ProtocolError>(dtls_data.transport_error);
+						handshake_failed();
+						return error;
+					}
+					if (dtls_res < 0)
+					{
+						LOG(WARN, "dtls_handle_message failed: %d", dtls_res);
+						handshake_failed();
+						return IO_ERROR_GENERIC_ESTABLISH;
+					}
+					if (dtls_data.read_error != NO_ERROR)
+					{
+						ProtocolError error = static_cast<ProtocolError>(dtls_data.read_error);
+						handshake_failed();
+						return error;
+					}
+					if (dtls_data.read_len > PROTOCOL_BUFFER_SIZE)
+					{
+						handshake_failed();
+						return INSUFFICIENT_STORAGE;
+					}
+					memset(buf, 0, PROTOCOL_BUFFER_SIZE);
 					memcpy(buf, dtls_data.read_buf, dtls_data.read_len);
 				}
 
@@ -392,17 +516,29 @@ namespace trackle
 
 						if (connection_status == 1)
 						{
-							LOG(TRACE, "timeout\n");
-							return IO_ERROR_GENERIC_ESTABLISH;
+							// Silence: keep ticket (do not count as ticket failure).
+							LOG(TRACE, "Handshake timeout, keeping ticket");
+							ticket_offered_for_handshake = false;
+							handshake_failed();
+							return MESSAGE_TIMEOUT;
 						}
 					}
 				}
 
-				/* new session created */
+				/* Full and abbreviated handshakes both create a fresh peer/CID. */
 				if (ret == 0)
 				{
 					LOG(TRACE, "valid session created");
 					valid_dtls_session = true;
+					handshake_succeeded();
+#if DTLS_SESSION_TICKET
+					if (peer->session_resumed)
+					{
+						LOG(INFO, "Session Ticket: abbreviated handshake completed");
+						flags |= Protocol::SKIP_SESSION_RESUME_HELLO;
+						return SESSION_RESUMED;
+					}
+#endif
 					return SESSION_CONNECTED;
 				}
 
@@ -431,62 +567,32 @@ namespace trackle
 			uint32_t buflen = (uint32_t)message.capacity();
 
 			dtls_data.read_len = 0;
+			dtls_data.read_error = NO_ERROR;
+			dtls_data.transport_error = NO_ERROR;
 			int len = callbacks.receive(buf, buflen, callbacks.tx_context);
+
+			if (len < 0)
+				return IO_ERROR_GENERIC_RECEIVE;
 
 			if (len > 0)
 			{
-				// reset dtls_data.read_len to avoid error
-				dtls_data.read_len = 0;
 				int dtls_res = dtls_handle_message(dtls_context, &dst, buf, len);
 				LOG(TRACE, "dtls_handle_message error %d, dtls_data.read_len %d", dtls_res, dtls_data.read_len);
-
-				// check malformed only if data received > 0
-				int res = -1;
-				if (dtls_data.read_len == 0)
+				if (dtls_data.transport_error != NO_ERROR)
+					return static_cast<ProtocolError>(dtls_data.transport_error);
+				if (dtls_res < 0)
 				{
-					res = memcmp(buf, malformed, MALFORMED_PACKET_LEN);
-					LOG(TRACE, "Check malformed packet: %d", (res == 0));
+					// UDP may deliver garbage / truncated DTLS records. Drop them
+					// without tearing down an established session.
+					LOG(WARN, "dtls_handle_message failed: %d (ignored)", dtls_res);
+					dtls_data.read_len = 0;
 				}
-
-				if (res == 0)
-				{
-					LOG(WARN, "Malformed dtls packet");
-					malformed_counter++;
-
-					// if already in move session, disconnect on malformed
-					if (move_session)
-					{
-						malformed_counter = 2;
-					}
-
-					// todo scrivere funzionamento
-					if (malformed_counter == 1)
-					{
-						LOG(INFO, "Handle ip change");
-						this->command(MessageChannel::MOVE_SESSION, nullptr);
-
-						// send ping
-						Message message;
-						create(message);
-						size_t len = Messages::ping(message.buf(), 0);
-						message.set_length(len);
-						send(message);
-
-						return NO_ERROR;
-					}
-					else
-					{
-						LOG(INFO, "Too much malformed packet, disconnecting.....");
-						this->command(MessageChannel::CLOSE, nullptr);
-
-						return IO_ERROR_GENERIC_RECEIVE;
-					}
-				}
-				else // packet ok
-				{
-					malformed_counter = 0;
-				}
+				else if (dtls_data.read_error != NO_ERROR)
+					return static_cast<ProtocolError>(dtls_data.read_error);
 			}
+
+			if (dtls_data.read_len > buflen)
+				return INSUFFICIENT_STORAGE;
 
 			memset(buf, 0, buflen);
 			memcpy(buf, dtls_data.read_buf, dtls_data.read_len);
@@ -494,7 +600,6 @@ namespace trackle
 			message.set_length(dtls_data.read_len);
 			if (dtls_data.read_len > 0)
 			{
-				cancel_move_session();
 #if defined(DEBUG_BUILD) && 0
 				if (LOG_ENABLED(TRACE))
 				{
@@ -511,22 +616,6 @@ namespace trackle
 #endif
 			}
 			return NO_ERROR;
-		}
-
-		/**
-		 * Once data has been successfully received we can stop
-		 * sending move-session messages.
-		 * This is also used to reset the expiration counter.
-		 */
-		void DTLSMessageChannel::cancel_move_session()
-		{
-			LOG(TRACE, "cancel_move_session");
-
-			if (move_session)
-			{
-				move_session = false;
-				command(SAVE_SESSION);
-			}
 		}
 
 		ProtocolError DTLSMessageChannel::send(Message &message)
@@ -550,8 +639,11 @@ namespace trackle
 			LOG_PRINT(TRACE, "\r\n");
 #endif
 
+			dtls_data.transport_error = NO_ERROR;
 			int ret = dtls_write(dtls_context, &dst, message.buf(), message.length());
-			return (ret >= 0 ? NO_ERROR : IO_ERROR_GENERIC_ESTABLISH);
+			if (dtls_data.transport_error != NO_ERROR)
+				return static_cast<ProtocolError>(dtls_data.transport_error);
+			return (ret >= 0 ? NO_ERROR : IO_ERROR_GENERIC_SEND);
 		}
 
 		bool DTLSMessageChannel::is_unreliable()
@@ -570,10 +662,6 @@ namespace trackle
 			case DISCARD_SESSION:
 				reset_session();
 				return IO_ERROR_DISCARD_SESSION; // force re-establish
-
-			case MOVE_SESSION:
-				move_session = true;
-				break;
 
 			case LOAD_SESSION:
 				// sessionPersist.restore(callbacks.restore);

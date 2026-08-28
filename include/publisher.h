@@ -1,21 +1,11 @@
-/**
- ******************************************************************************
-  Copyright (c) 2022 IOTREADY S.r.l.
-  Copyright (c) 2015 Particle Industries, Inc.
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation, either
-  version 3 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, see <http://www.gnu.org/licenses/>.
- ******************************************************************************
+/*
+ * Trackle Library - Source-Available IoT Client Library
+ * Copyright (c) 2022 IOTREADY S.r.l. All rights reserved.
+ * Copyright (c) 2015 Particle Industries, Inc.
+ *
+ * This source code is licensed under the Trackle Source-Available License
+ * Agreement found in the LICENSE file in the root directory of this source tree.
+ * Commercial deployment requires one paid Device License Key per device.
  */
 
 #pragma once
@@ -25,6 +15,7 @@
 #include "message_channel.h"
 #include "messages.h"
 #include "service_debug.h"
+#include "diagnostic.h"
 
 #include "completion_handler.h"
 
@@ -97,7 +88,7 @@ namespace trackle
 					bool rate_limited = is_rate_limited(is_system_event, time);
 					if (rate_limited)
 					{
-						// g_rateLimitedEventsCounter++;
+						diagnostic::diagnosticCloud(CLOUD_RATE_LIMITED_EVENTS, 1);
 						return BANDWIDTH_EXCEEDED;
 					}
 				}

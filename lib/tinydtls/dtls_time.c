@@ -29,6 +29,7 @@
 // in this way, we can know from the dump why the firmware crashes.
 static void dtls_ticks_aborting(uint32_t *ticks)
 {
+  (void)ticks;
   // NOTE FOR DEBUGGERS:
   // if you are reading this because your firmware crashes and a dump trace brought you here,
   // beware that the cause of your firmware's crashes is that no timing function was set
@@ -45,5 +46,5 @@ void dtls_ticks(dtls_tick_t *t)
 
 void TinyDtls_set_get_millis(void (*newGetMillis)(uint32_t *))
 {
-  dtls_ticks_callback = newGetMillis;
+  dtls_ticks_callback = newGetMillis ? newGetMillis : dtls_ticks_aborting;
 }

@@ -1,3 +1,12 @@
+/*
+ * Trackle Library - Source-Available IoT Client Library
+ * Copyright (c) 2022 IOTREADY S.r.l. All rights reserved.
+ *
+ * This source code is licensed under the Trackle Source-Available License
+ * Agreement found in the LICENSE file in the root directory of this source tree.
+ * Commercial deployment requires one paid Device License Key per device.
+ */
+
 #include "dtls_protocol.h"
 
 namespace trackle
@@ -33,11 +42,11 @@ namespace trackle
 
 			channel.set_ack_timeout(conPropType.ack_timeout * 1000);
 			channel.set_handshake_timeout(conPropType.handshake_timeout * 1000);
-			initialize_ping(conPropType.ping_interval * 1000, 30000);
+			initialize_ping(conPropType.dumb_ping_interval * 1000, conPropType.coap_ping_ratio);
 
-			ProtocolError error = channel.init(keys.core_private, 121,
-											   keys.server_public, 91,
-											   (const uint8_t *)device_id, channelCallbacks, &channel.next_id_ref());
+			ProtocolError error = channel.init(keys.core_private, PRIVATE_KEY_LENGTH - 1,
+											   keys.server_public, DTLS_PUBLIC_KEY_LENGTH,
+											   channelCallbacks, &channel.next_id_ref());
 			if (error)
 			{
 				LOG(WARN, "error initializing DTLS channel: %d", error);

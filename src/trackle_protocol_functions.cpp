@@ -1,3 +1,12 @@
+/*
+ * Trackle Library - Source-Available IoT Client Library
+ * Copyright (c) 2022 IOTREADY S.r.l. All rights reserved.
+ *
+ * This source code is licensed under the Trackle Source-Available License
+ * Agreement found in the LICENSE file in the root directory of this source tree.
+ * Commercial deployment requires one paid Device License Key per device.
+ */
+
 #include "protocol_defs.h"
 #include "protocol_selector.h"
 #include "trackle_protocol_functions.h"
@@ -48,10 +57,17 @@ int trackle_protocol_handshake(ProtocolFacade *protocol, void *)
     return protocol->begin();
 }
 
-bool trackle_protocol_event_loop(ProtocolFacade *protocol, void *)
+bool trackle_protocol_event_loop(ProtocolFacade *protocol, int *last_protocol_error, void *)
 {
     ASSERT_ON_SYSTEM_THREAD();
-    return protocol->event_loop();
+    // Do not use the bool event_loop(): it drops ProtocolError (true==1 would be cast to PING_TIMEOUT).
+    trackle::protocol::CoAPMessageType::Enum message_type;
+    trackle::protocol::ProtocolError error = protocol->event_loop(message_type);
+    if (last_protocol_error)
+    {
+        *last_protocol_error = static_cast<int>(error);
+    }
+    return error == trackle::protocol::NO_ERROR;
 }
 
 bool trackle_protocol_is_initialized(ProtocolFacade *protocol)

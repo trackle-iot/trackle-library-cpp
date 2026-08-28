@@ -1,21 +1,11 @@
-/**
- ******************************************************************************
-  Copyright (c) 2022 IOTREADY S.r.l.
-  Copyright (c) 2015 Particle Industries, Inc.
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation, either
-  version 3 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, see <http://www.gnu.org/licenses/>.
- ******************************************************************************
+/*
+ * Trackle Library - Source-Available IoT Client Library
+ * Copyright (c) 2022 IOTREADY S.r.l. All rights reserved.
+ * Copyright (c) 2015 Particle Industries, Inc.
+ *
+ * This source code is licensed under the Trackle Source-Available License
+ * Agreement found in the LICENSE file in the root directory of this source tree.
+ * Commercial deployment requires one paid Device License Key per device.
  */
 
 #pragma once
@@ -273,9 +263,8 @@ namespace trackle
 						{
 							const size_t MAX_ID_LEN =
 								sizeof(event_handlers[i].device_id) - 1;
-							const size_t id_len = id ? strnlen(id, MAX_ID_LEN) : 0;
-							if (id_len)
-								return !strncmp(event_handlers[i].device_id, id, id_len);
+							if (id)
+								return !memcmp(event_handlers[i].device_id, id, MAX_ID_LEN);
 							else
 								return !event_handlers[i].device_id[0];
 						}
@@ -304,11 +293,10 @@ namespace trackle
 						memset(event_handlers[i].filter + FILTER_LEN, 0, MAX_FILTER_LEN - FILTER_LEN);
 						event_handlers[i].handler = handler;
 						event_handlers[i].handler_data = handler_data;
-						event_handlers[i].device_id[0] = 0;
 						const size_t MAX_ID_LEN = sizeof(event_handlers[i].device_id) - 1;
-						const size_t id_len = id ? strnlen(id, MAX_ID_LEN) : 0;
-						memcpy(event_handlers[i].device_id, id, id_len);
-						event_handlers[i].device_id[id_len] = 0;
+						memset(event_handlers[i].device_id, 0, sizeof(event_handlers[i].device_id));
+						if (id)
+							memcpy(event_handlers[i].device_id, id, MAX_ID_LEN);
 						event_handlers[i].scope = scope;
 						return NO_ERROR;
 					}

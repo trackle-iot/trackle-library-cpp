@@ -1,11 +1,14 @@
-//
-//  Trackle.cpp
-//
-//  Created by Flavio Ferrandi on 14/09/17.
-//  Copyright © 2017 Flavio Ferrandi. All rights reserved.
-//
+/*
+ * Trackle Library - Source-Available IoT Client Library
+ * Copyright (c) 2017 IOTREADY S.r.l. All rights reserved.
+ *
+ * This source code is licensed under the Trackle Source-Available License
+ * Agreement found in the LICENSE file in the root directory of this source tree.
+ * Commercial deployment requires one paid Device License Key per device.
+ */
 
 #include "trackle.h"
+#include "trackle_internal.h"
 #include "protocol_defs.h"
 #include "version.h"
 #include <vector>
@@ -19,6 +22,9 @@
 #include <stdint.h>
 #include <sstream>
 #include <iomanip>
+#include <inttypes.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include "dtls_protocol.h"
 #include "tinydtls.h"
@@ -26,56 +32,20 @@
 #include "tinydtls_set_rand.h"
 #include "tinydtls_set_get_millis.h"
 #include "messages.h"
+#include "diagnostic.h"
+#include "file_transfer.h"
 
 using namespace trackle::protocol;
 
 // describe length:
 // {"f":[...],"v":{...},"i":30.1,"o":0,"p":102,"s":"3.2.0"} // min len is 50
-// func key len = FUNC_KEY_LENGTH + 3 // "....",
-// var key len = MAX_FUNCTION_KEY_LENGTH + 5 // "..":x,
-// remove 2 from total (2 are commas for last funct and var)
 // TOTAL LEN = 50 + 20 * (MAX_VARIABLE_KEY_LENGTH + 3) + 20 * (MAX_FUNCTION_KEY_LENGTH + 5) + (MAX_COMPONENTS_LIST_LENGTH + 7) - 2 = 1015
 
-#define PUB_KEY_OFFSET 26 // position of 0x04 marker
-#define PUB_KEY_MARKER 0x04
-#define PUB_KEY_XY_SIZE 64
-
-#define DEFAULT_CONNECTION_TIMEOUT 1000
-#define RECONNECTION_TIMEOUT 3750
-#define MAX_RECONNECTION_RETRY_INCREMENT 4 // 2^4 * 3750 = 60 seconds
 uint16_t connection_retry = 0;
 uint32_t connection_timeout = DEFAULT_CONNECTION_TIMEOUT;
 
-// OTA
-static const char *OTA_EVENT_NAME = "trackle/device/update/status";
-
-struct _ota_data
-{
-    bool running;
-    bool has_signature;
-    bool has_firmware_key;
-    char ota_job_id[64];
-    uint8_t firmware_signature[64];
-    uint8_t firmware_signature_key[PUB_KEY_XY_SIZE];
-} ota_data;
-
-#define MAX_COUNTER 9999999
-#define MAX_PING_INTERVAL 1000
-
-#ifndef VERSION_DEV
-#define VERSION_DEV ""
-#endif
-
-const uint32_t PUBLISH_EVENT_FLAG_PUBLIC = 0x0;
-const uint32_t PUBLISH_EVENT_FLAG_PRIVATE = 0x1;
-const int CLAIM_CODE_SIZE = 63;
-const int COMPONENTS_LIST_SIZE = MAX_COMPONENTS_LIST_LENGTH + 20;
-const int DESCRIBE_ATTR_SIZE = 35;
-
-// DICHIARAZIONI  ------------------------------------------------------------
-
-void TrackleLib_tinydtls_millis_wrapper(uint32_t *t);
-void TrackleLib_set_latest_millis_callback_for_tinydtls(uint32_t (*new_latest_millis_callback)());
+const char *OTA_EVENT_NAME = "trackle/device/update/status";
+struct _ota_data ota_data;
 
 trackle::protocol::DTLSProtocol protocol_instance;
 ProtocolFacade *protocol = &protocol_instance;
@@ -101,23 +71,17 @@ pincodeCallback *pincodeCb = NULL;
 connectionStatusCallback *connectionStatusCb = NULL;
 updateStateCallback *updateStateCb = NULL;
 
-uint32_t counter = 0; // MAX_COUNTER 9.999.999
-uint32_t prefix = 0;  // 4.294.967.296 -> 1.990.000.000
-uint8_t token = 0;    // 1 - 255
+uint32_t counter = 0;
+uint32_t prefix = 0;
+uint8_t token = 0;
 
-/**
- * It generates a random number in the range [1, 199] and uses it as the prefix for the publish counter
- *
- * @return The next publish counter.
- */
 uint32_t getNextPublishCounter()
 {
     uint32_t p = prefix;
 
     if (p == 0)
     {
-        // Inizializzazione
-        prefix = (HAL_RNG_GetRandomNumber() % 199) + 1; // Genera un numero da 1 a 199
+        prefix = (HAL_RNG_GetRandomNumber() % 199) + 1;
         p = prefix;
     }
 
@@ -136,42 +100,23 @@ uint32_t getNextPublishCounter()
         counter = 0;
     }
 
-    // Calcola la base per il prefisso come MAX_COUNTER + 1
     uint32_t base = MAX_COUNTER + 1;
-
     return (p * base) + counter;
 }
 
-/**
- * It gives a token for a coap packet. Alway more then 0.
- *
- * @return The token.
- */
 uint8_t getNextToken()
 {
-    // Increment token and ensure it's always greater than 0
     token++;
-
     if (token == 0)
     {
         token = 1;
     }
-
     return token;
 }
 
 constexpr char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7',
                            '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
-/**
- * It takes a pointer to a char array and the length of the array, and returns a string containing the
- * hexadecimal representation of the data in the array
- *
- * @param data The data to be converted to hex
- * @param len The length of the data to be converted.
- *
- * @return A string of hexadecimal characters.
- */
 std::string hexStr(char *data, int len)
 {
     std::string s(len * 2, ' ');
@@ -183,27 +128,17 @@ std::string hexStr(char *data, int len)
     return s;
 }
 
-/*** CONNECTION STATUS ***/
-/*
- SOCKET_NOT_CONNECTED
- SOCKET_CONNECTING
- SOCKET_READY
- */
 Connection_Status_Type connectionStatus = SOCKET_NOT_CONNECTED;
 int cloudStatus = -1;
 
 trackle::protocol::Connection_Properties_Type connectionPropTypeList[5] = {
-    {30, 10, 2},  // UNDEFINED
-    {30, 10, 2},  // WIFI
-    {30, 10, 2},  // ETHERNET
-    {30, 10, 2},  // CELLULAR
-    {150, 20, 5}, // LPWA
-}; // in seconds
+    {30, 2, 10, 2},
+    {30, 2, 10, 2},
+    {30, 2, 10, 2},
+    {30, 10, 10, 2},
+    {150, 2, 20, 5},
+};
 
-/**
- * The function increases the connection timeout with each retry  by a factor of 2
- * adding a random factor to the timeout value (between 0 and 0.512)
- */
 void increase_connection_timeout()
 {
     if (connection_retry < MAX_RECONNECTION_RETRY_INCREMENT)
@@ -211,13 +146,10 @@ void increase_connection_timeout()
         connection_retry++;
     }
     connection_timeout = pow(2, connection_retry) * RECONNECTION_TIMEOUT;
-    double x = (rand() % 512) / (double)1000; // rand between 0 and 0.512
+    double x = (rand() % 512) / (double)1000;
     connection_timeout += x * connection_timeout;
 }
 
-/**
- * Resets the connection timeout to 1000 milliseconds and the connection retry to 0.
- */
 void reset_connection_timeout()
 {
     connection_timeout = DEFAULT_CONNECTION_TIMEOUT;
@@ -225,6 +157,7 @@ void reset_connection_timeout()
 }
 
 uint32_t pingInterval = 0;
+uint8_t coapPingRatio = 0;
 Connection_Type connectionType = CONNECTION_TYPE_UNDEFINED;
 trackle::protocol::Connection_Properties_Type connectionPropType;
 
@@ -233,7 +166,6 @@ bool connectToCloud = false;
 system_tick_t millis_last_disconnection = 0;
 system_tick_t millis_started_at = 0;
 
-// OTA
 Ota_Method otaMethod = NO_OTA;
 bool updates_pending = false;
 bool updates_enabled = true;
@@ -243,12 +175,8 @@ system_tick_t millis_last_sent_received_time = 0;
 system_tick_t millis_last_sent_health_check = 0;
 system_tick_t health_check_interval = 0;
 
-// ------------------------------------------------------------
-
 string string_device_id;
 char t_device_id[DEVICE_ID_LENGTH];
-// 294byte + 1 byte (len n server address) + n byte server address + 2 byte server port
-// byte aggiuntivi dopo chiave: \x10\x74\x65\x73\x74\x2e\x69\x6f\x74\x72\x65\x61\x64\x79\x2e\x69\x74\x16\x33
 unsigned char server_public_key[PUBLIC_KEY_LENGTH] = {0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x02, 0x01, 0x06, 0x08, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00, 0x04, 0x2B, 0x19, 0x9D, 0xC9, 0xF2, 0xB0, 0x2D, 0xD1, 0xF1, 0x7D, 0xF0, 0x2B, 0xD1, 0xEC, 0xD1, 0x57, 0xD6, 0x74, 0x51, 0xD7, 0x9C, 0x09, 0xE1, 0x70, 0x43, 0x4A, 0x5B, 0xC2, 0x40, 0xC0, 0x49, 0x67, 0x34, 0xC8, 0xA4, 0xF8, 0xB4, 0xF7, 0xFB, 0xB4, 0xD0, 0x3F, 0xCC, 0xAF, 0x1F, 0xAA, 0x2E, 0x1D, 0x76, 0x82, 0xCF, 0x3A, 0x1A, 0x0B, 0x42, 0x38, 0x14, 0x6D, 0x54, 0x42, 0x05, 0xDC, 0x4D, 0x27};
 unsigned char client_private_key[PRIVATE_KEY_LENGTH];
 char claim_code[CLAIM_CODE_SIZE + 1];
@@ -256,1200 +184,7 @@ char components_list[COMPONENTS_LIST_SIZE + 1];
 char describe_imei[DESCRIBE_ATTR_SIZE + 1];
 char describe_iccid[DESCRIBE_ATTR_SIZE + 1];
 
-// TRACKLE.VARIABLE ------------------------------------------------------------
-
-struct CloudVariableTypeBase
-{
-    char userVarKey[MAX_VARIABLE_KEY_LENGTH + 1];
-    Data_TypeDef userVarType;
-    Data_TypeDef stringVarType;
-
-    // According to the following SO answer and comments, it's not safe to cast function pointers to void pointers (void*),
-    // but it's safe to cast a function pointer type to another function pointer type.
-    // For this reason, here we keep a reference to callback function using void *(*)(const char*).
-    // It's client's responsibility to cast such pointer to the correct type according to userVarType.
-    // URL to SO answer: https://stackoverflow.com/questions/36645660/why-cant-i-cast-a-function-pointer-to-void
-    void *(*funct)(const char *, const char *);
-
-    CloudVariableTypeBase(user_variable_pointer_t fn, const char *varKey, Data_TypeDef type)
-    {
-        strncpy(userVarKey, varKey, sizeof(userVarKey) - 1);
-        userVarKey[sizeof(userVarKey) - 1] = '\0';
-        userVarType = type;
-        funct = fn;
-    };
-};
-
-std::vector<CloudVariableTypeBase> vars;
-
-/**
- * It searches the vars array for a variable with the given key, and returns a pointer to that variable
- * if found, or NULL if not found
- *
- * @param varKey The key of the variable to be found.
- *
- * @return A pointer to the variable.
- */
-CloudVariableTypeBase *find_var_by_key(const char *varKey)
-{
-    for (int i = (int)vars.size(); i-- > 0;)
-    {
-        if (0 == strncmp(vars[i].userVarKey, varKey, MAX_VARIABLE_KEY_LENGTH))
-        {
-            return &vars[i];
-        }
-    }
-    return NULL;
-}
-
-/**
- * It takes a long integer and returns a string
- *
- * @param number The number to be converted to a string.
- *
- * @return A string
- */
-static string int_to_string(long number)
-{
-    std::string out_string;
-    std::stringstream ss;
-    ss << number;
-    out_string = ss.str();
-    return out_string;
-}
-
-/**
- * It returns the type of a variable, given its key
- *
- * @param varKey The variable key.
- *
- * @return The type of the variable.
- */
-int userVarType(const char *varKey)
-{
-    CloudVariableTypeBase *item = find_var_by_key(varKey);
-    return item ? item->userVarType : -1;
-}
-
-void Trackle::setEnabled(bool status)
-{
-    cloudEnabled = status;
-}
-
-bool Trackle::isEnabled()
-{
-    return cloudEnabled;
-}
-
-bool Trackle::addGet(const char *varKey, user_variable_pointer_t fn, Data_TypeDef userVarType)
-{
-    if (!varKey)
-    {
-        LOG(WARN, "Tried to set variable with NULL name");
-        return false;
-    }
-    if (varKey[0] == '\0')
-    {
-        LOG(WARN, "Tried to set variable with empty name");
-        return false;
-    }
-    if (!fn)
-    {
-        LOG(WARN, "Tried to set variable callback\"%s\" with NULL pointer", varKey);
-        return false;
-    }
-
-    if (vars.size() >= MAX_VARIABLE_COUNT)
-    {
-        LOG(WARN, "Maximum allowed limit of %d gets reached", MAX_VARIABLE_COUNT);
-        return false;
-    }
-
-    CloudVariableTypeBase *old_item = find_var_by_key(varKey);
-
-    if (old_item)
-    {
-        LOG(WARN, "Tried to add already-existing var (\"%s\" exists)", old_item->userVarKey);
-        return false;
-    }
-
-    if (userVarType == VAR_BOOLEAN)
-    {
-        CloudVariableTypeBase item = CloudVariableTypeBase(fn, varKey, VAR_BOOLEAN);
-        vars.push_back(item);
-        LOG(TRACE, "Set variable \"%s\" as boolean with value \"%d\"", item.userVarKey, 0);
-    }
-    else if (userVarType == VAR_INT)
-    {
-        CloudVariableTypeBase item = CloudVariableTypeBase(fn, varKey, VAR_INT);
-        vars.push_back(item);
-        LOG(TRACE, "Set variable \"%s\" as int with value \"%d\"", item.userVarKey, 0);
-    }
-    else if (userVarType == VAR_LONG)
-    {
-        CloudVariableTypeBase item = CloudVariableTypeBase(fn, varKey, VAR_LONG);
-        vars.push_back(item);
-        LOG(TRACE, "Set variable \"%s\" as long with value \"%d\"", item.userVarKey, 0);
-    }
-    else if (userVarType == VAR_STRING)
-    {
-        CloudVariableTypeBase item = CloudVariableTypeBase(fn, varKey, VAR_STRING);
-        item.stringVarType = VAR_STRING;
-        vars.push_back(item);
-        LOG(TRACE, "Set variable \"%s\" as string value \"%s\"", item.userVarKey, "");
-    }
-    else if (userVarType == VAR_JSON)
-    {
-        CloudVariableTypeBase item = CloudVariableTypeBase(fn, varKey, VAR_JSON);
-        item.stringVarType = VAR_JSON;
-        vars.push_back(item);
-        LOG(TRACE, "Set variable \"%s\" as json value \"%s\"", item.userVarKey, "");
-    }
-    else if (userVarType == VAR_CHAR)
-    {
-        CloudVariableTypeBase item = CloudVariableTypeBase(fn, varKey, VAR_STRING);
-        item.stringVarType = VAR_CHAR;
-        vars.push_back(item);
-        LOG(TRACE, "Set variable \"%s\" as char value \"%s\"", item.userVarKey, "");
-    }
-    else if (userVarType == VAR_DOUBLE)
-    {
-        CloudVariableTypeBase item = CloudVariableTypeBase(fn, varKey, VAR_DOUBLE);
-        vars.push_back(item);
-        LOG(TRACE, "Set variable \"%s\" as double with value \"%f\"", item.userVarKey, 0);
-    }
-    else
-    {
-        LOG(WARN, "Tried to set var \"%s\" with unknown type %d)", fn, 0);
-        return false;
-    }
-
-    return true;
-}
-
-bool Trackle::get(const char *varKey, user_variable_bool_cb_t fn)
-{
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-    return addGet(varKey, (user_variable_pointer_t)(fn), VAR_BOOLEAN);
-#pragma GCC diagnostic pop
-}
-
-bool Trackle::get(const char *varKey, user_variable_int32_cb_t fn)
-{
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-    return addGet(varKey, (user_variable_pointer_t)(fn), VAR_INT);
-#pragma GCC diagnostic pop
-}
-
-bool Trackle::get(const char *varKey, user_variable_double_cb_t fn)
-{
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-    return addGet(varKey, (user_variable_pointer_t)(fn), VAR_DOUBLE);
-#pragma GCC diagnostic pop
-}
-
-bool Trackle::get(const char *varKey, user_variable_char_cb_t fn)
-{
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-    return addGet(varKey, (user_variable_pointer_t)(fn), VAR_CHAR);
-#pragma GCC diagnostic pop
-}
-
-bool Trackle::get(const char *varKey, user_variable_pointer_t fn, Data_TypeDef type)
-{
-    return addGet(varKey, fn, type);
-}
-
-// TRACKLE.FUNCTION ------------------------------------------------------------
-
-struct CloudFunctionTypeBase
-{
-    user_function_int_char_t pUserFunc;
-    Function_PermissionDef permission;
-    char userFuncKey[MAX_FUNCTION_KEY_LENGTH + 1];
-    CloudFunctionTypeBase(const char *funcKey, user_function_int_char_t userFunc, Function_PermissionDef perms)
-    {
-        strncpy(userFuncKey, funcKey, sizeof(userFuncKey));
-        userFuncKey[sizeof(userFuncKey) - 1] = '\0';
-        pUserFunc = userFunc;
-        permission = perms;
-    };
-};
-
-std::vector<CloudFunctionTypeBase> funcs;
 std::vector<string> owners;
-
-/**
- * Check if the user_id is in the owners vector
- *
- * @param user_id The user ID of the user to check.
- *
- * @return A boolean value.
- */
-bool user_is_owner(const char *user_id)
-{
-    if (!user_id)
-    {
-        return NULL;
-    }
-    for (int i = (int)owners.size(); i-- > 0;)
-    {
-        if (0 == strcmp(owners[i].c_str(), user_id))
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-/**
- * It searches the `funcs` array for a function with the given `funcKey` and returns a pointer to the
- * function if found, or `NULL` if not found
- *
- * @param funcKey The key of the function to be found.
- *
- * @return A pointer to the function that matches the key.
- */
-CloudFunctionTypeBase *find_func_by_key(const char *funcKey)
-{
-    if (!funcKey)
-    {
-        return NULL;
-    }
-    for (int i = (int)funcs.size(); i-- > 0;)
-    {
-        if (0 == strncmp(funcs[i].userFuncKey, funcKey, MAX_FUNCTION_KEY_LENGTH))
-        {
-            return &funcs[i];
-        }
-    }
-    return NULL;
-}
-
-bool Trackle::post(const char *funcKey, user_function_int_char_t func, Function_PermissionDef permission)
-{
-    if (funcs.size() >= MAX_FUNCTION_COUNT)
-    {
-        LOG(WARN, "Maximum allowed limit of %d posts reached", MAX_FUNCTION_COUNT);
-        return false;
-    }
-
-    CloudFunctionTypeBase *old_item = find_func_by_key(funcKey);
-
-    if (old_item)
-    {
-        LOG(WARN, "Tried to add already-existing function \"%s\" (\"%s\" exists)", funcKey, old_item->userFuncKey);
-        return false;
-    }
-
-    CloudFunctionTypeBase item = CloudFunctionTypeBase(funcKey, func, permission);
-    funcs.push_back(item);
-    LOG(TRACE, "Set %s function \"%s\"", (permission == ALL_USERS ? "PUBLIC" : "OWNER ONLY"), item.userFuncKey);
-    return true;
-}
-
-// TRACKLE.PUBLISH
-
-/**
- * It converts from the API flags to the communications lib flags
- * The event visibility flag (public/private) is encoded differently. The other flags map directly.
- *
- * @param flags The flags for the event.
- *
- * @return The flags with the private flag removed and the public flag set.
- */
-inline uint32_t convert(uint32_t flags)
-{
-    bool priv = flags & PUBLISH_EVENT_FLAG_PRIVATE;
-    flags &= ~PUBLISH_EVENT_FLAG_PRIVATE;
-    flags |= !priv ? EventType::PUBLIC : EventType::PRIVATE;
-    return flags;
-}
-
-bool Trackle::sendPublish(const char *eventName, const char *data, int ttl, Event_Type eventType, Event_Flags eventFlag, uint32_t msg_key)
-{
-    if (!cloudEnabled)
-    {
-        LOG(WARN, "NOT PUBLISHED: cloud disabled");
-        return false;
-    }
-
-    // reject system events
-    if (is_system(eventName))
-    {
-        LOG(WARN, "NOT PUBLISHED: can't publish system event");
-        return false;
-    }
-
-    uint32_t flags = eventType | eventFlag;
-    flags = convert(flags);
-
-    bool res = false; // global return
-
-    // if packet size is ok, else return false
-    if (strlen(data) <= MAX_BLOCK_SIZE * trackle::protocol::trackle_get_blocks_number())
-    {
-        if (eventFlag & WITH_ACK) // se c'è il flag WITH_ACK
-        {
-
-            // calculate msg_key if argument = 0
-            if (msg_key == 0)
-            {
-                msg_key = getNextPublishCounter();
-            }
-
-            // if not connected, call sendPublishCb with error and return
-            if (connectionStatus != SOCKET_READY)
-            {
-                LOG(TRACE, "sendPublishCb ERROR");
-                if (sendPublishCb)
-                    (*sendPublishCb)(eventName, data, msg_key, false);
-
-                LOG(WARN, "NOT PUBLISHED: not connected to cloud");
-                return false;
-            }
-
-            // if connected continue, create packet block
-            trackle_protocol_send_event_data d = {};
-            trackle::protocol::block_messages_data *block = trackle::protocol::trackle_get_free_block();
-            uint16_t currBlockLength = MAX_BLOCK_SIZE;
-
-            if (block == NULL)
-            { // no free block
-                LOG(WARN, "NOT PUBLISHED: no free message block");
-                return false;
-            }
-
-            // Block-wise, more than one packet
-            if (strlen(data) > MAX_BLOCK_SIZE)
-            {
-                // copy from 2nd block, send 1st block with trackle_protocol_send_event
-                memcpy(block->buffer, data + MAX_BLOCK_SIZE, strlen(data) - MAX_BLOCK_SIZE);
-                block->totBytesNumber = strlen(data) - MAX_BLOCK_SIZE;
-                block->totBlockNumber = ceil((double)strlen(data) / MAX_BLOCK_SIZE);
-            }
-            else // single packet
-            {
-                block->totBytesNumber = 0;
-                block->totBlockNumber = 1;
-                currBlockLength = strlen(data);
-            }
-
-            block->currBlockIndex = 0;
-            block->eventName = std::string(eventName);
-            block->token = getNextToken();
-            block->msg_key = msg_key;
-            block->transmissionRunning = true;
-            block->ttl = ttl;
-            block->flags = flags;
-            block->completionCb = completedPublishCb;
-
-            d.handler_callback = trackle::protocol::genericBlockCompletionCallback;
-            d.handler_data = (void *)msg_key;
-            d.handler_token = block->token;
-
-            // publish send ok
-            LOG(TRACE, "sendPublishCb OK");
-            if (sendPublishCb)
-                (*sendPublishCb)(eventName, data, msg_key, true);
-
-            LOG(TRACE, "sendPublish %s: %s ", eventName, data);
-
-            res = trackle_protocol_send_event(protocol, block->token, block->eventName.c_str(), data, currBlockLength, ttl, block->currBlockIndex, block->totBlockNumber, flags, &d);
-            if (!res)
-            {
-                // If send fails, free the block so it can be reused
-                LOG(WARN, "trackle_protocol_send_event failed, freeing block for token 0x%02x", block->token);
-                block->transmissionRunning = false;
-                block->lastBlockSentTime = 0;
-            }
-        }
-        else // without ACK
-        {
-            // if not connected return
-            if (connectionStatus != SOCKET_READY)
-            {
-                LOG(WARN, "NOT PUBLISHED: not connected to cloud");
-                return false;
-            }
-
-            uint16_t totBytesNumber = strlen(data);
-            uint16_t totBlockNumber = ceil((double)strlen(data) / MAX_BLOCK_SIZE);
-            uint16_t currBlockLength = 0;
-            uint8_t token = getNextToken();
-            bool res = false;
-
-            for (int i = 0; i < totBlockNumber; i++)
-            {
-                currBlockLength = std::min(MAX_BLOCK_SIZE, totBytesNumber - i * MAX_BLOCK_SIZE);
-                res = trackle_protocol_send_event(protocol, token, eventName, data + i * MAX_BLOCK_SIZE, currBlockLength, ttl, i, totBlockNumber, flags, NULL);
-                if (!res)
-                    return false;
-            }
-
-            return true;
-        }
-    }
-    else
-    {
-        LOG(WARN, "NOT PUBLISHED: packet size too big");
-    }
-
-    return res;
-}
-
-bool Trackle::publish(const char *eventName, const char *data, int ttl, Event_Type eventType, Event_Flags eventFlag, uint32_t msg_key)
-{
-    return sendPublish(eventName, data, ttl, eventType, eventFlag, msg_key);
-}
-
-bool Trackle::publish(string eventName, const char *data, int ttl, Event_Type eventType, Event_Flags eventFlag, uint32_t msg_key)
-{
-    return sendPublish(eventName.c_str(), data, ttl, eventType, eventFlag, msg_key);
-}
-
-bool Trackle::publish(const char *eventName, const char *data, Event_Type eventType, Event_Flags eventFlag, uint32_t msg_key)
-{
-    return sendPublish(eventName, data, DEFAULT_TTL, eventType, eventFlag, msg_key);
-}
-
-bool Trackle::publish(string eventName, const char *data, Event_Type eventType, Event_Flags eventFlag, uint32_t msg_key)
-{
-    return sendPublish(eventName.c_str(), data, DEFAULT_TTL, eventType, eventFlag, msg_key);
-}
-
-bool Trackle::publish(const char *eventName)
-{
-    return sendPublish(eventName, NULL, DEFAULT_TTL, PUBLIC, EMPTY_FLAGS, 0);
-}
-
-bool Trackle::publish(string eventName)
-{
-    return sendPublish(eventName.c_str(), NULL, DEFAULT_TTL, PUBLIC, EMPTY_FLAGS, 0);
-}
-
-bool Trackle::syncState(const char *data)
-{
-    return sendPublish("trackle/p", data, DEFAULT_TTL, PUBLIC, WITH_ACK, 0);
-}
-
-bool Trackle::syncState(string data)
-{
-    return sendPublish("trackle/p", data.c_str(), DEFAULT_TTL, PUBLIC, WITH_ACK, 0);
-}
-
-bool Trackle::getTime()
-{
-    return trackle_protocol_send_time_request(protocol);
-}
-
-// TRACKLE.SUBSCRIBE
-
-/**
- * It checks if the socket is ready.
- *
- * @return A boolean value.
- */
-bool cloud_flag_connected(void)
-{
-    if (connectionStatus == SOCKET_READY)
-        return true;
-    else
-        return false;
-}
-
-/**
- * Convert a Subscription_Scope_Type enum to a SubscriptionScope::Enum enum.
- *
- * @param subscription_type This is the type of subscription you want to create. It can be either
- * MY_DEVICES or FIREHOSE.
- *
- * @return A pointer to a new instance of the Subscription class.
- */
-SubscriptionScope::Enum convert(Subscription_Scope_Type subscription_type)
-{
-    return (subscription_type == MY_DEVICES) ? SubscriptionScope::MY_DEVICES : SubscriptionScope::FIREHOSE;
-}
-
-bool Trackle::registerEvent(const char *eventName, Subscription_Scope_Type eventScope, const char *deviceId)
-{
-    bool success;
-    if (deviceId)
-    {
-        success = trackle_protocol_send_subscription_device(protocol, eventName, deviceId);
-    }
-    else
-    {
-        SubscriptionScope::Enum scope = convert(eventScope);
-        success = trackle_protocol_send_subscription_scope(protocol, eventName, scope);
-    }
-
-    LOG(TRACE, "register_event %d\n", success);
-    return success;
-}
-
-bool Trackle::addSubscription(const char *eventName, EventHandler handler, void *handlerData,
-                              Subscription_Scope_Type scope, const char *deviceId, void *reserved)
-
-{
-    char charDeviceId[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    if (deviceId != NULL)
-    {
-        std::string string_device_id = deviceId;
-        int L = strnlen(deviceId, 2 * DEVICE_ID_LENGTH + 1);
-        if (L == 2 * DEVICE_ID_LENGTH)
-        { // hex-string device id
-            stringstream ss;
-            unsigned int buffer;
-            int offset = 0;
-            while (offset < string_device_id.length())
-            {
-                ss.clear();
-                ss << hex << string_device_id.substr(offset, 2);
-                ss >> buffer;
-                charDeviceId[offset / 2] = buffer;
-                offset += 2;
-            }
-        }
-        else if (L == DEVICE_ID_LENGTH)
-        { // binary device id
-            // TODO: does the (L == DEVICE_ID_LENGTH) check work for binary data? is 0 guaranteed never to be a byte of the id?? is the array NUL-terminated even if it contains binary data?
-            memcpy(charDeviceId, deviceId, DEVICE_ID_LENGTH);
-        }
-        else
-        { // wrong device id
-            LOG(ERROR, "Wrong device id length in subscription");
-        }
-    }
-
-    SubscriptionScope::Enum eventScope = convert(scope);
-    bool success = trackle_protocol_add_event_handler(protocol, eventName, handler, eventScope, charDeviceId, handlerData);
-    if (success && cloud_flag_connected())
-    {
-        registerEvent(eventName, scope, deviceId);
-    }
-    return success;
-}
-
-bool Trackle::subscribe(const char *eventName, EventHandler handler)
-{
-    return addSubscription(eventName, handler, NULL, ALL_DEVICES, NULL, NULL);
-}
-
-bool Trackle::subscribe(const char *eventName, EventHandler handler, Subscription_Scope_Type scope)
-{
-    return addSubscription(eventName, handler, NULL, scope, NULL, NULL);
-}
-
-bool Trackle::subscribe(const char *eventName, EventHandler handler, const char *deviceID)
-{
-    return addSubscription(eventName, handler, NULL, MY_DEVICES, deviceID, NULL);
-}
-
-bool Trackle::subscribe(const char *eventName, EventHandler handler, Subscription_Scope_Type scope, const char *deviceID)
-{
-    return addSubscription(eventName, handler, NULL, scope, deviceID, NULL);
-}
-
-void Trackle::unsubscribe()
-{
-    trackle_protocol_remove_event_handlers(protocol, NULL);
-}
-
-/**
- * It handles all the events that are sent to the device from the Trackle cloud
- *
- * @param handler This is the pointer to the Trackle object.
- * @param event_name The name of the event that was published.
- * @param data the data that was sent with the event
- */
-void subscribe_trackle_handler(void *handler, const char *event_name, const char *data)
-{
-    LOG(TRACE, "trackle handler %s, %s\n", event_name, data);
-
-    bool replyWithPublish = false;
-
-    // if event trackle/device/updates/pending, set ota pending var
-    if (strcmp(event_name, "trackle/device/updates/pending") == 0)
-    {
-        updates_pending = (strcmp(data, "true") == 0 ? true : false);
-        replyWithPublish = true;
-    }
-    else if (strcmp(event_name, "trackle/device/updates/forced") == 0)
-    {
-        updates_forced = (strcmp(data, "true") == 0 ? true : false);
-        replyWithPublish = true;
-    }
-    else if (strcmp(event_name, "trackle/device/owners") == 0)
-    {
-
-        owners.clear(); // empty vector
-        if (data != NULL)
-        {
-            std::stringstream ss(data);
-            while (ss.good())
-            {
-                string substr;
-                getline(ss, substr, ',');
-                owners.push_back(substr.c_str());
-            }
-
-            // if ownars > 0, device is claimed
-            if (owners.size() > 0)
-            {
-                LOG(INFO, "Device is claimed by one owner.");
-                if (deviceClaimedCb)
-                {
-                    (*deviceClaimedCb)();
-                }
-            }
-        }
-    }
-    else if (strcmp(event_name, "trackle/device/reset") == 0)
-    {
-        if (systemRebootCb)
-        {
-            (*systemRebootCb)(data);
-        }
-        else
-        {
-            LOG(INFO, "systemRebootCb not implemented...");
-        }
-    }
-    else if (strcmp(event_name, "trackle/device/update") == 0)
-    {
-        if (otaUpdateCb)
-        {
-
-            char *copy = strdup(data);
-            if (copy == NULL)
-            {
-                LOG(ERROR, "strdup failed");
-                return;
-            }
-            char *saveptr = copy;
-            char *url = strtok_r(copy, ",", &saveptr);
-            char *crc32 = strtok_r(NULL, ",", &saveptr);
-            char *job_id = strtok_r(NULL, ",", &saveptr);
-            char *signature = strtok_r(NULL, ",", &saveptr);
-
-            if (!updates_enabled && !updates_forced)
-            {
-                LOG(WARN, "Ota upgrade refused: enabled %d, forced: %d", updates_enabled, updates_forced);
-                char ota_cloud_message[256];
-                sprintf(ota_cloud_message, "disabled,%s", job_id);
-                ((Trackle *)handler)->publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
-            }
-            else if (ota_data.running)
-            {
-                LOG(ERROR, "Ota already in progress...");
-                char ota_cloud_message[256];
-                sprintf(ota_cloud_message, "busy,%s", job_id);
-                ((Trackle *)handler)->publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
-            }
-            else
-            {
-                LOG(INFO, "otaUpdateCb %s", data);
-                memset(ota_data.ota_job_id, 0, 64);
-                memset(ota_data.firmware_signature, 0, 64);
-
-                // set default value to 0 number
-                ota_data.ota_job_id[0] = '0';
-
-                uint32_t crc = 0;
-                uint32_t ota_type = 0; // 0 undefined, 1 product, 2 developer
-
-                if (url != NULL)
-                {
-                    if (crc32 != NULL && job_id != NULL)
-                    {
-                        // product firmware update
-                        sscanf(crc32, "%" PRIx32 "", &crc);
-                        strcpy(ota_data.ota_job_id, job_id);
-
-                        ota_data.has_signature = true;
-                        if (signature != NULL && strlen(signature) >= 136) // 68*2 = 136 hex chars minimo
-                        {
-                            uint8_t raw_signature[80]; // Buffer fisso, max teorico è 72 bytes
-                            uint8_t result_r[DTLS_EC_KEY_SIZE];
-                            uint8_t result_s[DTLS_EC_KEY_SIZE];
-
-                            size_t sig_len = strlen(signature) / 2;
-
-                            // Verifica che non superi il buffer
-                            if (sig_len > sizeof(raw_signature))
-                            {
-                                LOG(ERROR, "Signature too long: %zu bytes", sig_len);
-                                ota_data.has_signature = false;
-                            }
-                            else
-                            {
-                                // Converti hex string in bytes
-                                for (int i = 0; i < sig_len; i++)
-                                {
-                                    sscanf(signature + 2 * i, "%2hhx", &raw_signature[i]);
-                                }
-
-                                // Parsing DER: salta SEQUENCE header (30 XX)
-                                uint8_t *data = raw_signature + 2;
-                                size_t data_len = sig_len - 2;
-
-                                // Estrai r
-                                int r_consumed = dtls_asn1_integer_to_ec_key(data, data_len, result_r, DTLS_EC_KEY_SIZE);
-                                if (r_consumed <= 0)
-                                {
-                                    LOG(ERROR, "Failed to parse r from signature");
-                                    ota_data.has_signature = false;
-                                }
-                                else
-                                {
-                                    // Estrai s
-                                    data += r_consumed;
-                                    data_len -= r_consumed;
-                                    int s_consumed = dtls_asn1_integer_to_ec_key(data, data_len, result_s, DTLS_EC_KEY_SIZE);
-                                    if (s_consumed <= 0)
-                                    {
-                                        LOG(ERROR, "Failed to parse s from signature");
-                                        ota_data.has_signature = false;
-                                    }
-                                    else
-                                    {
-                                        // Copia r e s nel tuo buffer
-                                        memcpy(ota_data.firmware_signature, result_r, DTLS_EC_KEY_SIZE);
-                                        memcpy(ota_data.firmware_signature + DTLS_EC_KEY_SIZE, result_s, DTLS_EC_KEY_SIZE);
-                                        ota_data.has_signature = true;
-
-                                        char signature_hex[2 * DTLS_EC_KEY_SIZE * 2 + 1]; // Buffer per la rappresentazione esadecimale
-                                        for (int i = 0; i < DTLS_EC_KEY_SIZE * 2; i++)
-                                        {
-                                            sprintf(signature_hex + 2 * i, "%02x", ota_data.firmware_signature[i]);
-                                        }
-                                        LOG(INFO, "Firmware signature in hex: %s", signature_hex);
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            LOG(WARN, "No firmware signature");
-                            ota_data.has_signature = false;
-                        }
-
-                        ota_type = 1;
-                    }
-                    else
-                    {
-                        // developer firmware update
-                        crc = 0;
-                        ota_type = 2;
-                    }
-                }
-                else
-                {
-                    LOG(ERROR, "not valid url");
-                    ota_type = 0;
-                }
-
-                if (ota_type > 0)
-                {
-                    int ota_error = (*otaUpdateCb)(url, crc);
-                    char ota_cloud_message[256];
-
-                    if (ota_error == NO_ERROR) // ota ok
-                    {
-                        ota_data.running = true;
-                        sprintf(ota_cloud_message, "started,%s", ota_data.ota_job_id);
-                        ((Trackle *)handler)->publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
-                        LOG(INFO, "otaUpdateCb OTA start successfully, job_id %s", ota_data.ota_job_id);
-                    }
-                    else // error
-                    {
-                        sprintf(ota_cloud_message, "failed,%s,%d", ota_data.ota_job_id, ota_error);
-                        ((Trackle *)handler)->publish(OTA_EVENT_NAME, ota_cloud_message, PRIVATE);
-                        LOG(INFO, "otaUpdateCb OTA start error, job_id %s", ota_data.ota_job_id);
-                    }
-                }
-            }
-
-            free(copy);
-        }
-        else
-        {
-            LOG(INFO, "otaUpdateCb not implemented...");
-        }
-    }
-    else if (strcmp(event_name, "trackle/device/pin_code") == 0)
-    {
-        if (pincodeCb)
-        {
-            (*pincodeCb)(data);
-        }
-        else
-        {
-            LOG(INFO, "pincodeCb not implemented...");
-        }
-    }
-
-    if (replyWithPublish)
-    {
-        char event_copy[64], data_copy[16];
-        strncpy(event_copy, event_name, sizeof(event_copy) - 1);
-        strncpy(data_copy, data ? data : "", sizeof(data_copy) - 1);
-        event_copy[sizeof(event_copy) - 1] = '\0';
-        data_copy[sizeof(data_copy) - 1] = '\0';
-        ((Trackle *)handler)->publish(event_copy, data_copy, PRIVATE);
-    }
-}
-
-// TRACKLE.CALLBACK ------------------------------------------------------------
-
-/**
- * If the OTA upgrade was successful, return true, otherwise return false
- *
- * @return The return value is a boolean value.
- */
-bool was_ota_upgrade_successful(void) { return false; } // TODO
-
-/**
- * It resets the status of the OTA flash.
- */
-void HAL_OTA_Flashed_ResetStatus(void) {}
-
-/**
- * It takes a variable key and returns the variable type
- *
- * @param varKey The variable key you want to get the type of.
- *
- * @return The return type of the variable.
- */
-TrackleReturnType::Enum wrapVarTypeInEnum(const char *varKey)
-{
-    CloudVariableTypeBase *item = find_var_by_key(varKey);
-    if (item->userVarType == VAR_BOOLEAN)
-    {
-        return TrackleReturnType::BOOLEAN;
-    }
-    else if (item->userVarType == VAR_INT)
-    {
-        return TrackleReturnType::INT;
-    }
-    else if (item->userVarType == VAR_LONG)
-    {
-        return TrackleReturnType::LONG;
-    }
-    else if (item->userVarType == VAR_STRING)
-    {
-        return TrackleReturnType::STRING;
-    }
-    else if (item->userVarType == VAR_JSON)
-    {
-        return TrackleReturnType::JSON;
-    }
-    else if (item->userVarType == VAR_DOUBLE)
-    {
-        return TrackleReturnType::DOUBLE;
-    }
-
-    return TrackleReturnType::INT;
-}
-
-/**
- * It returns the number of functions in the current program
- *
- * @return The number of functions in the program.
- */
-int num_functions(void)
-{
-    LOG(TRACE, "num_functions %d", funcs.size());
-    return (int)funcs.size();
-}
-
-/**
- * This function returns the user function key for the function at the specified index
- *
- * @param function_index The index of the function in the array of functions.
- *
- * @return The user function key.
- */
-const char *getUserFunctionKey(int function_index)
-{
-    LOG(TRACE, "getUserFunctionKey");
-    return funcs[function_index].userFuncKey;
-}
-
-/**
- * It prints the event name and data to the log
- *
- * @param event_name The name of the event.
- * @param data The data that was sent with the event.
- */
-void event_handler_trackle(const char *event_name, const char *data)
-{
-    LOG(TRACE, "received event %s: %s", event_name, data);
-}
-
-/**
- * It's a callback function that is called by the Trackle server when a user calls the update_state
- * function
- *
- * @param function_key The name of the function to be called.
- * @param arg the argument passed to the function
- * @param user_caller_id The user id of the user who is calling the function.
- * @param callback This is the callback function that will be called when the function is done.
- * @param  `function_key`: the name of the function to be called.
- *
- * @return The return value is the result of the function.
- */
-
-int update_state(const char *function_key, const char *arg, const char *user_caller_id,
-                 TrackleDescriptor::FunctionResultCallback callback, void *)
-{
-    LOG(TRACE, "update state %s with value %s", function_key, arg);
-    LOG(TRACE, "user_caller_id %s", user_caller_id);
-
-    if (updateStateCb)
-    {
-        int result = (*updateStateCb)(function_key, arg, user_is_owner(user_caller_id));
-        callback((void *)result, TrackleReturnType::INT);
-        return 0;
-    }
-    return 5; // error 500 updateStateCb not exists
-}
-
-/**
- * It calls the function with the given key, passing the given argument, and returns the result to the
- * caller
- *
- * @param function_key The name of the function to call.
- * @param arg The argument passed to the function.
- * @param user_caller_id The user id of the user who called the function.
- * @param callback This is the callback function that will be called when the function is called from
- * the cloud.
- * @param  `function_key`: The name of the function to call.
- *
- * @return The return value is the result of the function call.
- */
-int call_function(const char *function_key, const char *arg, const char *user_caller_id,
-                  TrackleDescriptor::FunctionResultCallback callback, void *)
-{
-
-    LOG(TRACE, "call_function");
-    LOG(TRACE, "user_caller_id %s", user_caller_id);
-
-    CloudFunctionTypeBase *function = find_func_by_key(function_key);
-
-    if (function != NULL)
-    {
-        if (function->permission == ALL_USERS || (function->permission == OWNER_ONLY && user_is_owner(user_caller_id)))
-        {
-            int result = (*function->pUserFunc)(arg, user_is_owner(user_caller_id), function_key);
-            callback((void *)result, TrackleReturnType::INT);
-            LOG(TRACE, "function %s called with args %s, result = %d", function_key, arg, result);
-        }
-        else
-        {
-            LOG(ERROR, "user %s not authorized to call function %s", user_caller_id, function_key);
-            return 3;
-        }
-    }
-    else
-    {
-        LOG(ERROR, "function %s called with args %s, does not exists!", function_key, arg);
-        return 4;
-    }
-
-    return 0;
-}
-
-/**
- * This function returns the number of user variables in the current program
- *
- * @return The number of user variables.
- */
-int numUserVariables(void)
-{
-    LOG(TRACE, "numUserVariables %d", vars.size());
-    return (int)vars.size();
-}
-
-/**
- * This function returns the key of the user variable at the specified index
- *
- * @param variable_index The index of the variable to get the key for.
- *
- * @return The key of the user variable.
- */
-const char *getUserVariableKey(int variable_index)
-{
-    LOG(TRACE, "getUserVariableKey");
-    return vars[variable_index].userVarKey;
-}
-/**
- * It returns a pointer to the value of the variable
- *
- * @param varKey The name of the variable you want to get the value of.
- *
- * @return The value of the variable.
- */
-const void *getUserVar(const char *varKey)
-{
-    CloudVariableTypeBase *item = find_var_by_key(varKey);
-    return (const void *)item->funct;
-}
-
-/**
- * It returns a string with the system information
- *
- * @param appender A function pointer to the function that will be used to append the data to the
- * buffer.
- * @param append The function to call to append the data to the JSON string.
- * @param reserved Reserved for future use.
- *
- * @return The system information.
- */
-bool appendSystemInfo(appender_fn appender, void *append, void *reserved)
-{
-    product_details_t details;
-    details.size = sizeof(details);
-
-    string json = "\"i\":" + int_to_string(connectionPropType.ping_interval) + "." + int_to_string(connectionType) + ",\"o\":" + int_to_string(otaMethod) + ",\"p\":" + int_to_string(PLATFORM_ID) + ",\"s\":\"" + int_to_string(VERSION_MAJOR) + "." + int_to_string(VERSION_MINOR) + "." + int_to_string(VERSION_PATCH) + VERSION_DEV + "\"" + components_list + describe_iccid + describe_imei;
-
-    LOG(TRACE, "%s", json.c_str());
-    const char *result = json.c_str();
-    ((Appender *)append)->append(result);
-    return true;
-}
-
-/* CRC-32 (Ethernet, ZIP, etc.) polynomial in reversed bit order. */
-#define POLY 0xedb88320
-
-/**
- * Calculate CRC-32
- *
- * @param crc The initial value of the CRC.
- * @param buf The buffer to calculate the CRC32C for.
- * @param len the length of the data to be crc'ed
- *
- * @return The CRC32 checksum of the data.
- */
-uint32_t crc32c(uint32_t crc, const unsigned char *buf, uint32_t len)
-{
-    int k;
-
-    crc = ~crc;
-    while (len--)
-    {
-        crc ^= *buf++;
-        for (k = 0; k < 8; k++)
-            crc = crc & 1 ? (crc >> 1) ^ POLY : crc >> 1;
-    }
-    return ~crc;
-}
-
-/**
- * It takes a pointer to a buffer and a length, and returns a CRC32C value
- *
- * @param data The data to calculate the CRC for.
- * @param len the length of the data to be CRC'd
- *
- * @return The CRC32C checksum of the data.
- */
-uint32_t calculateCrc(const unsigned char *data, uint32_t len)
-{
-    return crc32c(0, data, len);
-}
-
-/*** TESTING UTILS ***/
-
-/**
- * It takes a variable key as a parameter, finds the variable in the list of variables, and prints the
- * value of the variable to the console
- *
- * @param varKey The variable key that you want to print the value of.
- */
-void printType(const char *varKey)
-{
-
-    CloudVariableTypeBase *item = find_var_by_key(varKey);
-
-    if (item->userVarType == VAR_BOOLEAN)
-    {
-        LOG(TRACE, "ACTUAL BOOL %s", item->userVarKey);
-    }
-    else if (item->userVarType == VAR_INT)
-    {
-        LOG(TRACE, "ACTUAL INT %s", item->userVarKey);
-    }
-    else if (item->userVarType == VAR_LONG)
-    {
-        LOG(TRACE, "ACTUAL LONG %s", item->userVarKey);
-    }
-    else if (item->userVarType == VAR_STRING)
-    {
-        LOG(TRACE, "ACTUAL STRING %s", item->userVarKey);
-    }
-    else if (item->userVarType == VAR_JSON)
-    {
-        LOG(TRACE, "ACTUAL JSON %s", item->userVarKey);
-    }
-    else if (item->userVarType == VAR_DOUBLE)
-    {
-        LOG(TRACE, "ACTUAL DOUBLE %s", item->userVarKey);
-    }
-}
-
-void Trackle::test(string param)
-{
-    LOG(TRACE, "=========================================");
-
-    for (int i = (int)vars.size(); i-- > 0;)
-    {
-        printType(vars[i].userVarKey);
-    }
-
-    LOG(TRACE, "-----------------------------------------");
-
-    for (int i = (int)funcs.size(); i-- > 0;)
-    {
-        LOG(TRACE, "testing function %s with param %s", funcs[i].userFuncKey, param.c_str());
-        int result = (*funcs[i].pUserFunc)(param.c_str(), true, funcs[i].userFuncKey);
-        LOG(TRACE, "function %s result = %d", param.c_str(), result);
-    }
-
-    LOG(TRACE, "=========================================");
-
-    string event_string = "test_string";
-    publish(event_string);
-
-    publish(event_string, "params2a");
-    publish(event_string, "params2b", 120);
-    publish(event_string, "params2c", 120, PRIVATE);
-    publish(event_string, "params2d", 120, PRIVATE, WITH_ACK);
-
-    publish(event_string, "params3a", PRIVATE);
-    publish(event_string, "params3b", WITH_ACK);
-    publish(event_string, "params3c", PRIVATE, WITH_ACK);
-
-    LOG(TRACE, "-----------------------------------------");
-
-    const char *event_char = "test_char";
-    publish(event_char);
-
-    publish(event_char, "params2a");
-    publish(event_char, "params2b", 120);
-    publish(event_char, "params2c", 120, PRIVATE);
-    publish(event_char, "params2d", 120, PRIVATE, WITH_ACK);
-
-    publish(event_char, "params3a", PRIVATE);
-    publish(event_char, "params3b", WITH_ACK);
-    publish(event_char, "params3c", PRIVATE, WITH_ACK);
-
-    LOG(TRACE, "=========================================");
-}
 
 // CLOUD / CALLBACKS
 
@@ -1488,7 +223,7 @@ void setConnectionStatus(Connection_Status_Type newStatus)
  * @param error_type The error type.
  * @param force If true, the connection will be closed even if it's not connected.
  */
-void connectionError(int error_type, bool force = false)
+void connectionError(int error_type, bool force, int protocol_error_code)
 {
 
     // only if it was connected before (real disconnection)
@@ -1502,15 +237,23 @@ void connectionError(int error_type, bool force = false)
         diagnostic::diagnosticCloud(CLOUD_UNACKNOWLEDGED_MESSAGES, 0);
     }
 
+    // ProtocolError detail: also on failed handshake (not yet SOCKET_READY)
+    if (protocol_error_code != 0)
+    {
+        diagnostic::diagnosticCloud(CLOUD_PROTOCOL_ERROR_CODE, protocol_error_code);
+    }
+
     // if connected or trying to connect
     if (connectionStatus == SOCKET_READY || force)
     {
         millis_last_disconnection = (*callbacks.millis)();
 
-        if (error_type != CON_ERROR_SOCKET)
+        if (error_type != CLOUD_DISCONNECT_REASON_SOCKET)
             LOG(ERROR, "Cloud connection error %d, %lu", error_type, millis_last_disconnection);
 
         setConnectionStatus(SOCKET_NOT_CONNECTED);
+        if (trackle_protocol_is_initialized(protocol))
+            trackle_protocol_command(protocol, ProtocolCommands::DISCONNECT);
         (*disconnectCb)();
     }
 }
@@ -1529,10 +272,6 @@ int wrapSend(const unsigned char *buf, uint32_t buflen, void *tmp)
     if (!sendCb)
         return -1;
     int bytes_sent = (*sendCb)(buf, buflen, tmp);
-    if (bytes_sent < 0)
-    { // if sending error
-        connectionError(CON_ERROR_SEND);
-    }
     if (bytes_sent > 0)
     {
         millis_last_sent_received_time = (*callbacks.millis)();
@@ -1546,8 +285,7 @@ void Trackle::setSendCallback(sendCallback *send)
 }
 
 /**
- * It calls the receive callback function, and if it returns an error, it calls the connectionError
- * function
+ * It calls the receive callback function and propagates its result to the protocol layer.
  *
  * @param buf The buffer to store the received data in.
  * @param buflen The maximum number of bytes to receive.
@@ -1558,12 +296,7 @@ void Trackle::setSendCallback(sendCallback *send)
 int wrapReceive(unsigned char *buf, uint32_t buflen, void *tmp)
 {
     int bytes_received = (*receiveCb)(buf, buflen, tmp);
-    if (bytes_received < 0)
-    { // if receive error
-        connectionError(CON_ERROR_RECEIVE);
-        bytes_received = 0;
-    }
-    else if (bytes_received > 0)
+    if (bytes_received > 0)
     {
         millis_last_sent_received_time = (*callbacks.millis)();
     }
@@ -1736,33 +469,91 @@ void Trackle::setUpdateStateCallback(updateStateCallback *updateState)
 
 void Trackle::setClaimCode(const char *claimCode)
 {
-    memset(claim_code, 0, CLAIM_CODE_SIZE);
-    memcpy(claim_code, claimCode, CLAIM_CODE_SIZE);
-    claim_code[CLAIM_CODE_SIZE] = 0;
+    memset(claim_code, 0, sizeof(claim_code));
+
+    if (claimCode == NULL)
+    {
+        LOG(WARN, "claimCode not set: NULL pointer");
+        return;
+    }
+
+    const size_t len = strnlen(claimCode, CLAIM_CODE_SIZE + 1);
+    if (len > (size_t)CLAIM_CODE_SIZE)
+    {
+        LOG(WARN, "claimCode too long (max %d char)", CLAIM_CODE_SIZE);
+        return;
+    }
+
+    memcpy(claim_code, claimCode, len);
 }
 
 void Trackle::setComponentsList(const char *componentsList)
 {
-    if (strlen(componentsList) > MAX_COMPONENTS_LIST_LENGTH)
+    if (componentsList == NULL)
     {
-        LOG(WARN, "componentsList too long (max %d char)", MAX_COMPONENTS_LIST_LENGTH);
+        LOG(WARN, "componentsList not set: NULL pointer");
         return;
     }
 
-    memset(components_list, 0, COMPONENTS_LIST_SIZE);
-    sprintf(components_list, ",\"c\":\"%s\"", componentsList);
+    if (strnlen(componentsList, MAX_COMPONENTS_LIST_LENGTH + 1) > MAX_COMPONENTS_LIST_LENGTH)
+    {
+        LOG(WARN, "componentsList too long (max %zu char)", MAX_COMPONENTS_LIST_LENGTH);
+        return;
+    }
+
+    // A truncated attribute would break the JSON of the describe message, so it's dropped entirely.
+    const int written = snprintf(components_list, sizeof(components_list), ",\"c\":\"%s\"", componentsList);
+    if (written < 0 || (size_t)written >= sizeof(components_list))
+    {
+        LOG(WARN, "componentsList not set: describe attribute would not fit in %d char", COMPONENTS_LIST_SIZE);
+        components_list[0] = 0;
+    }
 }
 
 void Trackle::setImei(const char *imei)
 {
-    memset(describe_imei, 0, DESCRIBE_ATTR_SIZE);
-    sprintf(describe_imei, ",\"imei\":\"%s\"", imei);
+    if (imei == NULL)
+    {
+        LOG(WARN, "imei not set: NULL pointer");
+        return;
+    }
+
+    if (strnlen(imei, sizeof(describe_imei)) == sizeof(describe_imei))
+    {
+        LOG(WARN, "imei too long (max %d char for describe attr)", DESCRIBE_ATTR_SIZE);
+        describe_imei[0] = 0;
+        return;
+    }
+
+    const int written = snprintf(describe_imei, sizeof(describe_imei), ",\"imei\":\"%s\"", imei);
+    if (written < 0 || (size_t)written >= sizeof(describe_imei))
+    {
+        LOG(WARN, "imei not set: describe attribute would not fit in %d char", DESCRIBE_ATTR_SIZE);
+        describe_imei[0] = 0;
+    }
 }
 
 void Trackle::setIccid(const char *iccid)
 {
-    memset(describe_iccid, 0, DESCRIBE_ATTR_SIZE);
-    sprintf(describe_iccid, ",\"iccid\":\"%s\"", iccid);
+    if (iccid == NULL)
+    {
+        LOG(WARN, "iccid not set: NULL pointer");
+        return;
+    }
+
+    if (strnlen(iccid, sizeof(describe_iccid)) == sizeof(describe_iccid))
+    {
+        LOG(WARN, "iccid too long (max %d char for describe attr)", DESCRIBE_ATTR_SIZE);
+        describe_iccid[0] = 0;
+        return;
+    }
+
+    const int written = snprintf(describe_iccid, sizeof(describe_iccid), ",\"iccid\":\"%s\"", iccid);
+    if (written < 0 || (size_t)written >= sizeof(describe_iccid))
+    {
+        LOG(WARN, "iccid not set: describe attribute would not fit in %d char", DESCRIBE_ATTR_SIZE);
+        describe_iccid[0] = 0;
+    }
 }
 
 void Trackle::setSaveSessionCallback(saveSessionCallback *save)
@@ -1817,15 +608,16 @@ void Trackle::setConnectionType(Connection_Type conn)
     connectionType = conn;
 }
 
-void Trackle::setPingInterval(uint32_t interval)
+void Trackle::setPingInterval(uint32_t dumbInterval, uint8_t coapRatio)
 {
-    if (interval > MAX_PING_INTERVAL)
+    if (dumbInterval > MAX_PING_INTERVAL)
     {
         LOG(ERROR, "setPingInterval failed! interval too high (max %d seconds)!", MAX_PING_INTERVAL);
     }
     else
     {
-        pingInterval = interval;
+        pingInterval = dumbInterval;
+        coapPingRatio = coapRatio;
     }
 }
 
@@ -1986,7 +778,7 @@ int completeCloudConnection()
          */
         LOG(INFO, "Protocol begun successfully");
         uint32_t flags = PRIVATE | EMPTY_FLAGS;
-        flags = convert(flags);
+        flags = convert_publish_flags(flags);
 
         if (claim_code[0] != 0 && (uint8_t)claim_code[0] != 0xff)
         {
@@ -2009,8 +801,7 @@ int completeCloudConnection()
     else if (result != 0) /* Handshake error? */
     {
         LOG(ERROR, "Protocol beginning error: %d", result);
-        diagnostic::diagnosticCloud(CLOUD_CONNECTION_ERROR_CODE, 1);
-        connectionError(CON_ERROR_PROTOCOL, true);
+        connectionError(mapProtocolErrorToDisconnectionReason(result), true, result);
         return -1;
     }
     else
@@ -2051,11 +842,20 @@ int Trackle::connect()
 
         if (pingInterval > 0) // ping interval overrided
         {
-            connectionPropType.ping_interval = pingInterval;
+            connectionPropType.dumb_ping_interval = pingInterval;
         }
         else
         {
-            connectionPropType.ping_interval = connectionPropTypeList[connectionType].ping_interval;
+            connectionPropType.dumb_ping_interval = connectionPropTypeList[connectionType].dumb_ping_interval;
+        }
+
+        if (coapPingRatio > 0) // coap ping ratio overrided
+        {
+            connectionPropType.coap_ping_ratio = coapPingRatio;
+        }
+        else
+        {
+            connectionPropType.coap_ping_ratio = connectionPropTypeList[connectionType].coap_ping_ratio;
         }
 
         trackle_protocol_init(protocol, (const char *)t_device_id, keys, callbacks, descriptor, connectionPropType);
@@ -2082,7 +882,7 @@ int Trackle::connect()
         // If it returns < 0, it's an immediate error
         if (res < 0)
         {
-            connectionError(CON_ERROR_SOCKET, true);
+            connectionError(CLOUD_DISCONNECT_REASON_SOCKET, true);
             return -1;
         }
 
@@ -2102,8 +902,17 @@ int Trackle::connect()
 void Trackle::disconnect()
 {
     connectToCloud = false;
-    setConnectionStatus(SOCKET_NOT_CONNECTED);
-    (*disconnectCb)();
+    if (connectionStatus == SOCKET_READY)
+    {
+        connectionError(CLOUD_DISCONNECT_REASON_USER);
+    }
+    else
+    {
+        setConnectionStatus(SOCKET_NOT_CONNECTED);
+        if (trackle_protocol_is_initialized(protocol))
+            trackle_protocol_command(protocol, ProtocolCommands::DISCONNECT);
+        (*disconnectCb)();
+    }
 }
 
 void Trackle::loop()
@@ -2113,11 +922,26 @@ void Trackle::loop()
         return;
 
     // ready or disconnected
+    int protocol_error = 0;
+    static int last_protocol_error = 0;
+    bool force_diagnostic = false;
+
     if (connectionStatus == SOCKET_READY /* || connectionStatus == SOCKET_NOT_CONNECTED*/)
     {
-        int res = trackle_protocol_event_loop(protocol);
+        int res = trackle_protocol_event_loop(protocol, &protocol_error);
         if (!res)
-            connectionError(CON_ERROR_LOOP);
+        {
+            force_diagnostic = (protocol_error > 0 && protocol_error != last_protocol_error);
+            // If wrapSend/Receive already closed, status != READY: do not overwrite the reason
+            int mapped_error = mapProtocolErrorToDisconnectionReason(protocol_error);
+            if (mapped_error != 0)
+                connectionError(mapped_error, false, protocol_error);
+        }
+        else
+        {
+            // Reset on success
+            last_protocol_error = 0;
+        }
         if (!res && cloudStatus != res)
         {
             LOG(ERROR, "Event loop error");
@@ -2125,14 +949,15 @@ void Trackle::loop()
         cloudStatus = res;
     }
 
-    // ready - check publish diagnostic
-    if (connectionStatus == SOCKET_READY && health_check_interval > 0)
+    // ready - check publish diagnostic (force on protocol error)
+    if (connectionStatus == SOCKET_READY && (force_diagnostic || health_check_interval > 0))
     {
         system_tick_t millis_since_last_health_check = (*callbacks.millis)() - millis_last_sent_health_check;
-        if (health_check_interval < millis_since_last_health_check)
+        if (force_diagnostic || health_check_interval < millis_since_last_health_check)
         {
+            last_protocol_error = protocol_error;
             millis_last_sent_health_check = (*callbacks.millis)();
-            LOG(TRACE, "Sending health check");
+            LOG(TRACE, force_diagnostic ? "Sending health check (protocol error)" : "Sending health check");
             trackle_protocol_post_description(protocol, trackle::protocol::DESCRIBE_METRICS);
         }
     }
@@ -2358,7 +1183,14 @@ void default_system_set_time_cb(time_t time, unsigned int param, void *)
 
 Trackle::Trackle(void)
 {
-    // CONFIGURO IL CLOUD
+    // default values for diagnostics
+    diagnostic::diagnosticCloud(CLOUD_PROTOCOL_ERROR_CODE, CLOUD_PROTOCOL_NO_ERROR);
+    diagnostic::diagnosticCloud(CLOUD_DISCONNECTION_REASON, CLOUD_DISCONNECT_REASON_NONE);
+    diagnostic::diagnosticCloud(CLOUD_DISCONNECTS, 0);
+    diagnostic::diagnosticNetwork(NETWORK_DISCONNECTION_REASON, NETWORK_DISCONNECT_REASON_NONE);
+    diagnostic::diagnosticNetwork(NETWORK_DISCONNECTS, 0);  
+
+    // Configure the cloud
     memset(&callbacks, 0, sizeof(callbacks));
     callbacks.size = sizeof(callbacks);
     callbacks.calculate_crc = calculateCrc;

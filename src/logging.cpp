@@ -1,3 +1,12 @@
+/*
+ * Trackle Library - Source-Available IoT Client Library
+ * Copyright (c) 2022 IOTREADY S.r.l. All rights reserved.
+ *
+ * This source code is licensed under the Trackle Source-Available License
+ * Agreement found in the LICENSE file in the root directory of this source tree.
+ * Commercial deployment requires one paid Device License Key per device.
+ */
+
 #include "logging.h"
 
 #include <algorithm>
@@ -347,7 +356,7 @@ void TrackleLib_tinydtls_log_wrapper(unsigned int tinydtlsLogLevel, const char *
     va_list args;
     char builtMsg[256] = {0};
     va_start(args, format);
-    vsprintf(builtMsg, format, args);
+    vsnprintf(builtMsg, sizeof(builtMsg), format, args);
     va_end(args);
 
     // Call set callback to display log message

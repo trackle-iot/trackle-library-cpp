@@ -11,7 +11,10 @@
 
 [![Test cases (branch v4)](https://github.com/trackle-iot/trackle-library-cpp/actions/workflows/test_on_push_v4.yml/badge.svg?branch=v4)](https://github.com/trackle-iot/trackle-library-cpp/actions/workflows/test_on_push_v4.yml)
 
-Complete documentation can be found [here](https://trackle-iot.github.io/trackle-library-cpp/v4).
+> ⚠️ **License Notice**
+> **Trackle Library** is released under a **Source-Available Commercial License**.
+> The source code is publicly inspectable and buildable for evaluation, prototyping, and debugging purposes.
+> Deploying this library on production/commercial devices requires a valid **Device License Key** purchased from IOTREADY S.r.l. for each device.
 
 ## Table of contents
 - [Trackle library](#trackle-library)
@@ -19,7 +22,6 @@ Complete documentation can be found [here](https://trackle-iot.github.io/trackle
   - [What is Trackle](#what-is-trackle)
   - [Overview](#overview)
     - [Supported hardware](#supported-hardware)
-    - [License](#license)
     - [Download](#download)
     - [Usage and API](#usage-and-api)
       - [Get a Device ID and a private key](#get-a-device-id-and-a-private-key)
@@ -27,6 +29,7 @@ Complete documentation can be found [here](https://trackle-iot.github.io/trackle
       - [Getting started in C](#getting-started-in-c-1)
       - [Trackle client](#trackle-client)
       - [Generating Public/Private Key Pair for OTA Verification](#generating-publicprivate-key-pair-for-ota-verification)
+  - [Licensing & Commercial Use](#licensing--commercial-use)
 
 ## What is Trackle
 Trackle is an IoT platform that offers all the software and services needed to develop an IoT solution from Device to Cloud. [Trackle website](https://www.trackle.io)
@@ -34,11 +37,10 @@ Trackle is an IoT platform that offers all the software and services needed to d
 ## Overview
 This document provides instructions to use the Trackle library and connect your device to Trackle Cloud.
 
+Full API reference and guides: [Trackle Library documentation (v4)](https://trackle-iot.github.io/trackle-library-cpp/v4).
+
 ### Supported hardware
 Trackle library is hardware agnostic. It depends on tinydtls that is compatible with contiki, esp-idf, posix, riot, windows and zephyr.
-
-### License
-Unless stated elsewhere, file headers or otherwise, all files herein are licensed under an LGPLv3 license. For more information, please read the LICENSE file.
 
 ### Download
 You can download last **Trackle Library** from [here](https://github.com/trackle-iot/trackle-library-cpp/releases/latest).
@@ -400,3 +402,24 @@ To use OTA verification in your code, you need to configure the following functi
 
 - **trackle.verifyOtaSignature(firmware_hash, length) - trackleVerifyOtaSignature(trackle_s, firmware_hash, length)**:
 	verify the signature of a firmware OTA. This function should be called during the OTA update process after calculating the SHA256 hash of the downloaded firmware. Returns 1 on success, 0 if verification is skipped (no key set), -1 on error.
+
+---
+
+## Licensing & Commercial Use
+
+This repository contains the source code for the official Trackle Library.
+
+### Key Terms
+
+- **Development & Debugging:** You are free to inspect, build, modify, and integrate this source code within your firmware during the development and prototyping phase.
+- **Commercial Deployment:** Each device running or incorporating this library (or any derivative work) and connecting to the Trackle Cloud requires a paid **Device License Key** (a unique per-device private key authentication credential).
+- **Restrictions:** Bypassing authentication mechanisms, re-licensing the code under open-source terms, or redirecting the library to third-party/emulated cloud backends is strictly prohibited.
+
+For full legal terms and conditions, please refer to the [LICENSE](LICENSE) file.
+
+### Commercial Licensing & Inquiries
+
+To purchase Device License Keys or to discuss enterprise licensing terms for high-volume deployments, please contact us:
+
+- **Website:** [https://www.iotready.it](https://www.iotready.it)
+- **Email:** [hello@iotready.it](mailto:hello@iotready.it)

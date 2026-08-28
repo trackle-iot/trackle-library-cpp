@@ -274,6 +274,32 @@ class TrackleLibraryTest(ut.TestCase):
         self.assertIn(result["data"], {"online", "ip-changed"}, "not online from cloud")
         wait_queue_message(self.from_device, msgs.CONNECTED, self)
 
+    def test_02b_reconnect_after_session_resume(self):
+        """
+        Due riconnessioni consecutive dopo la prima sessione completa.
+        La seconda verifica che una sessione resumed abbia riportato entrambe
+        le state machine allo stato iniziale.
+        """
+        params = device.DeviceStartupParams(
+            cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
+            True
+        )
+        self.spawn_device(params)
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT, self)
+        self.assertTrue(res["return"])
+        wait_queue_message(self.from_device, msgs.CONNECTED, self, timeout=15)
+
+        for _ in range(2):
+            self.to_device.put({"msg": msgs.DISCONNECT})
+            wait_queue_message(self.from_device, msgs.DISCONNECTED, self, timeout=5)
+
+            self.to_device.put({"msg": msgs.RECONNECT})
+            res = wait_queue_message(self.from_device, msgs.RECONNECT_RESULT, self)
+            self.assertTrue(res["return"])
+            wait_queue_message(self.from_device, msgs.CONNECTED, self, timeout=15)
+
     def test_03_connect_3(self):
         """
         connessione con connettività alla rete, senza internet, con proxy, errore handshake
@@ -1369,7 +1395,7 @@ class TrackleLibraryTest(ut.TestCase):
         json_body = {"firmware_url": "https://iotready.fra1.cdn.digitaloceanspaces.com/Iotready/firmware_test_suite_22.bin"}
         resp = req.put(url, headers=self.headers, json=json_body, timeout=15)
         # print_http_response(resp, "PUT", url)
-        self.assertEqual(resp.status_code, 200, "request failed")
+        self.assertEqual(resp.status_code, 200, f"request failed: {resp.status_code} {resp.text}")
         self.assertEqual(resp.json().get("id"), cred.TRACKLE_ID_STRING, "unexpected trackle id")
         self.assertEqual(resp.json().get("status"), "Update sent", "unexpected method name")
         wait_queue_message(self.from_device, msgs.OTA_URL_RECEIVED, self)
@@ -1681,6 +1707,52 @@ class TrackleLibraryTest(ut.TestCase):
         # Altrimenti potrebbe essere success se la verifica è skipped
         self.assertIn(result["data"], ["success", f"failed,{trackle_enums.OtaError.OTA_ERR_SIGNATURE_FAILED.value}"], 
                      "unexpected OTA result")
+
+    def test_45_malformed_packet_ignored(self):
+        """
+        After connect, inject the historical DTLS "malformed" datagram
+        (removed in cf23c3e / feat: removed malformed packet), formerly used
+        as an IP-change sentinel.
+        Without that dedicated handling, tinydtls must drop it and the session
+        must stay online (cloud GET still works).
+        """
+        params = device.DeviceStartupParams(
+            cred.TRACKLE_PRIVATE_KEY_LIST,
+            SERVER_ADDRESS,
+            SERVER_PORT,
+            True
+        )
+        self.spawn_device(params)
+        res = wait_queue_message(self.from_device, msgs.CONNECT_RESULT, self)
+        self.assertTrue(res["return"])
+        wait_queue_message(self.from_device, msgs.CONNECTED, self)
+
+        # Exact bytes from former MALFORMED_PACKET_LEN sentinel in dtls_message_channel.cpp:
+        # {0x16, 0xfe, 0xfd, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00}
+        malformed = bytes([
+            0x16, 0xfe, 0xfd,  # DTLS 1.2 Handshake
+            0x00, 0x01,        # epoch
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  # seq
+            0x00, 0x10,        # length 16 (payload truncated -> malformed)
+            0x00, 0x00,
+        ])
+
+        self.to_device.put({"msg": msgs.INJECT_UDP_PACKET, "data": malformed})
+        wait_queue_message(self.from_device, msgs.UDP_PACKET_INJECTED, self)
+
+        # Allow a few loops to process the packet
+        time.sleep(2)
+
+        # Device must not disconnect
+        with self.assertRaises(TimeoutError):
+            wait_queue_message(self.from_device, msgs.DISCONNECTED, None, 2)
+
+        # Session must still be usable
+        method = "getEchoString"
+        url = f"{API_URL}/v1/products/1000/devices/{cred.TRACKLE_ID_STRING}/{method}"
+        resp = req.get(url, headers=self.headers, params={"args": "still_alive"}, timeout=15)
+        self.assertEqual(resp.status_code, 200, "device should still answer after malformed packet")
+        self.assertEqual(resp.json().get("result"), "still_alive", "unexpected GET result after malformed packet")
 
 if __name__  == "__main__":
 

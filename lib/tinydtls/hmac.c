@@ -18,9 +18,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #include "tinydtls.h"
+#include <assert.h>
 
 #include "dtls_debug.h"
 #include "hmac.h"

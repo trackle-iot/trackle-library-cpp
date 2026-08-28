@@ -1,3 +1,12 @@
+/*
+ * Trackle Library - Source-Available IoT Client Library
+ * Copyright (c) 2022 IOTREADY S.r.l. All rights reserved.
+ *
+ * This source code is licensed under the Trackle Source-Available License
+ * Agreement found in the LICENSE file in the root directory of this source tree.
+ * Commercial deployment requires one paid Device License Key per device.
+ */
+
 #pragma once
 
 #include "hal_platform.h"
@@ -180,7 +189,8 @@ namespace trackle
 
         typedef struct // in seconds
         {
-            uint16_t ping_interval;
+            uint16_t dumb_ping_interval;
+            uint8_t  coap_ping_ratio; // send a CoAP ping every N dumb pings
             uint16_t handshake_timeout;
             uint16_t ack_timeout;
         } Connection_Properties_Type;

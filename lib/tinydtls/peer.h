@@ -48,6 +48,10 @@ typedef struct dtls_peer_t {
   dtls_peer_type role;       /**< denotes if this host is DTLS_CLIENT or DTLS_SERVER */
   dtls_state_t state;        /**< DTLS engine state */
   int16_t optional_handshake_message; /**< optional next handshake message, DTLS_HT_NO_OPTIONAL_MESSAGE, if no optional message is expected. */
+#if DTLS_SESSION_TICKET
+  unsigned int resumed_client_flight_pending:1;
+  unsigned int session_resumed:1;
+#endif
 
   dtls_security_parameters_t *security_params[2];
   dtls_handshake_parameters_t *handshake_params;

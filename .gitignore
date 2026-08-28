@@ -10,3 +10,17 @@ setup_credentials.sh
 /local_test
 /test/posix/env.sh
 /test/posix/.env
+/test/posix/.venv/bin/activate
+/test/posix/.venv/bin/activate.csh
+/test/posix/.venv/bin/activate.fish
+/test/posix/.venv/bin/Activate.ps1
+/test/posix/.venv/bin/idna
+/test/posix/.venv/bin/normalizer
+/test/posix/.venv/bin/pip
+/test/posix/.venv/bin/pip3
+/test/posix/.venv/bin/pip3.10
+/test/posix/.venv/bin/python
+/test/posix/.venv/bin/python3
+/test/posix/.venv/bin/python3.10
+/test/posix/.venv/pyvenv.cfg
+/test/posix/.local_env

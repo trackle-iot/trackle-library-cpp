@@ -1,4 +1,14 @@
+/*
+ * Trackle Library - Source-Available IoT Client Library
+ * Copyright (c) 2022 IOTREADY S.r.l. All rights reserved.
+ *
+ * This source code is licensed under the Trackle Source-Available License
+ * Agreement found in the LICENSE file in the root directory of this source tree.
+ * Commercial deployment requires one paid Device License Key per device.
+ */
+
 #include "events.h"
+#include "defines.h"
 #include <string.h>
 
 // Private, used by two subscription variants below
@@ -29,7 +39,8 @@ size_t subscription(uint8_t buf[], uint16_t message_id,
 
   if (NULL != device_id)
   {
-    size_t len = strnlen(device_id, 63);
+    size_t n = strnlen(device_id, 2 * DEVICE_ID_LENGTH);
+    size_t len = (n == 2 * DEVICE_ID_LENGTH) ? n : DEVICE_ID_LENGTH;
 
     *p++ = 0xff;
     memcpy(p, device_id, len);

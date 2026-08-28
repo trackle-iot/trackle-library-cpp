@@ -1,3 +1,12 @@
+/*
+ * Trackle Library - Source-Available IoT Client Library
+ * Copyright (c) 2022 IOTREADY S.r.l. All rights reserved.
+ *
+ * This source code is licensed under the Trackle Source-Available License
+ * Agreement found in the LICENSE file in the root directory of this source tree.
+ * Commercial deployment requires one paid Device License Key per device.
+ */
+
 #ifndef Trackle_defines
 #define Trackle_defines
 
@@ -32,15 +41,73 @@ typedef enum
     SOCKET_READY
 } Connection_Status_Type;
 
+/**
+ * Cloud disconnection reasons → CLOUD_DISCONNECTION_REASON (cloud:dconnrsn).
+ * 0 = no reason / not set.
+ *
+ * CLOUD_PROTOCOL_ERROR_CODE (cloud:err) carries the raw ProtocolError instead
+ * (@ref Cloud_Protocol_Error).
+ */
 typedef enum
 {
-    CON_ERROR_SEND = -3,
-    CON_ERROR_RECEIVE = -2,
-    CON_ERROR_SOCKET = -1,
-    CON_ERROR_PROTOCOL = 2,
-    CON_ERROR_LOOP = 3,
-    CON_ERROR_RECONNECTION = 4,
-} Cloud_Connection_Error;
+    CLOUD_DISCONNECT_REASON_NONE = 0,     // No disconnection reason
+    CLOUD_DISCONNECT_REASON_SOCKET = 1,   // Socket failure
+    CLOUD_DISCONNECT_REASON_SEND = 2,     // Send failure
+    CLOUD_DISCONNECT_REASON_RECEIVE = 3,  // Receive failure
+    CLOUD_DISCONNECT_REASON_USER = 4,     // User-initiated disconnect
+    CLOUD_DISCONNECT_REASON_PROTOCOL = 5, // Handshake/protocol failure
+    CLOUD_DISCONNECT_REASON_AUTH = 6,     // Authentication failure
+    CLOUD_DISCONNECT_REASON_TIMEOUT = 7,  // Ping timeout
+} Cloud_Disconnection_Reason;
+
+/**
+ * Raw ProtocolError codes → CLOUD_PROTOCOL_ERROR_CODE (cloud:err).
+ *
+ * Subset of trackle::protocol::ProtocolError (protocol_defs.h) that the stack
+ * actually returns. Numeric values match ProtocolError (gaps are intentional).
+ */
+typedef enum
+{
+    CLOUD_PROTOCOL_NO_ERROR = 0,
+    CLOUD_PROTOCOL_INVALID_STATE = 3,
+    CLOUD_PROTOCOL_INSUFFICIENT_STORAGE = 4,
+    CLOUD_PROTOCOL_MALFORMED_MESSAGE = 5,
+    CLOUD_PROTOCOL_BANDWIDTH_EXCEEDED = 9,
+    CLOUD_PROTOCOL_MESSAGE_TIMEOUT = 10,
+    CLOUD_PROTOCOL_MISSING_MESSAGE_ID = 11,
+    CLOUD_PROTOCOL_MESSAGE_RESET = 12,
+    CLOUD_PROTOCOL_SESSION_RESUMED = 13,
+    CLOUD_PROTOCOL_IO_ERROR_SET_DATA_MAX_EXCEEDED = 15,
+    CLOUD_PROTOCOL_IO_ERROR_GENERIC_ESTABLISH = 17,
+    CLOUD_PROTOCOL_IO_ERROR_GENERIC_RECEIVE = 18,
+    CLOUD_PROTOCOL_IO_ERROR_GENERIC_SEND = 19,
+    CLOUD_PROTOCOL_IO_ERROR_DISCARD_SESSION = 21,
+    CLOUD_PROTOCOL_SESSION_CONNECTED = 28,
+    CLOUD_PROTOCOL_WAIT_FOR_ACK = 29,
+    CLOUD_PROTOCOL_ACK_RECEIVED = 30,
+    CLOUD_PROTOCOL_UNKNOWN = 0x7FFFF,
+} Cloud_Protocol_Error;
+
+/**
+ * Maps ProtocolError (@ref Cloud_Protocol_Error) -> Cloud_Disconnection_Reason.
+ * 0 (NO_ERROR) is not a reason: returns 0.
+ */
+static inline int mapProtocolErrorToDisconnectionReason(int protocol_error)
+{
+    switch (protocol_error)
+    {
+    case CLOUD_PROTOCOL_NO_ERROR:
+        return 0;
+    case CLOUD_PROTOCOL_MESSAGE_TIMEOUT:
+        return CLOUD_DISCONNECT_REASON_TIMEOUT;
+    case CLOUD_PROTOCOL_IO_ERROR_GENERIC_SEND:
+        return CLOUD_DISCONNECT_REASON_SEND;
+    case CLOUD_PROTOCOL_IO_ERROR_GENERIC_RECEIVE:
+        return CLOUD_DISCONNECT_REASON_RECEIVE;
+    default:
+        return CLOUD_DISCONNECT_REASON_PROTOCOL;
+    }
+}
 
 typedef int (*user_function_int_char_t)(const char *paramString, bool isOwner, const char *funKey);
 
@@ -80,11 +147,15 @@ typedef enum
     ALL_DEVICES
 } Subscription_Scope_Type;
 
+/*
+ * Generic network disconnect reasons → NETWORK_DISCONNECTION_REASON (net:dconnrsn).
+ * Additional to interface-specific values defined by the platform wrappers.
+ */
 typedef enum network_disconnect_reason
 {
-    NETWORK_DISCONNECT_REASON_RESET = 6,  ///< Disconnected to recover from a cloud connection error.
-    NETWORK_DISCONNECT_REASON_UNKNOWN = 7 ///< Unspecified disconnection reason.
-} network_disconnect_reason;
+    NETWORK_DISCONNECT_REASON_NONE = 0,
+    NETWORK_DISCONNECT_REASON_UNKNOWN = 0xFFFF
+} Network_Disconnect_Reason;
 
 typedef enum
 {
@@ -175,7 +246,7 @@ typedef enum
 typedef enum
 {
     CLOUD_CONNECTION_STATUS = 10,       // cloud:stat
-    CLOUD_CONNECTION_ERROR_CODE = 13,   // cloud:err
+    CLOUD_PROTOCOL_ERROR_CODE = 13,     // cloud:err
     CLOUD_DISCONNECTS = 14,             // cloud:dconn
     CLOUD_CONNECTION_ATTEMPTS = 29,     // cloud:connatt
     CLOUD_DISCONNECTION_REASON = 30,    // cloud:dconnrsn
@@ -221,7 +292,7 @@ typedef struct SessionPersistDataOpaque
 } SessionPersistDataOpaque;
 
 #define DEVICE_ID_LENGTH 12
-#define PUBLIC_KEY_LENGTH 92
+#define PUBLIC_KEY_LENGTH 91
 #define PRIVATE_KEY_LENGTH 122
 
 typedef uint32_t system_tick_t;
